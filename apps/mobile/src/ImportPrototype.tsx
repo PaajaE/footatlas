@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { lifeCardSentence, totals, type Totals } from "@footatlas/core";
-import { healthSource } from "./src/health";
+import { healthSource } from "./health";
 
 interface Result {
   totals: Totals;
