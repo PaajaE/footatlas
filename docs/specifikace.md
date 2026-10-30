@@ -186,7 +186,7 @@ Každé plné místo má stejnou strukturu:
 
 ### 7.6 Odhad náročnosti
 
-Výprava o 80 km vyžaduje zhruba 11–16 plných zastávek (po 5–10 km plus konce etap) a 35–45 malých objevů (po 1–3 km), celkem asi 50 míst. Ukázková Vltavská stezka v mockupech má na 62 km 9 zastávek a 29 malých objevů. Malé objevy jsou levnější (jedna věta, jeden zdroj, foto nepovinné), proto hustotu nesou hlavně ony. Hustotu bude potřeba ověřit na pilotní výpravě; pokud by byl objem obsahu neúnosný, rozšiřuje se spíš rozestup malých objevů než počet zastávek. Obsah je hlavní úzké hrdlo celého projektu, proto je MVP omezeno na dvě výpravy.
+Výprava o 80 km vyžaduje zhruba 11–16 plných zastávek (po 5–10 km plus konce etap) a 35–45 malých objevů (po 1–3 km), celkem asi 50 míst. Ukázková Vltavská stezka v mockupech má na 62 km 10 zastávek a 28 malých objevů. Malé objevy jsou levnější (jedna věta, jeden zdroj, foto nepovinné), proto hustotu nesou hlavně ony. Hustotu bude potřeba ověřit na pilotní výpravě; pokud by byl objem obsahu neúnosný, rozšiřuje se spíš rozestup malých objevů než počet zastávek. Obsah je hlavní úzké hrdlo celého projektu, proto je MVP omezeno na dvě výpravy.
 
 ## 8. Navigace a obrazovky
 

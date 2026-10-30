@@ -11,17 +11,17 @@ Světlý pergamen jako výchozí režim, noční pergamen jako tmavý režim pod
 - **Písmo:** IM Fell English jen na nadpisy a názvy míst, Work Sans na text a čísla.
 - **Barvy, den:** papír `#EFE4CB`, karty `#F8F1E1`, inkoust `#2B2118`, rumělka `#9B2C22` (tlačítka, trasa), okr `#8E6320` (popisky, linky).
 - **Barvy, noc:** podklad `#2B241C`, karty `#372E24`, text `#F1E6D2`, rumělka `#C2522F`, okr `#D9B068`.
-- **Karta života a pohlednice** jsou vždy světlé, protože se sdílí jako obrázek.
+- **Karta života a pohlednice** mají obě verze. Obrázek, který se z nich sdílí, je ale vždy světlý.
 
 ## Ukázková výprava
 
-Vltavská stezka z Vyšehradu k soutoku v Mělníku, 62 km po skutečném toku řeky, 4 etapy. Na trase je 9 zastávek a 29 malých objevů, tedy místo zhruba každých 1,7 km. Odpovídá hustotě ze specifikace v0.4 (7.2), která se ověří na pilotní výpravě.
+Vltavská stezka z Vyšehradu k soutoku v Mělníku, 62 km po skutečném toku řeky, 4 etapy. Na trase je 10 zastávek a 28 malých objevů, tedy místo zhruba každých 1,7 km. Mezi Levým Hradcem a Kralupy přibyla zastávka Libčice nad Vltavou, takže zastávky jsou od sebe nejvýš 11,6 km (Vraňany–Mělník). Odpovídá hustotě ze specifikace v0.4 (7.2), která se ověří na pilotní výpravě.
 
 Všechny obrazovky ukazují stejný okamžik: uživatel ušel 35,6 km, právě došel do Kralup a dokončil 2. etapu. Další zastávka je zámek Nelahozeves za 3,0 km.
 
 ## Soubory
 
-- `*.dc.html` jsou obrazovky ve světlém režimu, `*-noc.dc.html` jejich tmavé verze (na plátně ve druhé řadě). Otevírají se v Claude Design plátně (artifact „FootAtlas mockupy“). Pomocný soubor `support.js`, na který se odkazují, dodává editor a do repa se neukládá. Bez něj se dají otevřít i přímo v prohlížeči.
+- `*.dc.html` jsou obrazovky ve světlém režimu, `*-noc.dc.html` jejich tmavé verze všech sedmi (na plátně ve druhé řadě). Otevírají se v Claude Design plátně (artifact „FootAtlas mockupy“). Pomocný soubor `support.js`, na který se odkazují, dodává editor a do repa se neukládá. Bez něj se dají otevřít i přímo v prohlížeči.
 - `canvas.json` je rozložení plátna.
 - `assets/` obsahuje fotky (`foto-*.jpg`) a vykreslené mapy (`mapa-*.jpg`). Autoři a licence fotek jsou v `assets/ZDROJE.md`. Při nahrávání na plátno je potřeba nahrát i tuto složku.
 - `nastroje/` slouží k přegenerování obrazovek:
@@ -34,6 +34,5 @@ Všechny obrazovky ukazují stejný okamžik: uživatel ušel 35,6 km, právě d
 
 - Texty zastávek, fakta a čísla jsou jen ukázka. Před použitím se musí ověřit ze dvou zdrojů (spec 7.3).
 - Polohy malých objevů jsou přibližné.
-- Mezi Levým Hradcem (km 21,7) a Kralupy (km 35,5) je 13,8 km bez zastávky. Podle specifikace v0.4 by tam měla přibýt jedna.
 - U fotky Trojského zámku chybí v metadatech autor, je potřeba ho doplnit.
 - Mapové podklady jsou pro mockupy z bezplatné služby OpenFreeMap. Pro aplikaci platí doporučení z `docs/technologie.md`.

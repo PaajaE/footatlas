@@ -183,19 +183,20 @@
     },
     {
       "id": "libcice",
-      "druh": "objev",
+      "druh": "zastavka",
       "nazev": "Libčice nad Vltavou",
       "lon": 14.36,
       "lat": 50.199,
-      "text": "Bývalá voroplavecká obec."
+      "text": "Bývalá voroplavecká obec v úzkém údolí. Odtud se otevírá výhled na skalnaté svahy nad řekou.",
+      "foto": "libcice"
     },
     {
-      "id": "rivnac",
+      "id": "privoz-letky",
       "druh": "objev",
-      "nazev": "Řivnáč",
+      "nazev": "Přívoz do Letek",
       "lon": 14.353,
       "lat": 50.213,
-      "text": "Ostroh s pravěkým hradištěm."
+      "text": "Přívoz převáží chodce a kola na druhý břeh."
     },
     {
       "id": "dolany",

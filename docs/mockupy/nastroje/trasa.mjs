@@ -113,16 +113,15 @@ async function mapy() {
   const views = [
     { name: 'vyprava-mapa', w: 390, h: 844, center: route[youIdx], zoom: 11.15, pan: [85, 30], route: { line: route, cut: youIdx } },
     { name: 'zastavka-mapa', w: 358, h: 132, center: placeAt['levy-hradec'], zoom: 13.2, route: { line: route, cut: youIdx } },
-    { name: 'pohlednice-etapa', w: 322, h: 150, bounds: bboxOf(sub(e[1].od, e[1].do)), pad: { top: 18, bottom: 18, left: 24, right: 24 }, route: { line: sub(e[1].od, e[1].do), cut: 10000 }, jenDen: true },
+    { name: 'pohlednice-etapa', w: 322, h: 150, bounds: bboxOf(sub(e[1].od, e[1].do)), pad: { top: 18, bottom: 18, left: 24, right: 24 }, route: { line: sub(e[1].od, e[1].do), cut: 10000 } },
     { name: 'objevovat-trasa', w: 116, h: 150, bounds: bboxOf(route), pad: 12, route: { line: route, cut: youIdx, w: 2.4 } },
-    { name: 'svet-karta', w: 342, h: 220, center: [106, 44], zoom: 0.18, life: { line: life, done: lifeDone }, jenDen: true },
+    { name: 'svet-karta', w: 342, h: 220, center: [106, 44], zoom: 0.18, life: { line: life, done: lifeDone } },
     { name: 'svet-kronika', w: 358, h: 150, center: [106, 44], zoom: 0.18, life: { line: life, done: lifeDone } }
   ];
 
   const browser = await chromium.launch();
   const out = { stav, km: kmOf, delkaKm: t.delkaKm, views: {} };
   for (const v of views) for (const [tema, T] of Object.entries(TEMATA)) {
-    if (v.jenDen && tema !== 'den') continue;
     const page = await openPage(browser);
     await page.evaluate(o => setup(o), { w: v.w, h: v.h, parchment: true, tema, center: v.center, zoom: v.zoom, bounds: v.bounds, pad: v.pad });
     if (v.pan) await page.evaluate(d => map.panBy(d, { duration: 0 }), v.pan);

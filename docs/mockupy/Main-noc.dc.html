@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Karta života · noc</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Work Sans',system-ui,sans-serif}
+.fa{--bg:#2B241C;--surface:#372E24;--ink:#F1E6D2;--muted:#B5A68D;--line:#4A3E31;--accent:#C2522F;--accent-fg:#FFF4E6;--ochre:#D9B068;--nav:#241E17;--panel:rgba(43,36,28,.95);--track:#4A3E31;--lock:#6E6252;--seal:#C2522F;--seal-fg:#FFF0DC;--free:#8CCB9F;--shadow:rgba(0,0,0,.4)}
+.fa{width:390px;height:844px;box-sizing:border-box;background:var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='390' height='844'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='4' seed='9'/><feColorMatrix values='0 0 0 0 .62  0 0 0 0 .48  0 0 0 0 .26  0 0 0 .9 -.25'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.18'/></svg>");background-blend-mode:multiply;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:'Work Sans',system-ui,sans-serif}
+.fa *{box-sizing:border-box}
+.fell{font-family:'IM Fell English',Georgia,serif;font-weight:400}
+.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;letter-spacing:.05em;color:var(--ochre)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.melt{position:absolute;left:0;right:0;top:0;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%)}
+.edges{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.soft{-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%)}
+.top{position:relative;padding:54px 20px 0;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.top a{color:inherit;text-decoration:none}
+.eyebrow{display:flex;align-items:center;gap:8px;font-family:'IM Fell English SC',Georgia,serif;font-size:15px;letter-spacing:.06em;color:var(--ochre)}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;width:20px;background:var(--ochre);opacity:.7}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.med{border-radius:50%;flex:none;background-size:cover;background-position:center;border:1.5px solid var(--ochre);outline:1px solid var(--line);outline-offset:3px;position:relative}
+.badge{position:absolute;right:-6px;bottom:-5px;width:20px;height:20px;background:var(--seal);color:var(--seal-fg);font-size:11px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.dot{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--lock);color:var(--muted)}
+.seal{width:36px;height:36px;flex:none;background:var(--seal);color:var(--seal-fg);display:flex;align-items:center;justify-content:center;font-size:14px;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.rule{height:1px;background:var(--line)}
+.btn{display:block;text-align:center;text-decoration:none;font-weight:600;font-size:16px;padding:15px;border-radius:14px}
+.btn.pri{background:var(--accent);color:var(--accent-fg)}
+.btn.sec{border:1.5px solid var(--line);color:var(--ink)}
+.map{position:relative;overflow:hidden;flex:none}
+.map img{display:block;width:100%;height:100%}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.attr{position:absolute;right:8px;bottom:5px;font-size:9px;color:var(--muted)}
+.nav{display:flex;justify-content:space-around;padding:10px 6px 30px;font-size:12px;flex:none;margin-top:auto;background:var(--nav);color:var(--muted);border-top:1px solid var(--line)}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;text-decoration:none;color:inherit}
+.nav a.on{color:var(--accent);font-weight:600}
+</style>
+</helmet>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <clipPath id="kruh" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+</defs></svg>
+<div class="fa">
+<div style="padding:56px 24px 0;display:flex;justify-content:space-between;align-items:baseline">
+    <span class="fell" style="font-size:22px">FootAtlas</span><span class="muted" style="font-size:13px">Načteno z Apple Health</span>
+  </div>
+  <div style="padding:24px 24px 0;display:flex;flex-direction:column;gap:6px">
+    <span class="eyebrow">Za život jste ušli</span>
+    <div style="display:flex;align-items:baseline;gap:10px"><span class="fell num" style="font-size:84px;line-height:.95">14 200</span><span class="fell" style="font-size:28px">km</span></div>
+    <p style="margin:4px 0 0;font-size:17px;line-height:1.45">To je z Prahy až do Tokia a ještě 5 100 km dál, přes Tichý oceán.</p>
+  </div>
+  <div class="map soft" style="width:342px;height:220px;margin:14px 24px 0"><img src="assets/mapa-svet-karta-noc.jpg" alt=""><svg viewBox="0 0 342 220" aria-hidden="true"><circle cx="23.4" cy="95.6" r="4.5" fill="#C2522F" stroke="#372E24" stroke-width="1.5"/><text x="25.4" y="112.6" font-family="IM Fell English, serif" font-style="italic" font-size="13" fill="#F1E6D2">Praha</text><path d="M225.3 127.5 v-16 l10 4 -10 4" fill="#C2522F" stroke="#F1E6D2" stroke-width=".8"/><text x="181.3" y="145.5" font-family="IM Fell English, serif" font-style="italic" font-size="13" fill="#F1E6D2">Tokio, 9 100 km</text><circle cx="318.4" cy="100.3" r="14" fill="#E0704A" opacity=".2"/><circle cx="318.4" cy="100.3" r="6.5" fill="#E0704A" stroke="#FFF6E6" stroke-width="2.4"/><g transform="translate(40 178) scale(0.8)"><circle r="21" fill="#372E24" fill-opacity=".85" stroke="#F1E6D2" stroke-width=".8"/><circle r="17" fill="none" stroke="#F1E6D2" stroke-width=".5"/>
+      <polygon points="0,-24 4,-4 24,0 4,4 0,24 -4,4 -24,0 -4,-4" fill="#F1E6D2"/><polygon points="0,-24 4,-4 0,0 -4,-4" fill="#C2522F"/>
+      <polygon points="14,-14 2,-2 -14,14 -2,2" fill="#F1E6D2" opacity=".45"/><polygon points="-14,-14 -2,2 14,14 2,-2" fill="#F1E6D2" opacity=".45"/>
+      <text y="-28" text-anchor="middle" font-family="IM Fell English, serif" font-size="10" fill="#F1E6D2">S</text></g></svg><span class="attr">© OpenStreetMap</span></div>
+  <div style="padding:14px 24px 0;display:flex;flex-direction:column;gap:9px">
+    <div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Z čeho se číslo skládá</span><span class="muted">od roku 2016</span></div>
+    <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px"><div style="flex:85;background:var(--accent)"></div><div style="flex:15;background:repeating-linear-gradient(135deg,var(--accent) 0 3px,var(--track) 3px 6px)"></div></div>
+    <div style="display:flex;flex-direction:column;gap:4px;font-size:13.5px" class="num"><div style="display:flex;justify-content:space-between"><span>Ověřeno ze zdravotních dat</span><span>12 100 km</span></div><div class="muted" style="display:flex;justify-content:space-between"><span>Odhad z kroků</span><span>2 100 km</span></div></div>
+  </div>
+  <div style="margin-top:auto;padding:0 24px 34px;display:flex;flex-direction:column;gap:12px">
+    <a href="Domu-noc.dc.html" class="btn pri">Vybrat první výpravu</a>
+    <a href="#share" class="btn sec">Sdílet kartu jako obrázek</a>
+    <span class="muted" style="text-align:center;font-size:13px">Data zůstávají na vašem telefonu.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
     python3 obrazovky.py
 
 Světlý režim (výchozí) se ukládá jako Nazev.dc.html, tmavý jako Nazev-noc.dc.html.
-Karta života a pohlednice existují jen světlé, protože se sdílí jako obrázek.
+Karta života a pohlednice mají obě verze, sdílený obrázek z nich je ale vždy světlý.
 Čte mista.json, stav.json, trasa.json a ../assets/mapy.json (viz trasa.mjs).
 Ruční úpravy obrazovek na plátně je potřeba přenést sem, jinak je další běh přepíše.
 """
@@ -22,7 +22,7 @@ MISTA = sorted(({**m, 'km': KM[m['id']]} for m in data['mista']), key=lambda m: 
 BY = {m['id']: m for m in MISTA}
 USLO = stav['usloKm']
 DELKA = trasa['delkaKm']
-FOTO = {'vysehrad', 'troja', 'karluv-most', 'roztoky', 'levy-hradec', 'nelahozeves', 'veltrusy', 'melnik'}
+FOTO = {'vysehrad', 'troja', 'karluv-most', 'roztoky', 'levy-hradec', 'libcice', 'nelahozeves', 'veltrusy', 'melnik'}
 
 def km(v, d=1):
     return f"{v:.{d}f}".replace('.', ',')
@@ -217,9 +217,9 @@ def medallion(m, size=40, badge=False):
         return f'<div class="seal" style="width:{size}px;height:{size}px">✓</div>'
     return f'<div class="dot" style="width:{size}px;height:{size}px">·</div>'
 
-# ---------------------------------------------------------------- 1 Karta života (jen světlá)
+# ---------------------------------------------------------------- 1 Karta života
 
-def karta(t='den'):
+def karta(t):
     c = T[t]
     b = mapy['views']['svet-karta']['body']
     px, py = b['praha']; tx, ty = b['tokio']; zx, zy = b['zivot']
@@ -243,11 +243,11 @@ def karta(t='den'):
     <div style="display:flex;flex-direction:column;gap:4px;font-size:13.5px" class="num"><div style="display:flex;justify-content:space-between"><span>Ověřeno ze zdravotních dat</span><span>12 100 km</span></div><div class="muted" style="display:flex;justify-content:space-between"><span>Odhad z kroků</span><span>2 100 km</span></div></div>
   </div>
   <div style="margin-top:auto;padding:0 24px 34px;display:flex;flex-direction:column;gap:12px">
-    <a href="Domu.dc.html" class="btn pri">Vybrat první výpravu</a>
+    <a href="{href('Domu', t)}" class="btn pri">Vybrat první výpravu</a>
     <a href="#share" class="btn sec">Sdílet kartu jako obrázek</a>
     <span class="muted" style="text-align:center;font-size:13px">Data zůstávají na vašem telefonu.</span>
   </div>'''
-    return page('Karta života', t, body)
+    return page('Karta života' + (' · noc' if t == 'noc' else ''), t, body)
 
 # ---------------------------------------------------------------- 2 Domů
 
@@ -266,7 +266,7 @@ def domu(t):
     <span class="fell" style="font-size:38px;line-height:1">{DALSI['nazev']}</span>
     <span class="muted" style="font-size:13.5px">Dojdete zítra při běžné chůzi.</span>
   </a>
-  <a href="Pohlednice.dc.html" class="card" style="position:relative;margin:16px 20px 0;padding:12px 14px;display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
+  <a href="{href('Pohlednice', t)}" class="card" style="position:relative;margin:16px 20px 0;padding:12px 14px;display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
     <div class="seal">✓</div>
     <span style="font-size:14px;line-height:1.4">Vítejte zpět. Od posledně jste ušli <b>11,4 km</b>, došli do Kralup a dokončili <b>2. etapu</b>.</span>
   </a>
@@ -388,9 +388,9 @@ def kronika(t):
   {nav('Kronika', t)}'''
     return page('Kronika' + (' · noc' if t == 'noc' else ''), t, body)
 
-# ---------------------------------------------------------------- 6 Konec etapy (jen světlá)
+# ---------------------------------------------------------------- 6 Konec etapy
 
-def pohlednice(t='den'):
+def pohlednice(t):
     et = stav['etapy'][1]
     v = [m for m in MISTA if et['od'] < m['km'] <= et['do']]
     nz = sum(1 for m in v if m['druh'] == 'zastavka'); no = len(v) - nz
@@ -405,7 +405,7 @@ def pohlednice(t='den'):
     <span class="eyebrow">Etapa 2 ze 4 dokončena</span>
     <h1 class="fell" style="margin:0;font-size:31px;line-height:1.08">Z Roztok do Kralup údolím pod hradišti</h1>
   </div>
-  <div style="margin:18px 22px 0;background:#FFFDF7;padding:9px;transform:rotate(-1.6deg);box-shadow:0 10px 22px var(--shadow);position:relative">
+  <div style="margin:18px 22px 0;background:#FFFDF7;color:#2B2118;padding:9px;transform:rotate(-1.6deg);box-shadow:0 10px 22px var(--shadow);position:relative">
     <div style="height:196px;background-size:cover;background-position:center;{foto('levy-hradec')};position:relative">
       <span class="fell" style="position:absolute;left:12px;bottom:8px;font-size:30px;font-style:italic;color:#FFFFFF;text-shadow:0 2px 8px rgba(0,0,0,.6)">Pozdrav z údolí Vltavy</span>
     </div>
@@ -421,13 +421,13 @@ def pohlednice(t='den'):
     {stat(km(et['do'] - et['od']) + ' km', 'ušlo')}{stat('8 dní', 'vlastním tempem')}{stat(nz, 'zastávky')}{stat(no, 'objevů')}
   </div>
   <div style="margin-top:auto;padding:0 20px 30px;display:flex;flex-direction:column;gap:10px">
-    <div style="display:flex;gap:10px"><a href="#share" class="btn pri" style="flex:1">Sdílet pohlednici</a><a href="Vyprava.dc.html" class="btn sec" style="flex:1">Na etapu 3</a></div>
+    <div style="display:flex;gap:10px"><a href="#share" class="btn pri" style="flex:1">Sdílet pohlednici</a><a href="{href('Vyprava', t)}" class="btn sec" style="flex:1">Na etapu 3</a></div>
     <div class="card" style="padding:11px 14px;display:flex;align-items:center;gap:12px">
       <div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:14px;font-weight:600">Upozornit vás na události?</span><span class="muted" style="font-size:12px">Jen dosažení místa a konec etapy. Nikdy denně.</span></div>
       <span style="width:46px;height:28px;border-radius:14px;background:var(--track);position:relative;flex:none"><span style="position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px var(--shadow)"></span></span>
     </div>
   </div>'''
-    return page('Konec etapy', t, body)
+    return page('Konec etapy' + (' · noc' if t == 'noc' else ''), t, body)
 
 # ---------------------------------------------------------------- 7 Objevovat
 
@@ -481,9 +481,9 @@ def objevovat(t):
   {nav('Objevovat', t)}'''
     return page('Objevovat' + (' · noc' if t == 'noc' else ''), t, body)
 
-SCREENS = [('Main', karta, ('den',)), ('Domu', domu, ('den', 'noc')), ('Vyprava', vyprava, ('den', 'noc')),
+SCREENS = [('Main', karta, ('den', 'noc')), ('Domu', domu, ('den', 'noc')), ('Vyprava', vyprava, ('den', 'noc')),
            ('Zastavka', zastavka, ('den', 'noc')), ('Kronika', kronika, ('den', 'noc')),
-           ('Pohlednice', pohlednice, ('den',)), ('Objevovat', objevovat, ('den', 'noc'))]
+           ('Pohlednice', pohlednice, ('den', 'noc')), ('Objevovat', objevovat, ('den', 'noc'))]
 
 if __name__ == '__main__':
     for name, fn, temata in SCREENS:
