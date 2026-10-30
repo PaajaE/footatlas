@@ -1,0 +1,15 @@
+diff --git a/android/src/main/java/dev/matinzd/healthconnect/permissions/PermissionUtils.kt b/android/src/main/java/dev/matinzd/healthconnect/permissions/PermissionUtils.kt
+index 0d9d3427cb5c60e9a3d988ef6ac68ea54ea06fb4..d95aafc4810190976824a18d4268972c82a1d849 100644
+--- a/android/src/main/java/dev/matinzd/healthconnect/permissions/PermissionUtils.kt
++++ b/android/src/main/java/dev/matinzd/healthconnect/permissions/PermissionUtils.kt
+@@ -62,6 +62,10 @@ class PermissionUtils {
+           pushMap(ReactPermission(AccessType.WRITE, "ExerciseRoute").toReadableMap())
+         }
+ 
++        if (grantedPermissions.contains(HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY)) {
++          pushMap(ReactPermission(AccessType.READ, "ReadHealthDataHistory").toReadableMap())
++        }
++
+         if (grantedPermissions.contains(HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND)
+         ) {
+           pushMap(ReactPermission(AccessType.READ, "BackgroundAccessPermission").toReadableMap())

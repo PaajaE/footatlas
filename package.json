@@ -13,6 +13,9 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "workerd"
-    ]
+    ],
+    "patchedDependencies": {
+      "react-native-health-connect": "patches/react-native-health-connect.patch"
+    }
   }
 }
