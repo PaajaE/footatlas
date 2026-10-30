@@ -1,0 +1,9 @@
+{
+  "name": "@footatlas/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": { "test": "vitest run", "typecheck": "tsc -p ." },
+  "devDependencies": { "typescript": "~6.0.3", "vitest": "^5.0.5" }
+}
