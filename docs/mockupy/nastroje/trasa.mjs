@@ -11,7 +11,11 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const assets = process.env.MAPY_OUT || path.join(dir, '..', 'assets');
-const TEMA = process.env.MAPY_TEMA || 'pergamen';
+// Barvy trasy pro denní a noční mapu; noční verze se ukládá s příponou -noc.
+const TEMATA = {
+  den: { suffix: '', route: { done: '#9B2C22', plan: '#3A2A1C', halo: '#F3E6C4', w: 3.2 }, life: { done: '#9B2C22', plan: '#3A2A1C', halo: '#F3E6C4' } },
+  noc: { suffix: '-noc', route: { done: '#E0704A', plan: '#E2D3B4', halo: '#2B241C', w: 3.2 }, life: { done: '#E0704A', plan: '#E2D3B4', halo: '#2B241C' } }
+};
 const data = JSON.parse(fs.readFileSync(path.join(dir, 'mista.json'), 'utf8'));
 
 const hav = (a, b) => {
@@ -100,7 +104,6 @@ async function mapy() {
   const kmOf = Object.fromEntries(t.mista.map(m => [m.id, m.km]));
   const sub = (fromKm, toKm) => route.filter((_, i) => t.km[i] >= fromKm && t.km[i] <= toKm);
   const bboxOf = line => { const lo = line.map(p => p[0]), la = line.map(p => p[1]); return [[Math.min(...lo), Math.min(...la)], [Math.max(...lo), Math.max(...la)]]; };
-  const parch = TEMA === 'noc' ? { done: '#E0704A', plan: '#E2D3B4', halo: '#2B241C', w: 3.2 } : { done: '#9B2C22', plan: '#3A2A1C', halo: '#F3E6C4', w: 3.2 };
 
   const praha = [14.42, 50.08], tokio = [139.69, 35.69], sf = [-122.42 + 360, 37.77];
   const life = [...greatCircle(praha, tokio), ...greatCircle(tokio, sf).slice(1)];
@@ -108,24 +111,25 @@ async function mapy() {
 
   const e = stav.etapy;
   const views = [
-    { name: 'vyprava-mapa', w: 390, h: 844, center: route[youIdx], zoom: 11.15, pan: [85, 30], route: { line: route, cut: youIdx, colors: parch } },
-    { name: 'zastavka-mapa', w: 358, h: 132, center: placeAt['levy-hradec'], zoom: 13.2, route: { line: route, cut: youIdx, colors: parch } },
-    { name: 'pohlednice-etapa', w: 322, h: 150, bounds: bboxOf(sub(e[1].od, e[1].do)), pad: { top: 18, bottom: 18, left: 24, right: 24 }, route: { line: sub(e[1].od, e[1].do), cut: 10000, colors: parch } },
-    { name: 'objevovat-trasa', w: 116, h: 150, bounds: bboxOf(route), pad: 12, route: { line: route, cut: youIdx, colors: { ...parch, w: 2.4 } } },
-    { name: 'svet-karta', w: 342, h: 220, center: [106, 44], zoom: 0.18, life: { line: life, done: lifeDone } },
+    { name: 'vyprava-mapa', w: 390, h: 844, center: route[youIdx], zoom: 11.15, pan: [85, 30], route: { line: route, cut: youIdx } },
+    { name: 'zastavka-mapa', w: 358, h: 132, center: placeAt['levy-hradec'], zoom: 13.2, route: { line: route, cut: youIdx } },
+    { name: 'pohlednice-etapa', w: 322, h: 150, bounds: bboxOf(sub(e[1].od, e[1].do)), pad: { top: 18, bottom: 18, left: 24, right: 24 }, route: { line: sub(e[1].od, e[1].do), cut: 10000 }, jenDen: true },
+    { name: 'objevovat-trasa', w: 116, h: 150, bounds: bboxOf(route), pad: 12, route: { line: route, cut: youIdx, w: 2.4 } },
+    { name: 'svet-karta', w: 342, h: 220, center: [106, 44], zoom: 0.18, life: { line: life, done: lifeDone }, jenDen: true },
     { name: 'svet-kronika', w: 358, h: 150, center: [106, 44], zoom: 0.18, life: { line: life, done: lifeDone } }
   ];
 
   const browser = await chromium.launch();
   const out = { stav, km: kmOf, delkaKm: t.delkaKm, views: {} };
-  for (const v of views) {
+  for (const v of views) for (const [tema, T] of Object.entries(TEMATA)) {
+    if (v.jenDen && tema !== 'den') continue;
     const page = await openPage(browser);
-    await page.evaluate(o => setup(o), { w: v.w, h: v.h, parchment: true, tema: TEMA, center: v.center, zoom: v.zoom, bounds: v.bounds, pad: v.pad });
+    await page.evaluate(o => setup(o), { w: v.w, h: v.h, parchment: true, tema, center: v.center, zoom: v.zoom, bounds: v.bounds, pad: v.pad });
     if (v.pan) await page.evaluate(d => map.panBy(d, { duration: 0 }), v.pan);
-    if (v.route) await page.evaluate(r => addRoute(r.line, r.cut, r.colors), v.route);
-    if (v.life) await page.evaluate(l => addLife(l.line, l.done), v.life);
+    if (v.route) await page.evaluate(r => addRoute(r.line, r.cut, r.colors), { ...v.route, colors: { ...T.route, w: v.route.w || T.route.w } });
+    if (v.life) await page.evaluate(l => addLife(l.line, l.done, l.colors), { ...v.life, colors: T.life });
     await page.evaluate(() => idle());
-    await page.locator('#map').screenshot({ path: path.join(assets, `mapa-${v.name}.jpg`), type: 'jpeg', quality: 84 });
+    await page.locator('#map').screenshot({ path: path.join(assets, `mapa-${v.name}${T.suffix}.jpg`), type: 'jpeg', quality: 84 });
     const ids = Object.keys(placeAt);
     const pts = await page.evaluate(p => project(p), [...ids.map(id => placeAt[id]), route[youIdx], ...(v.life ? [lifeDone.at(-1), praha, tokio] : [])]);
     const proj = Object.fromEntries(ids.map((id, k) => [id, pts[k]]));
@@ -133,7 +137,7 @@ async function mapy() {
     if (v.life) { proj.zivot = pts[ids.length + 1]; proj.praha = pts[ids.length + 2]; proj.tokio = pts[ids.length + 3]; }
     out.views[v.name] = { w: v.w, h: v.h, body: proj };
     await page.close();
-    console.log('mapa', v.name);
+    console.log('mapa', v.name, tema);
   }
   await browser.close();
   fs.writeFileSync(path.join(assets, 'mapy.json'), JSON.stringify(out, null, 1));

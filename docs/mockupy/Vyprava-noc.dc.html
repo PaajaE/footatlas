@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Výprava · noc</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Work Sans',system-ui,sans-serif}
+.fa{--bg:#2B241C;--surface:#372E24;--ink:#F1E6D2;--muted:#B5A68D;--line:#4A3E31;--accent:#C2522F;--accent-fg:#FFF4E6;--ochre:#D9B068;--nav:#241E17;--panel:rgba(43,36,28,.95);--track:#4A3E31;--lock:#6E6252;--seal:#C2522F;--seal-fg:#FFF0DC;--free:#8CCB9F;--shadow:rgba(0,0,0,.4)}
+.fa{width:390px;height:844px;box-sizing:border-box;background:var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='390' height='844'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='4' seed='9'/><feColorMatrix values='0 0 0 0 .62  0 0 0 0 .48  0 0 0 0 .26  0 0 0 .9 -.25'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.18'/></svg>");background-blend-mode:multiply;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:'Work Sans',system-ui,sans-serif}
+.fa *{box-sizing:border-box}
+.fell{font-family:'IM Fell English',Georgia,serif;font-weight:400}
+.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;letter-spacing:.05em;color:var(--ochre)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.melt{position:absolute;left:0;right:0;top:0;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%)}
+.edges{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.soft{-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%)}
+.top{position:relative;padding:54px 20px 0;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.top a{color:inherit;text-decoration:none}
+.eyebrow{display:flex;align-items:center;gap:8px;font-family:'IM Fell English SC',Georgia,serif;font-size:15px;letter-spacing:.06em;color:var(--ochre)}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;width:20px;background:var(--ochre);opacity:.7}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.med{border-radius:50%;flex:none;background-size:cover;background-position:center;border:1.5px solid var(--ochre);outline:1px solid var(--line);outline-offset:3px;position:relative}
+.badge{position:absolute;right:-6px;bottom:-5px;width:20px;height:20px;background:var(--seal);color:var(--seal-fg);font-size:11px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.dot{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--lock);color:var(--muted)}
+.seal{width:36px;height:36px;flex:none;background:var(--seal);color:var(--seal-fg);display:flex;align-items:center;justify-content:center;font-size:14px;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.rule{height:1px;background:var(--line)}
+.btn{display:block;text-align:center;text-decoration:none;font-weight:600;font-size:16px;padding:15px;border-radius:14px}
+.btn.pri{background:var(--accent);color:var(--accent-fg)}
+.btn.sec{border:1.5px solid var(--line);color:var(--ink)}
+.map{position:relative;overflow:hidden;flex:none}
+.map img{display:block;width:100%;height:100%}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.attr{position:absolute;right:8px;bottom:5px;font-size:9px;color:var(--muted)}
+.nav{display:flex;justify-content:space-around;padding:10px 6px 30px;font-size:12px;flex:none;margin-top:auto;background:var(--nav);color:var(--muted);border-top:1px solid var(--line)}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;text-decoration:none;color:inherit}
+.nav a.on{color:var(--accent);font-weight:600}
+.fa>div:last-child>.nav{flex:1}</style>
+</helmet>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <clipPath id="kruh" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+</defs></svg>
+<div class="fa">
+<div class="map " style="width:390px;height:844px;position:absolute;inset:0"><img src="assets/mapa-vyprava-mapa-noc.jpg" alt=""><svg viewBox="0 0 390 844" aria-hidden="true"><circle cx="333.9" cy="764.8" r="19" fill="#372E24" stroke="#C2522F" stroke-width="1.8"/><image href="assets/foto-levy-hradec.jpg" x="317.9" y="748.8" width="32" height="32" clip-path="url(#kruh)" preserveAspectRatio="xMidYMid slice"/><circle cx="345.79999999999995" cy="776.6999999999999" r="5.5" fill="#C2522F"/><path d="M343.29999999999995 776.6999999999999 l1.8 1.8 3.2 -3.4" stroke="#FFF0DC" stroke-width="1.3" fill="none"/><rect x="230.8" y="754.8" width="79.1" height="20" rx="3" fill="#372E24" fill-opacity=".94" stroke="#4A3E31"/><text x="236.8" y="769.0" font-family="IM Fell English, serif" font-style="italic" font-size="12.5" fill="#F1E6D2">Levý Hradec</text><circle cx="303.5" cy="765.6" r="5.2" fill="#C2522F" stroke="#372E24" stroke-width="1.6"/><circle cx="261.9" cy="723.1" r="5.2" fill="#C2522F" stroke="#372E24" stroke-width="1.6"/><circle cx="284.5" cy="608.5" r="5.2" fill="#C2522F" stroke="#372E24" stroke-width="1.6"/><circle cx="248.3" cy="557.5" r="5.2" fill="#C2522F" stroke="#372E24" stroke-width="1.6"/><circle cx="191" cy="458.6" r="5.2" fill="#C2522F" stroke="#372E24" stroke-width="1.6"/><circle cx="133.3" cy="408.2" r="13" fill="#372E24" stroke="#C2522F" stroke-width="1.8"/><path d="M129.3 412.2 v-6 l2 -3 2 3 v-3 h4 v9 z" fill="#C2522F"/><circle cx="145.20000000000002" cy="420.09999999999997" r="5.5" fill="#C2522F"/><path d="M142.70000000000002 420.09999999999997 l1.8 1.8 3.2 -3.4" stroke="#FFF0DC" stroke-width="1.3" fill="none"/><circle cx="85.9" cy="362.5" r="4.6" fill="#372E24" stroke="#F1E6D2" stroke-width="1.3"/><circle cx="90.9" cy="293" r="19" fill="#372E24" stroke="#C2522F" stroke-width="2.6"/><image href="assets/foto-nelahozeves.jpg" x="74.9" y="277" width="32" height="32" clip-path="url(#kruh)" preserveAspectRatio="xMidYMid slice"/><rect x="114.9" y="283" width="115.7" height="20" rx="3" fill="#372E24" fill-opacity=".94" stroke="#4A3E31"/><text x="120.9" y="297.2" font-family="IM Fell English, serif" font-style="italic" font-size="12.5" fill="#F1E6D2">Zámek Nelahozeves</text><circle cx="81.9" cy="305" r="4.6" fill="#372E24" stroke="#F1E6D2" stroke-width="1.3"/><circle cx="113.5" cy="243.6" r="19" fill="#372E24" stroke="#F1E6D2" stroke-width="1.8"/><image href="assets/foto-veltrusy.jpg" x="97.5" y="227.6" width="32" height="32" clip-path="url(#kruh)" preserveAspectRatio="xMidYMid slice" style="filter:grayscale(1)"/><rect x="137.5" y="233.6" width="97.4" height="20" rx="3" fill="#372E24" fill-opacity=".94" stroke="#4A3E31"/><text x="143.5" y="247.79999999999998" font-family="IM Fell English, serif" font-style="italic" font-size="12.5" fill="#F1E6D2">Zámek Veltrusy</text><circle cx="165.6" cy="197.7" r="4.6" fill="#372E24" stroke="#F1E6D2" stroke-width="1.3"/><circle cx="168.9" cy="169" r="4.6" fill="#372E24" stroke="#F1E6D2" stroke-width="1.3"/><circle cx="156.9" cy="130.6" r="4.6" fill="#372E24" stroke="#F1E6D2" stroke-width="1.3"/><circle cx="258.4" cy="43.9" r="4.6" fill="#372E24" stroke="#F1E6D2" stroke-width="1.3"/><circle cx="278.7" cy="47.2" r="4.6" fill="#372E24" stroke="#F1E6D2" stroke-width="1.3"/><circle cx="330.5" cy="35" r="13" fill="#372E24" stroke="#F1E6D2" stroke-width="1.8"/><path d="M326.5 39 v-6 l2 -3 2 3 v-3 h4 v9 z" fill="#F1E6D2"/><circle cx="110" cy="392" r="14" fill="#E0704A" opacity=".2"/><circle cx="110" cy="392" r="6.5" fill="#E0704A" stroke="#FFF6E6" stroke-width="2.4"/><g transform="translate(340 560) scale(0.95)"><circle r="21" fill="#372E24" fill-opacity=".85" stroke="#F1E6D2" stroke-width=".8"/><circle r="17" fill="none" stroke="#F1E6D2" stroke-width=".5"/>
+      <polygon points="0,-24 4,-4 24,0 4,4 0,24 -4,4 -24,0 -4,-4" fill="#F1E6D2"/><polygon points="0,-24 4,-4 0,0 -4,-4" fill="#C2522F"/>
+      <polygon points="14,-14 2,-2 -14,14 -2,2" fill="#F1E6D2" opacity=".45"/><polygon points="-14,-14 -2,2 14,14 2,-2" fill="#F1E6D2" opacity=".45"/>
+      <text y="-28" text-anchor="middle" font-family="IM Fell English, serif" font-size="10" fill="#F1E6D2">S</text></g></svg></div>
+  <span class="attr" style="bottom:252px;right:14px">© OpenStreetMap</span>
+  <div style="position:absolute;left:12px;right:12px;top:52px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 14px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="fell" style="font-size:21px">Vltavská stezka</span><span class="num" style="font-weight:600;font-size:13px;color:var(--accent)">35,6 / 62 km</span></div>
+    <div style="display:flex;gap:4px"><div style="flex:18.8;height:5px;border-radius:3px;background:var(--accent)"></div><div style="flex:16.7;height:5px;border-radius:3px;background:var(--accent)"></div><div style="flex:14.9;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--accent) 4%,var(--track) 0)"></div><div style="flex:11.6;height:5px;border-radius:3px;background:var(--track)"></div></div>
+    <div class="muted" style="display:flex;justify-content:space-between;font-size:11.5px"><span>Etapa 3 ze 4 · 11 míst na 14,9 km</span><span>Skutečná trasa podél řeky</span></div>
+  </div>
+  <div style="position:absolute;right:12px;top:170px;display:flex;flex-direction:column;gap:8px"><span style="width:38px;height:38px;border-radius:10px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:19px">+</span><span style="width:38px;height:38px;border-radius:10px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:19px">−</span><span style="width:38px;height:38px;border-radius:10px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:19px;font-size:15px">◎</span></div>
+  <div style="position:absolute;left:12px;right:12px;bottom:96px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 24px var(--shadow)">
+    <a href="Zastavka-noc.dc.html" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
+      <div style="width:66px;height:66px;border-radius:12px;flex:none;background-size:cover;background-position:center;background-image:url('assets/foto-nelahozeves.jpg')"></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="sc" style="font-size:13.5px">Další zastávka</span><span class="fell" style="font-size:22px;line-height:1.05">Zámek Nelahozeves</span><span class="muted" style="font-size:12px">dojdete zítra při běžné chůzi</span></div>
+      <span class="fell num" style="font-size:25px;white-space:nowrap">3,0 km</span>
+    </a>
+    <div class="rule"></div>
+    <div style="font-size:13px"><span class="muted">Malý objev za 1,4 km:</span> Lobeček</div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;display:flex"><nav class="nav"><a href="Domu-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Domů</a><a href="Vyprava-noc.dc.html" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z M9 4v14 M15 6v14"/></svg>Výprava</a><a href="Objevovat-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Objevovat</a><a href="Kronika-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z M5 17a3 3 0 013-3h11"/></svg>Kronika</a></nav></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

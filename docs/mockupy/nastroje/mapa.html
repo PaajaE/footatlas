@@ -80,12 +80,12 @@ window.addRoute = (route, cut, colors) => {
   map.addLayer({id:'done-halo',type:'line',source:'done',paint:{'line-color':colors.halo,'line-width':colors.w+3,'line-opacity':.85},layout:{'line-cap':'round','line-join':'round'}});
   map.addLayer({id:'done',type:'line',source:'done',paint:{'line-color':colors.done,'line-width':colors.w},layout:{'line-cap':'round','line-join':'round'}});
 };
-window.addLife = (line, done) => {
+window.addLife = (line, done, c) => {
   map.addSource('life',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:line}}});
   map.addSource('lifeDone',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:done}}});
-  map.addLayer({id:'life',type:'line',source:'life',paint:{'line-color':'#3A2A1C','line-width':1.4,'line-dasharray':[2,2]},layout:{'line-cap':'round'}});
-  map.addLayer({id:'lifeDone-halo',type:'line',source:'lifeDone',paint:{'line-color':'#F3E6C4','line-width':5,'line-opacity':.8},layout:{'line-cap':'round'}});
-  map.addLayer({id:'lifeDone',type:'line',source:'lifeDone',paint:{'line-color':'#9B2C22','line-width':2.6},layout:{'line-cap':'round'}});
+  map.addLayer({id:'life',type:'line',source:'life',paint:{'line-color':c.plan,'line-width':1.4,'line-dasharray':[2,2]},layout:{'line-cap':'round'}});
+  map.addLayer({id:'lifeDone-halo',type:'line',source:'lifeDone',paint:{'line-color':c.halo,'line-width':5,'line-opacity':.8},layout:{'line-cap':'round'}});
+  map.addLayer({id:'lifeDone',type:'line',source:'lifeDone',paint:{'line-color':c.done,'line-width':2.6},layout:{'line-cap':'round'}});
 };
 window.project = (pts) => pts.map(p=>{const q=map.project(p);return [Math.round(q.x*10)/10, Math.round(q.y*10)/10];});
 window.idle = () => new Promise(r=>{ if(map.loaded()&&map.areTilesLoaded()) setTimeout(r,300); else map.once('idle',()=>setTimeout(r,300)); });
