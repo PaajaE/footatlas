@@ -2,13 +2,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import {
   computeState,
   isPaused,
-  localDateKey,
   markSeen as markSessionSeen,
   pauseSession,
   resumeSession,
-  sessionWalkedM,
+  sessionSlices,
+  sessionStart,
   startSession,
-  type DailyRecord,
+  walkedInSlicesM,
   type ExpeditionSession,
   type ExpeditionState,
 } from "@footatlas/core";
@@ -48,7 +48,8 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [demo, setDemoState] = useState<DemoState>(DEFAULT_DEMO);
   const [session, setSession] = useState<ExpeditionSession | null>(null);
-  const [records, setRecords] = useState<DailyRecord[]>([]);
+  /** Vzdálenost výpravy z posledního načtení zdravotních dat. */
+  const [measuredM, setMeasuredM] = useState(0);
   const [status, setStatus] = useState<DataStatus>({ kind: "loading" });
   const sessionRef = useRef<ExpeditionSession | null>(null);
   sessionRef.current = session;
@@ -60,7 +61,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const refreshFor = useCallback(async (s: ExpeditionSession | null) => {
     if (!s) {
-      setRecords([]);
+      setMeasuredM(0);
       setStatus({ kind: "ok" });
       return;
     }
@@ -68,12 +69,20 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     try {
       const availability = await healthSource.availability();
       if (availability !== "available") {
-        setRecords([]);
+        setMeasuredM(0);
         setStatus({ kind: "unavailable", reason: availability });
         return;
       }
-      const from = new Date(`${s.periods[0]!.from}T00:00:00`);
-      setRecords(await healthSource.readDaily(from, new Date()));
+      // Celé dny z denních součtů, části dne (den zahájení, pozastavení, obnovení) čtením intervalu.
+      const now = new Date();
+      const slices = sessionSlices(s, now);
+      const [daily, intervalM] = await Promise.all([
+        healthSource.readDaily(sessionStart(s), now),
+        Promise.all(
+          slices.map((x) => (x.whole || !healthSource.readInterval ? null : healthSource.readInterval(x.from, x.to))),
+        ),
+      ]);
+      setMeasuredM(walkedInSlicesM(slices, daily, intervalM));
       setStatus({ kind: "ok" });
     } catch (e) {
       setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e) });
@@ -91,16 +100,14 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     })();
   }, [refreshFor]);
 
-  const today = () => localDateKey(new Date());
-
   const start = useCallback(async () => {
-    const s = startSession(vltavska.id, today());
+    const s = startSession(vltavska.id, new Date());
     await persistSession(s);
     try {
       // Žádost o oprávnění až ve chvíli, kdy uživatel výpravu spouští (spec 9.1: nic se nežádá předem).
       const access = await healthSource.requestAccess();
       if (!access.read) {
-        setRecords([]);
+        setMeasuredM(0);
         setStatus({ kind: "unavailable", reason: "denied" });
         return;
       }
@@ -113,13 +120,17 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const pause = useCallback(async () => {
     const s = sessionRef.current;
-    if (s) await persistSession(pauseSession(s, today()));
-  }, [persistSession]);
+    if (!s) return;
+    const next = pauseSession(s, new Date());
+    await persistSession(next);
+    // Znovu načíst, aby se započítal pohyb až do okamžiku pozastavení.
+    await refreshFor(next);
+  }, [persistSession, refreshFor]);
 
   const resume = useCallback(async () => {
     const s = sessionRef.current;
     if (!s) return;
-    const next = resumeSession(s, today());
+    const next = resumeSession(s, new Date());
     await persistSession(next);
     await refreshFor(next);
   }, [persistSession, refreshFor]);
@@ -138,13 +149,13 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const resetAll = useCallback(async () => {
     await persistSession(null);
-    setRecords([]);
+    setMeasuredM(0);
     setDemoState(DEFAULT_DEMO);
     await saveDemo(DEFAULT_DEMO);
     setStatus({ kind: "ok" });
   }, [persistSession]);
 
-  const walkedM = demo.enabled ? demo.walkedM : session ? sessionWalkedM(records, session) : 0;
+  const walkedM = demo.enabled ? demo.walkedM : session ? measuredM : 0;
   const previousM = demo.enabled ? demo.seenM : (session?.lastSeenWalkedM ?? 0);
   const active = demo.enabled || session !== null;
   const paused = !demo.enabled && session !== null && isPaused(session);

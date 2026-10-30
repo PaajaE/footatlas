@@ -1,11 +1,12 @@
 import {
   aggregateGroupByPeriod,
+  aggregateRecord,
   getSdkStatus,
   initialize,
   requestPermission,
   SdkAvailabilityStatus,
 } from "react-native-health-connect";
-import { addToDay, mergeDaily, periodStartDayKey, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource } from "@footatlas/core";
+import { addToDay, mergeDaily, periodStartDayKey, toDailyRecord, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource } from "@footatlas/core";
 
 const READ_STEPS = { accessType: "read", recordType: "Steps" } as const;
 const READ_DISTANCE = { accessType: "read", recordType: "Distance" } as const;
@@ -34,6 +35,19 @@ async function dailySums(kind: Kind, from: Date, to: Date): Promise<Map<string, 
   return byDay;
 }
 
+/**
+ * Součet za libovolný interval. Předpoklad (NEOVĚŘENO na telefonu): Health Connect záznam
+ * přesahující hranici intervalu započítá poměrnou částí, ne celý.
+ */
+async function intervalSum(kind: Kind, from: Date, to: Date): Promise<number> {
+  const r = (await aggregateRecord({
+    recordType: kind,
+    timeRangeFilter: { operator: "between", startTime: from.toISOString(), endTime: to.toISOString() },
+  } as never)) as Record<string, any>;
+  const value = kind === "Distance" ? r.DISTANCE?.inMeters : r.COUNT_TOTAL;
+  return typeof value === "number" ? value : 0;
+}
+
 export const androidHealthSource: HealthSource = {
   platform: "android",
 
@@ -59,5 +73,11 @@ export const androidHealthSource: HealthSource = {
       dailySums("Steps", from, to),
     ]);
     return mergeDaily(dist, steps);
+  },
+
+  async readInterval(from: Date, to: Date): Promise<number> {
+    await initialize();
+    const [dist, steps] = await Promise.all([intervalSum("Distance", from, to), intervalSum("Steps", from, to)]);
+    return toDailyRecord("", dist, steps)?.distanceM ?? 0;
   },
 };

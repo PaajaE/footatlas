@@ -87,3 +87,6 @@ Závěry:
 
 - **Android: vzdálenost zahrnuje všechny aktivity.** Agregace `Distance` v Health Connectu počítá i jízdu na kole a další pohyb, kdežto iOS čte jen chůzi a běh (`DistanceWalkingRunning`), takže výsledky se mezi platformami liší a spec 6.3 (výchozí chůze a běh) neplatí. Řešení bez zařízení nelze ověřit; možnosti: (a) na Androidu brát kroky jako hlavní zdroj, (b) odečíst vzdálenost v relacích `ExerciseSession` jiných typů než chůze, běh a turistika. Rozhodnout po ověření na reálných datech.
 - **Rozsah mapových dat.** Vlastní PMTiles z OSM je nutné vyrobit a hostovat (výřez Česka, nebo koridory výprav). Zbývá ověřit velikost souborů, limity R2 a Workerů pro čtení rozsahů a postup aktualizace dat.
+- **Výprava od okamžiku zahájení (rozhodnutí 0004).** Části dne čte Android přes `aggregateRecord` s časovým intervalem. NEOVĚŘENO na telefonu: zda Health Connect záznam kroků přesahující hranici intervalu (např. 10:55–11:05 při pozastavení v 11:00) započítá poměrně, nebo celý. iOS čtení intervalu zatím nemá (`apps/mobile/src/health/ios.ts` se v této fázi nemění), takže den zahájení a pozastavení počítá celý.
+- **Časová pásma.** Úseky po dnech se dělí podle aktuálního pásma zařízení, denní součty Health Connectu podle pásma záznamu. Při cestování přes pásma se den zahájení nebo pozastavení může o pár hodin posunout; neřešeno.
+

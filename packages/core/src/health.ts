@@ -22,6 +22,12 @@ export interface HealthSource {
    * mezi zdroji (řeší platforma agregací). Dny bez pohybu se nevracejí.
    */
   readDaily(from: Date, to: Date): Promise<DailyRecord[]>;
+  /**
+   * Vzdálenost v metrech za interval [from, to) mimo hranice dnů (např. od okamžiku
+   * zahájení výpravy), podle stejného pravidla jako `readDaily`. Volitelné: zdroj bez něj
+   * započítá části dne celým dnem (viz `walkedInSlicesM`).
+   */
+  readInterval?(from: Date, to: Date): Promise<number>;
 }
 
 /**
