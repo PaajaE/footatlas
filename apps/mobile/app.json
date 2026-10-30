@@ -8,7 +8,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "cz.footatlas.app"
+      "bundleIdentifier": "cz.footatlas.app",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "FootAtlas čte vaše kroky a ušlou vzdálenost, aby z nich sestavil vaši kroniku pohybu. Data zůstávají na telefonu."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,10 +21,35 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "cz.footatlas.app"
+      "package": "cz.footatlas.app",
+      "permissions": [
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_DISTANCE",
+        "android.permission.health.READ_HEALTH_DATA_HISTORY"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-dev-client",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      "react-native-health-connect",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "FootAtlas čte vaše kroky a ušlou vzdálenost, aby z nich sestavil vaši kroniku pohybu. Data zůstávají na telefonu.",
+          "NSHealthUpdateUsageDescription": "FootAtlas do zdravotních dat nic nezapisuje.",
+          "background": false
+        }
+      ]
+    ]
   }
 }

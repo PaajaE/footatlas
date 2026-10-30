@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { place } from "./index.js";
+import { place } from "./index";
 
 const stop = {
   kind: "stop",

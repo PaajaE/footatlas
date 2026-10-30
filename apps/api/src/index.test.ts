@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { handle } from "./index.js";
+import { handle } from "./index";
 
 const env = { MAPY_API_KEY: "test-key" };
 const call = (path: string, e: Record<string, unknown> = env) =>
