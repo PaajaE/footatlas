@@ -34,7 +34,12 @@ Verdikt: pro MVP **ne**. Jádro (datový model, pravidla započítávání, výp
 Princip: aplikace funguje offline a data žijí na zařízení. Server slouží jen k doručení obsahu a volitelně k záloze.
 
 - **Obsah výprav** jako statické balíčky (JSON + obrázky) na **Cloudflare R2** (bez poplatků za egress, velkorysý bezplatný tarif) nebo Pages. Verzovat, podepisovat, kešovat. Žádný server není potřeba.
-- **Mapové dlaždice**: vlastní vektorové dlaždice formátem **PMTiles** (Protomaps, data OpenStreetMap) na R2 plus **MapLibre** v aplikaci. Veřejné servery dlaždic OSM nejsou určené pro produkční provoz aplikace. Offline mapy se pak dají nabídnout jako placený doplněk.
+- **Mapy**: primárně **Mapy.com API** (podklady Seznamu, pro ČR a střední Evropu nejlepší turistická/outdoorová kartografie; k dispozici i routing, geokódování a výškový profil). V aplikaci přes **MapLibre** s rastrovými dlaždicemi. Před zavedením ověřit v podmínkách služby a ceníku:
+  - bezplatný limit a cena po jeho překročení (kredity za dlaždice a požadavky),
+  - povinná atribuce (logo a copyright),
+  - **zákaz nebo omezení cachování a offline použití dlaždic**. To ovlivňuje plán prodávat offline mapy jako placený doplněk (viz spec. 11.2),
+  - jak chránit klíč v mobilní aplikaci: klíč v balíčku jde snadno vytáhnout, proto dlaždice a dotazy vést přes tenkou **Cloudflare Worker proxy** s limitem požadavků.
+- **Záložní/doplňková varianta**: vlastní vektorové dlaždice formátem PMTiles (Protomaps, OpenStreetMap) na R2. Hodí se pro zahraniční výpravy mimo kvalitní pokrytí Mapy.com a pro legální offline mapy. Veřejné servery dlaždic OSM nejsou určené pro produkční provoz aplikace.
 - **Cloudflare Workers + D1/KV**: jen pokud bude potřeba API (ověření nákupu, sdílení karet, volitelná synchronizace). V bezplatných limitech by MVP mělo vystačit; limity je nutné ověřit.
 - **Supabase**: vhodný, až se zavede volitelný účet a synchronizace (Auth + Postgres + RLS). Bezplatný projekt se po týdnu nečinnosti pozastavuje a má malé limity, pro start je to v pořádku, pro produkci počítat s tarifem. Do MVP bych ho nezaváděl, abychom se vyhnuli správě zdravotních dat na serveru (GDPR).
 - **Nákupy**: RevenueCat (bezplatně do určitého obratu) nebo přímo StoreKit a Play Billing.
@@ -51,10 +56,11 @@ Princip: aplikace funguje offline a data žijí na zařízení. Server slouží 
 
 ## 5. Navržené další kroky
 
-1. Založit monorepo (pnpm, Expo dev client, `packages/core`).
-2. Prototyp `HealthSource` pro iOS a Android a import historie na reálných zařízeních, výstup = karta života.
-3. Podat žádost o oprávnění k historii v Google Play (dlouhá doba schvalování).
-4. Zod schéma obsahu výpravy a jedna pilotní výprava jako šablona.
+1. Založit vývojářský projekt na Mapy.com a ověřit podmínky (limity, atribuce, cachování).
+2. Založit monorepo (pnpm, Expo dev client, `packages/core`).
+3. Prototyp `HealthSource` pro iOS a Android a import historie na reálných zařízeních, výstup = karta života.
+4. Podat žádost o oprávnění k historii v Google Play (dlouhá doba schvalování).
+5. Zod schéma obsahu výpravy a jedna pilotní výprava jako šablona.
 
 ## 6. Otevřené body
 

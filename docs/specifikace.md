@@ -273,7 +273,7 @@ Notifikace se v onboardingu **nežádají**.
 
 - Další výpravy po balíčcích
 - Rozšířený příběhový obsah
-- Offline mapy a doplňkové styly map
+- Offline mapy a doplňkové styly map (závisí na licenčních podmínkách poskytovatele map)
 - Souběžné výpravy (po jejich zavedení)
 - Tištěná kronika, plakát s mapou, pohlednice
 - Pokročilé roční přehledy
