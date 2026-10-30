@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { place } from "./place";
+import { draftPlace, place } from "./place";
 
 /** Typ trasy (spec 5.4); každá trasa nese viditelný štítek. */
 export const routeType = z.enum(["real", "simplified", "virtual", "symbolic", "imported"]);
@@ -24,6 +24,8 @@ export const expedition = z
     id: z.string().min(1),
     name: z.string().min(1),
     summary: z.string().min(1),
+    /** `draft`: obsah nemusí být ověřený, výpravu nelze vydat. */
+    status: z.enum(["draft", "published"]),
     routeType,
     /** Odkud trasa pochází (nutné u `real` a `simplified`). */
     routeSource: z.string().min(1).optional(),
@@ -32,7 +34,7 @@ export const expedition = z
     /** Konce etap v metrech; poslední je `totalM`. Chybí-li, rozdělí se rovnoměrně. */
     stageEndsM: z.array(z.number().positive()).optional(),
     chapters: z.array(chapter).default([]),
-    places: z.array(place).min(1),
+    places: z.array(z.union([place, draftPlace])).min(1),
   })
   .superRefine((e, ctx) => {
     const ids = new Set<string>();
@@ -42,7 +44,10 @@ export const expedition = z
       if (p.unlockAtM > e.totalM) {
         ctx.addIssue({ code: "custom", path: ["places", i, "unlockAtM"], message: "Místo leží za koncem trasy" });
       }
-      if (p.kind === "stop" && p.chapterId && !e.chapters.some((c) => c.id === p.chapterId)) {
+      if (e.status === "published" && "draft" in p) {
+        ctx.addIssue({ code: "custom", path: ["places", i, "draft"], message: `Místo ${p.id} je rozpracované, výprava nejde vydat` });
+      }
+      if ("chapterId" in p && p.chapterId && !e.chapters.some((c) => c.id === p.chapterId)) {
         ctx.addIssue({ code: "custom", path: ["places", i, "chapterId"], message: `Neznámá kapitola ${p.chapterId}` });
       }
     });

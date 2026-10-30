@@ -23,6 +23,7 @@ const base = {
   id: "vltavska",
   name: "Vltavská stezka",
   summary: "Pro test.",
+  status: "published" as const,
   routeType: "simplified" as const,
   routeSource: "OpenStreetMap, ODbL",
   routeFile: "vltavska.json",
@@ -52,6 +53,11 @@ describe("výprava", () => {
   it("poslední etapa končí v cíli", () => {
     expect(expedition.safeParse({ ...base, stageEndsM: [30_000, 50_000] }).success).toBe(false);
     expect(expedition.safeParse({ ...base, stageEndsM: [30_000, 62_000] }).success).toBe(true);
+  });
+  it("rozpracované místo projde jen v konceptu", () => {
+    const draft = { kind: "stop" as const, id: "d1", name: "Koncept", lat: 50, lon: 14, unlockAtM: 100, text: "Text.", draft: true as const };
+    expect(expedition.safeParse({ ...base, status: "draft", places: [draft] }).success).toBe(true);
+    expect(expedition.safeParse({ ...base, status: "published", places: [draft] }).success).toBe(false);
   });
   it("každý typ trasy má štítek", () => {
     expect(Object.keys(routeTypeLabel)).toHaveLength(5);

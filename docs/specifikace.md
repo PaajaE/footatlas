@@ -347,6 +347,7 @@ Balíčky tras + fyzické produkty. Předplatné „Atlas“ zvážit až po ov�
 - Povinnost účtu a synchronizace mezi zařízeními. Bez účtu je potřeba vyřešit zálohu a přenos na nový telefon (např. šifrovaný export/import souboru nebo volitelný anonymní účet).
 - Volba cross-platform technologie (např. Flutter, React Native nebo Kotlin Multiplatform) a požadavky Google Play na oprávnění k historii v Health Connectu
 - Licence k fotografiím a trasovým datům
+- Druhý vizuální styl aplikace (např. moderní, neutrální, s podkladem Mapy.com) jako volba v nastavení, po MVP. Zatím je jediný styl pergamenový (viz `docs/rozhodnuti.md`, rozhodnutí 0002).
 
 ## 17. Plán ověření a další kroky
 

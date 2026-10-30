@@ -8,7 +8,7 @@ const image = z.object({
   license: z.string().min(1),
 });
 
-const base = {
+export const placeBase = {
   id: z.string().min(1),
   name: z.string().min(1),
   lat: z.number().min(-90).max(90),
@@ -18,7 +18,7 @@ const base = {
 };
 
 export const stop = z.object({
-  ...base,
+  ...placeBase,
   kind: z.literal("stop"),
   text: z.string().min(1),
   surprisingFact: z.string().min(1),
@@ -30,7 +30,7 @@ export const stop = z.object({
 });
 
 export const discovery = z.object({
-  ...base,
+  ...placeBase,
   kind: z.literal("discovery"),
   text: z.string().min(1),
   image: image.optional(),
@@ -39,3 +39,17 @@ export const discovery = z.object({
 
 export const place = z.discriminatedUnion("kind", [stop, discovery]);
 export type Place = z.infer<typeof place>;
+
+/**
+ * Rozpracované místo: jen to, co mají mockupy a pilotní data. Neprošlo kontrolou faktů,
+ * proto ho schéma pustí jen ve výpravě se stavem `draft` (viz expedition.ts).
+ */
+export const draftPlace = z.object({
+  ...placeBase,
+  kind: z.enum(["stop", "discovery"]),
+  draft: z.literal(true),
+  text: z.string().min(1),
+  /** Klíč fotky v knihovně obrázků, licence se ověří při přechodu na `published`. */
+  photo: z.string().min(1).optional(),
+});
+export type DraftPlace = z.infer<typeof draftPlace>;
