@@ -10,7 +10,8 @@ import { fileURLToPath } from 'node:url';
 const { chromium } = createRequire(import.meta.url)('playwright');
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const assets = path.join(dir, '..', 'assets');
+const assets = process.env.MAPY_OUT || path.join(dir, '..', 'assets');
+const TEMA = process.env.MAPY_TEMA || 'pergamen';
 const data = JSON.parse(fs.readFileSync(path.join(dir, 'mista.json'), 'utf8'));
 
 const hav = (a, b) => {
@@ -99,7 +100,7 @@ async function mapy() {
   const kmOf = Object.fromEntries(t.mista.map(m => [m.id, m.km]));
   const sub = (fromKm, toKm) => route.filter((_, i) => t.km[i] >= fromKm && t.km[i] <= toKm);
   const bboxOf = line => { const lo = line.map(p => p[0]), la = line.map(p => p[1]); return [[Math.min(...lo), Math.min(...la)], [Math.max(...lo), Math.max(...la)]]; };
-  const parch = { done: '#9B2C22', plan: '#3A2A1C', halo: '#F3E6C4', w: 3.2 };
+  const parch = TEMA === 'noc' ? { done: '#E0704A', plan: '#E2D3B4', halo: '#2B241C', w: 3.2 } : { done: '#9B2C22', plan: '#3A2A1C', halo: '#F3E6C4', w: 3.2 };
 
   const praha = [14.42, 50.08], tokio = [139.69, 35.69], sf = [-122.42 + 360, 37.77];
   const life = [...greatCircle(praha, tokio), ...greatCircle(tokio, sf).slice(1)];
@@ -119,7 +120,7 @@ async function mapy() {
   const out = { stav, km: kmOf, delkaKm: t.delkaKm, views: {} };
   for (const v of views) {
     const page = await openPage(browser);
-    await page.evaluate(o => setup(o), { w: v.w, h: v.h, parchment: true, center: v.center, zoom: v.zoom, bounds: v.bounds, pad: v.pad });
+    await page.evaluate(o => setup(o), { w: v.w, h: v.h, parchment: true, tema: TEMA, center: v.center, zoom: v.zoom, bounds: v.bounds, pad: v.pad });
     if (v.pan) await page.evaluate(d => map.panBy(d, { duration: 0 }), v.pan);
     if (v.route) await page.evaluate(r => addRoute(r.line, r.cut, r.colors), v.route);
     if (v.life) await page.evaluate(l => addLife(l.line, l.done), v.life);

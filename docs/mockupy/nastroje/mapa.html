@@ -5,11 +5,15 @@
 <style>html,body{margin:0}#map{width:var(--w);height:var(--h)}.maplibregl-ctrl-attrib{display:none}</style>
 </head><body><div id="map"></div>
 <script>
-const P = {
-  bg:'#E9D8B0', land:'#E4D0A3', wood:'#D3C595', park:'#DBCF9F', water:'#AFC3BC', waterLine:'#9FB6AE',
-  bld:'#D9C397', bldLine:'#B59D73', road:'#8A6B45', roadMinor:'#A58A62', path:'#7A5A36',
-  rail:'#5E4630', text:'#3A2A1C', halo:'#E9D8B0', border:'#9B2C22'
+const PALETY = {
+  pergamen: { bg:'#E9D8B0', land:'#E4D0A3', wood:'#D3C595', park:'#DBCF9F', water:'#AFC3BC', waterLine:'#9FB6AE', urban:'#D2B98A',
+    bld:'#D9C397', bldLine:'#B59D73', road:'#8A6B45', roadMinor:'#A58A62', path:'#7A5A36', rail:'#5E4630', text:'#3A2A1C', textWater:'#4F6A66', halo:'#E9D8B0' },
+  den: { bg:'#EFE4CB', land:'#EBDFC3', wood:'#DCD5AE', park:'#E4DCB9', water:'#B7CBC5', waterLine:'#A7BEB7', urban:'#E0CCA3',
+    bld:'#E1CFAA', bldLine:'#BDA77F', road:'#8A6B45', roadMinor:'#AB9473', path:'#7A5A36', rail:'#5E4630', text:'#3A2A1C', textWater:'#4F6A66', halo:'#EFE4CB' },
+  noc: { bg:'#2B241C', land:'#2E271F', wood:'#2F3124', park:'#302D22', water:'#2F474E', waterLine:'#3F5C64', urban:'#3A3126',
+    bld:'#43382B', bldLine:'#55473A', road:'#A68A5E', roadMinor:'#7A6649', path:'#A68A5E', rail:'#8C7656', text:'#E2D3B4', textWater:'#8FAAA6', halo:'#2B241C' }
 };
+let P = PALETY.pergamen;
 function parchment(style){
   for (const l of style.layers){
     const id=l.id, t=l.type; l.paint=l.paint||{}; l.layout=l.layout||{};
@@ -24,7 +28,7 @@ function parchment(style){
       else if(/ice|glacier|sand/.test(id)) c=P.bg;
       l.paint['fill-color']=c; if(!/building/.test(id)) delete l.paint['fill-outline-color'];
       if(/landuse|landcover/.test(id) && !/wood|forest/.test(id)) l.paint['fill-opacity']=.6;
-      if(/residential|suburb|urban/.test(id)) { l.paint['fill-color']='#D2B98A'; l.paint['fill-opacity']=.75; }
+      if(/residential|suburb|urban/.test(id)) { l.paint['fill-color']=P.urban; l.paint['fill-opacity']=.75; }
     }
     else if(t==='fill-extrusion'){ l.layout.visibility='none'; }
     else if(t==='line'){
@@ -41,13 +45,13 @@ function parchment(style){
     else if(t==='symbol'){
       if(/poi|aeroway|transit|airport|station|shield|highway-shield|oneway/.test(id)){ l.layout.visibility='none'; continue; }
       if(l.layout['text-field']) l.layout['text-field']=['coalesce',['get','name:cs'],['get','name:latin'],['get','name']];
-      l.paint['text-color']=/water/.test(id)?'#4F6A66':P.text;
+      l.paint['text-color']=/water/.test(id)?P.textWater:P.text;
       l.paint['text-halo-color']=P.halo; l.paint['text-halo-width']=1.4;
       if(/place|label_|water/.test(id)) l.layout['text-font']=['Noto Sans Italic'];
       if(l.layout['icon-image']) l.paint['icon-opacity']=0;
     }
     else if(t==='raster'){ l.layout.visibility='none'; }
-    else if(t==='hillshade'){ l.paint['hillshade-shadow-color']='#7A5A2E'; l.paint['hillshade-highlight-color']=P.bg; }
+    else if(t==='hillshade'){ l.paint['hillshade-shadow-color']=P.rail; l.paint['hillshade-highlight-color']=P.bg; }
   }
   return style;
 }
@@ -55,7 +59,7 @@ window.setup = async (opts) => {
   document.documentElement.style.setProperty('--w', opts.w+'px');
   document.documentElement.style.setProperty('--h', opts.h+'px');
   let style = await (await fetch('https://tiles.openfreemap.org/styles/liberty')).json();
-  if (opts.parchment) style = parchment(style);
+  if (opts.parchment) { P = PALETY[opts.tema || 'pergamen']; style = parchment(style); }
   window.map = new maplibregl.Map({container:'map', style, center:opts.center||[14.4,50.2], zoom:opts.zoom||10, pixelRatio:2, attributionControl:false, fadeDuration:0, preserveDrawingBuffer:true});
   await new Promise(r=>map.once('load',r));
   if (opts.bounds) map.fitBounds(opts.bounds,{padding:opts.pad||20,duration:0});
