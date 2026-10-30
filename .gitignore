@@ -8,3 +8,4 @@ dist
 .dev.vars
 *.keystore
 *.jks
+.claude/worktrees/
