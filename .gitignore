@@ -8,3 +8,7 @@ dist
 .dev.vars
 *.keystore
 *.jks
+
+# Mapy: generované soubory a velké binárky (viz docs/mapy-osm.md)
+tools/maps/out/
+*.pmtiles

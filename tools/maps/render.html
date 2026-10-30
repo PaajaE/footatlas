@@ -1,0 +1,32 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="/vendor/maplibre-gl.css" rel="stylesheet">
+<script src="/vendor/maplibre-gl.js"></script>
+<script src="/vendor/pmtiles.js"></script>
+<style>html,body{margin:0}#map{width:var(--w);height:var(--h)}</style>
+</head><body><div id="map"></div>
+<script>
+const protocol = new pmtiles.Protocol();
+maplibregl.addProtocol('pmtiles', protocol.tile);
+
+// opts: { style, routeLayers, routeCoords, doneCoords, center, zoom, bounds, w, h, pad }
+window.setup = async (opts) => {
+  document.documentElement.style.setProperty('--w', opts.w + 'px');
+  document.documentElement.style.setProperty('--h', opts.h + 'px');
+  window.map = new maplibregl.Map({
+    container: 'map', style: opts.style, center: opts.center || [14.4, 50.2], zoom: opts.zoom ?? 10,
+    pixelRatio: 2, fadeDuration: 0, preserveDrawingBuffer: true,
+    attributionControl: { compact: true },
+  });
+  await new Promise((r) => map.once('load', r));
+  const feat = (coords) => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: coords } });
+  map.addSource('route-done', { type: 'geojson', data: feat(opts.doneCoords) });
+  map.addSource('route-rest', { type: 'geojson', data: feat(opts.restCoords) });
+  for (const l of opts.routeLayers) map.addLayer(l);
+  if (opts.bounds) map.fitBounds(opts.bounds, { padding: opts.pad ?? 20, duration: 0 });
+  await new Promise((r) => (map.loaded() && map.areTilesLoaded() ? setTimeout(r, 300) : map.once('idle', () => setTimeout(r, 300))));
+  return { errors: window.__errors ?? [] };
+};
+window.__errors = [];
+window.addEventListener('error', (e) => window.__errors.push(String(e.message)));
+</script></body></html>
