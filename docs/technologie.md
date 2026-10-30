@@ -86,3 +86,8 @@ Závěry:
 
 - Jaké zařízení máte k dispozici pro testování (Android i iPhone, hodinky)?
 - Apple Developer program (99 USD/rok) je nutný pro testování HealthKit na zařízení a pro vydání; Google Play (jednorázově 25 USD).
+
+## Známá omezení a otevřená rozhodnutí
+
+- **Android: vzdálenost zahrnuje všechny aktivity.** Agregace `Distance` v Health Connectu počítá i jízdu na kole a další pohyb, kdežto iOS čte jen chůzi a běh (`DistanceWalkingRunning`), takže výsledky se mezi platformami liší a spec 6.3 (výchozí chůze a běh) neplatí. Řešení bez zařízení nelze ověřit; možnosti: (a) na Androidu brát kroky jako hlavní zdroj, (b) odečíst vzdálenost v relacích `ExerciseSession` jiných typů než chůze, běh a turistika. Rozhodnout po ověření na reálných datech.
+- **Mapový styl a Mapy.com.** Pergamenový vzhled map z mockupů vyžaduje vlastní vektorové dlaždice (OSM, PMTiles na R2) a vlastní styl v MapLibre; rastrové dlaždice Mapy.com se přebarvit nedají. Mapy.com pak zůstává pro hledání míst, trasování a výškový profil. Rozhodnutí čeká na potvrzení.
