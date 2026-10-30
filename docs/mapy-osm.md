@@ -66,8 +66,16 @@ Obrázky: `docs/mapy-osm/` (`vyprava`, `zastavka`, `praha`, `cela-trasa`, každ�
 - Řeka na hlavní trase je tenká modrá linka; plocha Vltavy je vykreslená jen tam, kde je v OSM polygon (v Praze ano).
 - Ladění barev a hustoty (zejména vedlejší cesty, ty jsem skryl do zoomu 12) je záležitost pro designéra a pro zkoušku na telefonu.
 
+## Spike na telefonu (Android, 30. 10. 2026)
+Zařízení: motorola edge 50 fusion, Android 16. `@maplibre/maplibre-react-native` 11.5.1 (nativní MapLibre 13.6.1), obrazovka `apps/mobile/src/app/mapa-spike.tsx` (jen pro vývoj, ExpeditionMap se nemění). Koridor Vltavské stezky ±5 km, zoom 0–15, 26 MB.
+- **`pmtiles://` čte knihovna přímo, bez Workeru a bez převodu na MBTiles.** Vykreslilo se z HTTP s Range (`pmtiles://http://127.0.0.1:8787/...`, `tools/maps/serve.mjs` + `adb reverse`) i ze souboru v úložišti aplikace (`pmtiles://file:///data/user/0/cz.footatlas.app/files/...`).
+- Pergamenový styl z `packages/map-style` se vykreslil včetně českých popisků (Praha, zoom 12).
+- Soubor v `/storage/emulated/0/Android/data/<balíček>/files/` nahraný přes `adb push` se nenačetl (`Cannot read file`); v úložišti aplikace (`files/`) ano. Offline soubory proto stahovat do `files/` aplikace.
+- Písma v spiku jdou z OpenFreeMap (síť). Pro produkci vlastní kopie, viz níže.
+- Neověřeno: iOS (u knihovny je otevřený problém s `pmtiles://` na iOS), výkon na slabších telefonech, hustota popisků, vrstvy trasy a značky nad mapou, R2 s Range a cache.
+
 ## Co není ověřené
-- **Zobrazení na telefonu.** Aplikace by měla používat MapLibre Native (`@maplibre/maplibre-react-native`). Zda aktuální verze čte `pmtiles://` přímo, jsem neověřil. Pokud ne: (a) Worker nad R2, který vrací dlaždice `/tiles/{z}/{x}/{y}` z PMTiles, nebo (b) převod na MBTiles pro offline. Rozhodnout po zkoušce v aplikaci.
+- **Zobrazení na telefonu:** na Androidu ověřeno (viz spike výše), `pmtiles://` funguje přímo. Na iOS neověřeno; kdyby selhalo, záloha je Worker nad R2 vracející dlaždice `/tiles/{z}/{x}/{y}` nebo převod na MBTiles.
 - **Písma.** Při renderu se používají Noto Sans (OFL) z OpenFreeMap. Pro produkci je nutná vlastní kopie (např. na R2) a oddělit se od služby třetí strany.
 - **Offline.** Koridor 26 MB se dá stáhnout jako jeden soubor na zařízení (spec 11.2). Postup stahování, aktualizací a ověření licence dat (ODbL) zbývá.
 - **Hustota popisků a výkon** na slabších telefonech.
