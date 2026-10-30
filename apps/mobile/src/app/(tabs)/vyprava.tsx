@@ -29,17 +29,18 @@ export default function Expedition() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 12, gap: 8 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-          <T variant="title">{vltavska.name}</T>
-          <T variant="strong" accent>
+        {/* Nadpis má celý řádek sám pro sebe; vedle vzdálenosti se na telefonu zkracoval. */}
+        <T variant="title">{vltavska.name}</T>
+        <StageBar stages={vltavska.plan.stages} walkedM={state.walkedM} />
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+          <T variant="small" style={{ flex: 1 }}>
+            Etapa {state.stage.index + 1} ze {vltavska.plan.stages.length} · {vltavska.routeTypeLabel}
+            {demo.enabled ? " · ukázkový postup" : ""}
+          </T>
+          <T variant="strong" accent style={{ flexShrink: 0 }}>
             {(state.walkedM / 1000).toFixed(1).replace(".", ",")} / {Math.round(vltavska.totalM / 1000)} km
           </T>
         </View>
-        <StageBar stages={vltavska.plan.stages} walkedM={state.walkedM} />
-        <T variant="small">
-          Etapa {state.stage.index + 1} ze {vltavska.plan.stages.length} · {vltavska.routeTypeLabel}
-          {demo.enabled ? " · ukázkový postup" : ""}
-        </T>
       </View>
 
       <ExpeditionMap

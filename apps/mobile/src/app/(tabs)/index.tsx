@@ -30,7 +30,10 @@ export default function Home() {
   if (!active) {
     return (
       <Screen>
-        <T variant="small">{formatDayLong(new Date())}</T>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <T variant="small">{formatDayLong(new Date())}</T>
+          <DevLink onPress={() => router.push("/dev")} />
+        </View>
         <T variant="display">{vltavska.name}</T>
         <T variant="body">{vltavska.summary}</T>
         <Card style={{ gap: 12 }}>
@@ -43,7 +46,6 @@ export default function Home() {
           <T variant="small">Při startu vás aplikace požádá o čtení kroků a vzdálenosti {fromHealthSource()}.</T>
         </Card>
         <StatusNote />
-        <DevLink onPress={() => router.push("/dev")} />
       </Screen>
     );
   }
@@ -57,9 +59,12 @@ export default function Home() {
 
   return (
     <Screen>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <T variant="small">{formatDayLong(new Date())}</T>
-        <T variant="small">{ex.demo.enabled ? "Ukázkový postup" : paused ? "Výprava je pozastavena" : vltavska.name}</T>
+        <T variant="small" style={{ flex: 1, textAlign: "right" }} numberOfLines={1}>
+          {ex.demo.enabled ? "Ukázkový postup" : paused ? "Výprava je pozastavena" : vltavska.name}
+        </T>
+        <DevLink onPress={() => router.push("/dev")} />
       </View>
 
       {state.completed ? (
@@ -134,7 +139,6 @@ export default function Home() {
         </Card>
       )}
       <StatusNote />
-      <DevLink onPress={() => router.push("/dev")} />
     </Screen>
   );
 
@@ -153,11 +157,20 @@ export default function Home() {
   }
 }
 
+/** Odkaz na vývojářský panel nahoře v hlavičce; dole na konci obsahu ho na telefonu zakrývala lišta. */
 function DevLink({ onPress }: { onPress: () => void }) {
   if (!__DEV__) return null;
   return (
-    <Pressable accessibilityRole="link" onPress={onPress} style={{ paddingVertical: 12 }}>
-      <T variant="small">Vývojářský panel</T>
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel="Vývojářský panel"
+      onPress={onPress}
+      hitSlop={12}
+      style={{ paddingVertical: 4, paddingLeft: 8 }}
+    >
+      <T variant="small" accent>
+        Vývoj
+      </T>
     </Pressable>
   );
 }

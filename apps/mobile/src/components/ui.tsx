@@ -39,10 +39,13 @@ export function T({
 export function Screen({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const pad: ViewStyle = { paddingTop: insets.top + 24, paddingHorizontal: 20 };
-  if (!scroll) return <View style={[styles.fill, pad, { backgroundColor: colors.bg }]}>{children}</View>;
+  const pad: ViewStyle = { paddingTop: 24, paddingHorizontal: 20 };
+  // Odsazení od stavového řádku je na vnějším View, ne v obsahu posuvníku: při posouvání
+  // pak obsah nevjede pod stavový řádek (Android kreslí od okraje k okraji).
+  const outer = [styles.fill, { backgroundColor: colors.bg, paddingTop: insets.top }];
+  if (!scroll) return <View style={outer}><View style={[styles.fill, pad]}>{children}</View></View>;
   return (
-    <View style={[styles.fill, { backgroundColor: colors.bg }]}>
+    <View style={outer}>
       <ScrollBody pad={pad}>{children}</ScrollBody>
     </View>
   );
