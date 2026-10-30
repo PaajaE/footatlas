@@ -1,0 +1,22 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-30T20:00:00Z" },
+  "title": "FootAtlas mockupy",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 Karta života" },
+    "Domu.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 Domů" },
+    "Vyprava.dc.html": { "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 Výprava, mapa" },
+    "Zastavka.dc.html": { "x": 1410, "y": 0, "w": 390, "h": 844, "title": "4 Zastávka" },
+    "Kronika.dc.html": { "x": 1880, "y": 0, "w": 390, "h": 844, "title": "5 Kronika" },
+    "Pohlednice.dc.html": { "x": 2350, "y": 0, "w": 390, "h": 844, "title": "6 Konec etapy" },
+    "Objevovat.dc.html": { "x": 2820, "y": 0, "w": 390, "h": 844, "title": "7 Objevovat" }
+  },
+  "order": ["Main.dc.html", "Domu.dc.html", "Vyprava.dc.html", "Zastavka.dc.html", "Kronika.dc.html", "Pohlednice.dc.html", "Objevovat.dc.html"],
+  "notes": {
+    "t1": { "x": 0, "y": -240, "text": "FootAtlas: klíčové obrazovky MVP", "kind": "title1", "maxW": 3210 },
+    "n1": { "x": 0, "y": -110, "text": "Ukázkový obsah. Texty zastávek a fakta jsou jen ilustrace a před použitím je nutné je ověřit (dva zdroje).", "w": 520, "fill": "orange" }
+  },
+  "designSystems": []
+}

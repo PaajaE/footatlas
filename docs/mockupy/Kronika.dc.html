@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Kronika</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Public Sans',system-ui,sans-serif}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F3F4EF; color: #17302E; display: flex; flex-direction: column; overflow: hidden">
+  <div style="flex: 1; padding: 56px 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+    <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 32px; letter-spacing: -0.02em">Kronika</h1>
+    <div style="display: flex; background: #E4EBE2; border-radius: 12px; padding: 4px; gap: 4px">
+      <span style="flex: 1; text-align: center; padding: 8px 0; border-radius: 9px; background: #FFFFFF; font-size: 14px; font-weight: 600">Statistiky</span>
+      <a href="#zivotni-cesta" style="flex: 1; text-align: center; padding: 8px 0; border-radius: 9px; font-size: 14px; color: #3E524F; text-decoration: none">Životní cesta</a>
+      <a href="#vypravy" style="flex: 1; text-align: center; padding: 8px 0; border-radius: 9px; font-size: 14px; color: #3E524F; text-decoration: none">Výpravy</a>
+    </div>
+    <div style="display: flex; align-items: baseline; gap: 8px">
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 52px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums">14 200</span>
+      <span style="font-size: 18px; font-weight: 500">km celkem</span>
+    </div>
+    <div style="background: #FFFFFF; border: 1px solid #D5DAD2; border-radius: 16px; padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 13px; color: #5B6E6B">Kilometry za rok</span>
+      <svg width="320" height="150" viewBox="0 0 320 150" role="img" aria-label="Sloupcový graf kilometrů po letech: 2016 900, 2017 1250, 2018 1400, 2019 1500, 2020 1650, 2021 1550, 2022 1400, 2023 1350, 2024 1300, 2025 1250, 2026 650 do října." style="display: block; max-width: 100%">
+        <line x1="0" y1="118" x2="320" y2="118" stroke="#D5DAD2"/>
+        <line x1="0" y1="66" x2="320" y2="66" stroke="#E4E7E0"/>
+        <line x1="0" y1="14" x2="320" y2="14" stroke="#E4E7E0"/>
+        <g fill="#17302E">
+          <rect x="4" y="73" width="22" height="45" rx="2"/><rect x="33" y="55" width="22" height="63" rx="2"/><rect x="62" y="48" width="22" height="70" rx="2"/><rect x="91" y="43" width="22" height="75" rx="2"/><rect x="120" y="35" width="22" height="83" rx="2"/><rect x="149" y="40" width="22" height="78" rx="2"/><rect x="178" y="48" width="22" height="70" rx="2"/><rect x="207" y="51" width="22" height="67" rx="2"/><rect x="236" y="53" width="22" height="65" rx="2"/><rect x="265" y="55" width="22" height="63" rx="2"/>
+        </g>
+        <rect x="294" y="85" width="22" height="33" rx="2" fill="#2F6F8F"/>
+        <g font-family="Public Sans, sans-serif" font-size="11" fill="#3E524F" text-anchor="middle">
+          <text x="15" y="134">16</text><text x="44" y="134">17</text><text x="73" y="134">18</text><text x="102" y="134">19</text><text x="131" y="134">20</text><text x="160" y="134">21</text><text x="189" y="134">22</text><text x="218" y="134">23</text><text x="247" y="134">24</text><text x="276" y="134">25</text><text x="305" y="134">26</text>
+          <text x="131" y="29" fill="#17302E" font-weight="600">1 650</text>
+        </g>
+        <text x="302" y="146" font-family="Public Sans, sans-serif" font-size="9" fill="#3E524F" text-anchor="middle">do října</text>
+      </svg>
+    </div>
+    <div style="display: flex; gap: 10px">
+      <div style="flex: 1; background: #FFFFFF; border: 1px solid #D5DAD2; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums">3 912</span>
+        <span style="font-size: 13px; color: #5B6E6B">dní se záznamem</span>
+      </div>
+      <div style="flex: 1; background: #FFFFFF; border: 1px solid #D5DAD2; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums">24 km</span>
+        <span style="font-size: 13px; color: #5B6E6B">nejdelší den, 12. 6. 2021</span>
+      </div>
+    </div>
+    <div style="background: #17302E; color: #F3F4EF; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-weight: 600; font-size: 15px">Životní cesta: Asie</span><span style="font-size: 13px; color: #A9C2BC; font-variant-numeric: tabular-nums">9 200 z 11 000 km</span></div>
+      <div style="height: 8px; border-radius: 4px; background: #2D4B48; position: relative; overflow: hidden"><div style="position: absolute; inset: 0 auto 0 0; width: 84%; background: #E8663D"></div></div>
+      <span style="font-size: 13px; color: #A9C2BC">Ještě 1 800 km k dalšímu milníku. Při vašem tempu zhruba 14 měsíců.</span>
+    </div>
+    <span style="font-size: 12px; color: #5B6E6B">Ověřeno 85 %, odhad z kroků 15 %.</span>
+  </div>
+  <div style="display: flex; border-top: 1px solid #D5DAD2; background: #FFFFFF; padding: 8px 8px 28px">
+    <a href="Domu.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #5B6E6B; font-size: 12px; font-weight: 500">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Domů</a>
+    <a href="Vyprava.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #5B6E6B; font-size: 12px; font-weight: 500">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z M9 4v14 M15 6v14"/></svg>Výprava</a>
+    <a href="Objevovat.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #5B6E6B; font-size: 12px; font-weight: 500">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Objevovat</a>
+    <a href="Kronika.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #C8431F; font-size: 12px; font-weight: 600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z M5 17a3 3 0 013-3h11"/></svg>Kronika</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
