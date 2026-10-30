@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "cz.footatlas.app",
@@ -29,7 +29,9 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
     },
     "plugins": [
       "expo-dev-client",
@@ -49,7 +51,14 @@
           "NSHealthUpdateUsageDescription": "FootAtlas do zdravotních dat nic nezapisuje.",
           "background": false
         }
-      ]
-    ]
+      ],
+      "expo-router",
+      "expo-status-bar",
+      "expo-splash-screen"
+    ],
+    "scheme": "footatlas",
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
