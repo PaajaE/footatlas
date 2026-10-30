@@ -1,6 +1,8 @@
 # Specifikace produktu: Cestovatelská aplikace (pracovní název)
 
-Verze 0.3 · 30. 10. 2026 · Navazuje na původní vizi (v0.1), konkurenční analýzu a testování konkurenčních aplikací
+Verze 0.4 · 30. 10. 2026 · Navazuje na původní vizi (v0.1), konkurenční analýzu a testování konkurenčních aplikací
+
+**Změny oproti v0.3:** zvýšena hustota míst na trase podle mockupů (7.2, 7.6, 9.2, 9.3): místo v průměru každých 1,5–2 km, zastávky po 5–10 km.
 
 **Změny oproti v0.2:** opraven příklad karty života (číselný nesoulad), sjednocena hustota obsahu s odhadem náročnosti (7.2 × 7.6), doplněno riziko schválení oprávnění k historii v Google Play, otevřená otázka zálohy a přenosu dat bez účtu a upřesněna volba technologie (viz `docs/technologie.md`).
 
@@ -151,9 +153,11 @@ Statistiky vždy ukazují, z jakých úrovní se skládají.
 
 ### 7.2 Hustota událostí
 
-- **Malý objev** (mikro-místo): zhruba každé 2–4 km. Krátká věta, ilustrace nebo foto.
-- **Zastávka** (plné místo): zhruba každých 8–15 km a na konci etap. Plný obsah podle šablony.
-- **První objev** do 1–2 km od startu, aby první den něco přinesl.
+- **Malý objev** (mikro-místo): zhruba každé 1–3 km. Krátká věta, foto nebo ilustrace jsou volitelné.
+- **Zastávka** (plné místo): zhruba každých 5–10 km a na konci etap. Plný obsah podle šablony.
+- **Cíl hustoty:** v průměru jedno místo (zastávka nebo objev) každých 1,5–2 km. Mezera mezi dvěma místy nemá přesáhnout 4 km, aby i krátká procházka něco přinesla.
+- **První objev** do 1 km od startu, aby první den něco přinesl.
+- **Výhled dopředu:** aplikace vždy ukazuje, kolik míst čeká na dalších 5 km.
 
 ### 7.3 Šablona zastávky
 
@@ -182,7 +186,7 @@ Každé plné místo má stejnou strukturu:
 
 ### 7.6 Odhad náročnosti
 
-Výprava o 80 km vyžaduje zhruba 10–14 plných zastávek (po 8–15 km plus konce etap) a 20–40 malých objevů (po 2–4 km). Hustotu bude potřeba ověřit na pilotní výpravě; pokud by byl objem obsahu neúnosný, rozšiřuje se spíš rozestup malých objevů než počet zastávek. Obsah je hlavní úzké hrdlo celého projektu, proto je MVP omezeno na dvě výpravy.
+Výprava o 80 km vyžaduje zhruba 11–16 plných zastávek (po 5–10 km plus konce etap) a 35–45 malých objevů (po 1–3 km), celkem asi 50 míst. Ukázková Vltavská stezka v mockupech má na 62 km 9 zastávek a 29 malých objevů. Malé objevy jsou levnější (jedna věta, jeden zdroj, foto nepovinné), proto hustotu nesou hlavně ony. Hustotu bude potřeba ověřit na pilotní výpravě; pokud by byl objem obsahu neúnosný, rozšiřuje se spíš rozestup malých objevů než počet zastávek. Obsah je hlavní úzké hrdlo celého projektu, proto je MVP omezeno na dvě výpravy.
 
 ## 8. Navigace a obrazovky
 
@@ -213,14 +217,14 @@ Notifikace se v onboardingu **nežádají**.
 
 ### 9.2 Den 1
 
-- Kroky od zahájení se započítají. První objev je blízko (do 1–2 km), takže první den obvykle přinese první odměnu.
+- Kroky od zahájení se započítají. První objev je blízko (do 1 km), takže první den obvykle přinese první odměnu.
 - Při odemčení krátká animace na mapě, malý příběh, uložení do deníku.
 - Žádný push, jen přehled při otevření aplikace.
 
 ### 9.3 Dny 2–3
 
 - Při každém otevření **Domů** odpoví: „Od posledně jste ušli X km, minuli jste Y, do další zastávky zbývá Z km.“
-- Malé objevy každých 2–4 km udržují pocit pohybu.
+- Malé objevy každých 1–3 km udržují pocit pohybu.
 - Při prvním plném místě je odemčena první tematická kapitola.
 - Pokud uživatel aplikaci neotevře, nic se neděje. Při návratu: „Vítejte zpět. Mezitím jste došli k…“.
 
