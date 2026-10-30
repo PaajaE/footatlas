@@ -54,15 +54,35 @@ Princip: aplikace funguje offline a data žijí na zařízení. Server slouží 
 - **Testy**: Vitest pro jádro, Maestro nebo Detox pro E2E později.
 - **CI**: GitHub Actions + EAS Build (bezplatný tarif má omezený počet buildů).
 
-## 5. Navržené další kroky
+## 5. Zdroje tras: Stezka Českem a Via Czechia
+
+Prověřeno 30. 10. 2026 na veřejných webech. Jde o technický podklad, ne o právní posouzení. Jsou to dva různé projekty, které se snadno zaměňují, protože obě stezky spojují nejzápadnější a nejvýchodnější bod ČR.
+
+| | Stezka Českem | Via Czechia |
+|---|---|---|
+| Autor | kolektiv nadšenců ve spolupráci s KČT | Jan Hocek |
+| Rozsah | severní a jižní větev, každá cca 1 000 km, po 10 etapách | šest stezek, přes 10 000 km (pěší Severní 1 058 km, Jižní 1 052 km) |
+| GPX ke stažení | na webu nenalezeno; trasa jen jako sdílené odkazy na Mapy.cz a v placené aplikaci FarOut | ano, pod tabulkou u každé stezky na stránce Online mapy, aktualizace cca 1× ročně |
+| Licence | nenalezena | web uvádí CC BY-NC-SA 4.0 (nejasné, zda platí i pro GPX) |
+| OSM | relace nenalezena | trasy jsou v OSM (nahrál autor), licenční stránka v diskusi na talk-cz zůstala otevřená |
+| Zdroj | stezkaceskem.cz | viaczechia.cz/online-mapy |
+
+Závěry:
+- **Via Czechia** je technicky nejschůdnější (GPX, zmapované etapy, itineráře). Doložka NC se neslučuje s placenými doplňky (spec. 11.2) a SA by vynutila stejnou licenci pro odvozená díla. Pro placenou aplikaci je nutné **písemné svolení autora**.
+- **Stezka Českem** nemá dohledatelná data ani licenci, bez souhlasu autorů nic nepoužívat. Název a značku používat jen po domluvě.
+- OSM není obejití licence: u Via Czechia je licenční otázka otevřená. Vlastní trasu z OSM (ODbL, s atribucí) lze sestavit jako „zjednodušenou reprezentaci" (spec. 5.4), bez názvu a značky stezky.
+- Ověřeno jen z webů. Stránky etap Stezky Českem a dotaz na OSM přes Overpass se nepodařilo načíst, doporučuji zkontrolovat ručně.
+
+## 6. Navržené další kroky
 
 1. Založit vývojářský projekt na Mapy.com a ověřit podmínky (limity, atribuce, cachování).
 2. Založit monorepo (pnpm, Expo dev client, `packages/core`).
 3. Prototyp `HealthSource` pro iOS a Android a import historie na reálných zařízeních, výstup = karta života.
 4. Podat žádost o oprávnění k historii v Google Play (dlouhá doba schvalování).
 5. Zod schéma obsahu výpravy a jedna pilotní výprava jako šablona.
+6. Kontaktovat Jana Hocka (Via Czechia) a autory Stezky Českem kvůli povolení a licenci k trasám.
 
-## 6. Otevřené body
+## 7. Otevřené body
 
 - Jaké zařízení máte k dispozici pro testování (Android i iPhone, hodinky)?
 - Apple Developer program (99 USD/rok) je nutný pro testování HealthKit na zařízení a pro vydání; Google Play (jednorázově 25 USD).
