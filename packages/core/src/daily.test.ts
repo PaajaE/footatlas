@@ -65,22 +65,24 @@ describe("yearChunks", () => {
 });
 
 describe("mergeDaily", () => {
-  it("vzdálenost má přednost před kroky, kroky jsou odhad", () => {
-    const dist = new Map([["2026-10-02", 5000]]);
+  it("kroky jsou hlavní zdroj, spolehlivá vzdálenost je přebije", () => {
+    const dist = new Map([["2026-10-02", 6000], ["2026-10-30", 72]]);
     const steps = new Map([
       ["2026-10-01", 1000],
       ["2026-10-02", 9000],
+      ["2026-10-30", 1147],
     ]);
     expect(mergeDaily(dist, steps)).toEqual([
       { date: "2026-10-01", distanceM: 750, confidence: "estimated" },
-      { date: "2026-10-02", distanceM: 5000, confidence: "verified" },
+      { date: "2026-10-02", distanceM: 6000, confidence: "verified" },
+      { date: "2026-10-30", distanceM: 1147 * 0.75, confidence: "estimated" },
     ]);
   });
 
-  it("vynechá dny bez pohybu a řadí podle dne", () => {
+  it("vynechá dny bez kroků a řadí podle dne", () => {
     const dist = new Map([["2026-10-03", 100], ["2026-10-01", 0]]);
-    const steps = new Map([["2026-10-02", 0]]);
-    expect(mergeDaily(dist, steps).map((r) => r.date)).toEqual(["2026-10-03"]);
+    const steps = new Map([["2026-10-04", 200], ["2026-10-02", 0]]);
+    expect(mergeDaily(dist, steps).map((r) => r.date)).toEqual(["2026-10-04"]);
   });
 });
 

@@ -45,6 +45,37 @@ export function toDailyRecord(
   return null;
 }
 
+/**
+ * Meze, ve kterých se na Androidu věří agregované vzdálenosti, jako podíl odhadu z kroků.
+ * Pod `min` zapsal vzdálenost jen některý zdroj nebo jen část dne (na telefonu z ověření
+ * 72 m proti 860 m z kroků). Nad `max` jde nejspíš o jízdu na kole nebo jiný pohyb,
+ * který Health Connect `Distance` započítává také. 2× odpovídá délce kroku 1,5 m, tedy
+ * i rychlému běhu. Zdůvodnění v docs/technologie.md (Známá omezení).
+ */
+export const ANDROID_DISTANCE_TRUST = { min: 0.5, max: 2 } as const;
+
+/**
+ * Pravidlo pro Android: hlavním zdrojem jsou kroky, protože Health Connect `Distance`
+ * bývá neúplná a zahrnuje i jiné aktivity než chůzi a běh (spec 6.3).
+ * Vzdálenost se použije ("verified") jen, když leží v mezích `ANDROID_DISTANCE_TRUST`
+ * vůči odhadu z kroků; jinak se vrátí odhad z kroků ("estimated").
+ * Den bez kroků se nepočítá, ani když má vzdálenost: bez kroků nejde o chůzi ani běh.
+ */
+export function toDailyRecordStepsFirst(
+  date: string,
+  distanceM: number,
+  steps: number,
+  stepLengthM = 0.75,
+  trust: { min: number; max: number } = ANDROID_DISTANCE_TRUST,
+): DailyRecord | null {
+  if (!(steps > 0)) return null;
+  const estimateM = steps * stepLengthM;
+  if (distanceM >= estimateM * trust.min && distanceM <= estimateM * trust.max) {
+    return { date, distanceM, confidence: "verified" };
+  }
+  return { date, distanceM: estimateM, confidence: "estimated" };
+}
+
 /** Lokální datum jako YYYY-MM-DD. */
 export function localDateKey(d: Date): string {
   const p = (n: number) => String(n).padStart(2, "0");

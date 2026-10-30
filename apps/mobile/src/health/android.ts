@@ -6,7 +6,7 @@ import {
   requestPermission,
   SdkAvailabilityStatus,
 } from "react-native-health-connect";
-import { addToDay, mergeDaily, periodStartDayKey, toDailyRecord, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource } from "@footatlas/core";
+import { addToDay, mergeDaily, periodStartDayKey, toDailyRecordStepsFirst, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource } from "@footatlas/core";
 
 const READ_STEPS = { accessType: "read", recordType: "Steps" } as const;
 const READ_DISTANCE = { accessType: "read", recordType: "Distance" } as const;
@@ -78,6 +78,6 @@ export const androidHealthSource: HealthSource = {
   async readInterval(from: Date, to: Date): Promise<number> {
     await initialize();
     const [dist, steps] = await Promise.all([intervalSum("Distance", from, to), intervalSum("Steps", from, to)]);
-    return toDailyRecord("", dist, steps)?.distanceM ?? 0;
+    return toDailyRecordStepsFirst("", dist, steps)?.distanceM ?? 0;
   },
 };

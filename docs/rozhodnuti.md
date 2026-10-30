@@ -32,3 +32,11 @@ Datum: 30. 10. 2026 · Stav: přijato
 - Zdroj bez čtení intervalu (zatím iOS) započítá části dne celým dnem, každý den jednou: nic se neztratí, ale může se započítat i pohyb ze stejného dne před zahájením nebo po pozastavení.
 - Starý uložený stav po dnech se při načtení převede na lokální půlnoci a počítá stejně jako dřív.
 - Vzdálenost se po každém otevření a po pozastavení znovu dopočítá ze zdravotních dat, neukládá se. Pozdě synchronizovaná data (hodinky) se tak do správného období doplní.
+
+## 0005 Android: kroky jako hlavní zdroj vzdálenosti
+Datum: 30. 10. 2026 · Stav: přijato, přehodnotit s daty z hodinek
+
+- Na Androidu se vzdálenost počítá z kroků; agregovaná `Distance` z Health Connectu se použije, jen když je mezi 50 % a 200 % odhadu z kroků. Den bez kroků se nepočítá.
+- Důvod: na reálném telefonu byla `Distance` jen za jeden den a i ta neúplná, kdežto kroky za šest týdnů; `Distance` navíc zahrnuje kolo.
+- iOS se nemění (čte `DistanceWalkingRunning`, vzdálenost má přednost).
+- Podrobnosti a co zbývá ověřit: `docs/technologie.md`, Známá omezení.
