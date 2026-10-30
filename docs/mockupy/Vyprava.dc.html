@@ -10,68 +10,78 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'Public Sans',system-ui,sans-serif}
-</style>
+body{margin:0;font-family:'Work Sans',system-ui,sans-serif}
+.fa{width:390px;height:844px;box-sizing:border-box;background:#0F1A1E;color:#F2EEE6;position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:'Work Sans',system-ui,sans-serif}
+.fa *{box-sizing:border-box}
+.fell{font-family:'IM Fell English',Georgia,serif;font-weight:400}
+.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;letter-spacing:.05em}
+.amber{color:#E7A44B}.muted{color:#9AA5A3}.gold{color:#E2B862}
+.num{font-variant-numeric:tabular-nums}
+.ph{background-size:cover;background-position:center}
+.hero{position:relative;flex:none}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,26,30,.6) 0%,rgba(15,26,30,0) 22%,rgba(15,26,30,0) 45%,rgba(15,26,30,.9) 86%,#0F1A1E 100%)}
+.hero>*{position:relative;z-index:1}
+.hero.strong::after{background:linear-gradient(180deg,rgba(15,26,30,.85) 0%,rgba(15,26,30,.2) 30%,rgba(15,26,30,.15) 50%,rgba(15,26,30,.9) 86%,#0F1A1E 100%)}
+.topbar{padding:56px 20px 0;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.rule{height:1px;background:linear-gradient(90deg,transparent,#E2B86288 12%,#E2B86288 88%,transparent)}
+.eyebrow{display:flex;align-items:center;gap:8px;color:#E2B862;font-family:'IM Fell English SC',Georgia,serif;font-size:15px;letter-spacing:.06em}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;width:20px;background:#E2B862;opacity:.7}
+.med{border-radius:50%;flex:none;background-size:cover;background-position:center;border:1.5px solid #E2B862;outline:1px solid #E2B86266;outline-offset:3px;position:relative}
+.med.lock{filter:grayscale(1) brightness(.55);border-color:#56656A;outline-color:#56656A55}
+.seal{position:absolute;right:-6px;bottom:-5px;width:20px;height:20px;background:#9B2C22;color:#F2D9B0;font-size:11px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.dot{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px dashed #56656A;color:#9AA5A3}
+.dot.on{border:none;background:#9B2C22;color:#F2D9B0}
+.card{background:#18262B;border-radius:14px}
+.btn{display:block;text-align:center;text-decoration:none;font-weight:600;font-size:16px;padding:15px;border-radius:14px}
+.btn.pri{background:#E7A44B;color:#0F1A1E}
+.btn.sec{border:1.5px solid #E2B86288;color:#F2EEE6}
+.parch{position:relative;overflow:hidden}
+.parch img{display:block;width:100%;height:100%}
+.parch svg.ov{position:absolute;inset:0;width:100%;height:100%}
+.attr{position:absolute;right:8px;bottom:5px;font-size:9px;color:#3A2A1C;opacity:.8;z-index:2}
+.nav{display:flex;justify-content:space-around;padding:10px 6px 30px;font-size:12px;flex:none;margin-top:auto;background:#0F1A1E;color:#9AA5A3;border-top:1px solid #1F2E33;position:relative;z-index:3}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;text-decoration:none;color:inherit}
+.nav a.on{color:#E7A44B}
+.fa .nav{position:absolute;left:0;right:0;bottom:0}</style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F3F4EF; color: #17302E; display: flex; flex-direction: column; overflow: hidden">
-  <div style="position: relative; height: 470px; background: #E3EAE0; flex: none">
-    <svg width="390" height="470" viewBox="0 0 390 470" role="img" aria-label="Mapa trasy Vltavská stezka od Vyšehradu k Mělníku. Ušlý úsek vede k poloze mezi Trojou a Veltrusy." style="display: block">
-      <path d="M0 330 C60 300 90 340 150 320 C220 296 250 250 300 230 C340 214 370 190 390 170 L390 470 L0 470 Z" fill="#D2DECF"/>
-      <path d="M0 120 C40 110 70 70 120 60 C170 50 200 20 250 0 L0 0 Z" fill="#D2DECF"/>
-      <path d="M-10 410 C40 390 70 350 110 320 C160 284 170 240 205 205 C240 170 300 150 330 100 C350 70 380 50 400 40" fill="none" stroke="#8DB6CB" stroke-width="14" stroke-linecap="round"/>
-      <path d="M40 410 L70 350 L120 300 L150 250 L210 190 L260 150 L330 70" fill="none" stroke="#A7B3AC" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
-      <path d="M40 410 L70 350 L120 300 L150 250" fill="none" stroke="#C8431F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="55" cy="381" r="3.5" fill="#17302E"/><circle cx="92" cy="326" r="3.5" fill="#17302E"/><circle cx="134" cy="276" r="3.5" fill="#17302E"/><circle cx="178" cy="221" r="3" fill="#FFFFFF" stroke="#17302E" stroke-width="1.5"/><circle cx="236" cy="168" r="3" fill="#FFFFFF" stroke="#17302E" stroke-width="1.5"/>
-      <circle cx="40" cy="410" r="9" fill="#17302E"/>
-      <circle cx="120" cy="300" r="9" fill="#17302E"/>
-      <circle cx="210" cy="190" r="10" fill="#FFFFFF" stroke="#C8431F" stroke-width="4"/>
-      <circle cx="330" cy="70" r="9" fill="#FFFFFF" stroke="#17302E" stroke-width="3"/>
-      <circle cx="150" cy="250" r="14" fill="#C8431F" fill-opacity="0.22"/><circle cx="150" cy="250" r="7" fill="#C8431F" stroke="#FFFFFF" stroke-width="3"/>
-      <g font-family="Public Sans, sans-serif" font-size="12" font-weight="600" fill="#17302E" paint-order="stroke" stroke="#E3EAE0" stroke-width="4">
-        <text x="56" y="414">Vyšehrad</text>
-        <text x="134" y="304">Trojský zámek</text>
-        <text x="224" y="186">Zámek Veltrusy</text>
-        <text x="262" y="66">Mělník, soutok</text>
-        <text x="168" y="254" fill="#C8431F" font-size="11">Vy</text>
-      </g>
-    </svg>
-    <div style="position: absolute; left: 16px; right: 16px; top: 52px; display: flex; justify-content: space-between; align-items: center">
-      <div style="background: #FFFFFF; border-radius: 12px; padding: 8px 12px; border: 1px solid #D5DAD2; display: flex; flex-direction: column; gap: 1px">
-        <span style="font-size: 12px; color: #5B6E6B">Vltavská stezka · zjednodušená trasa</span>
-        <span style="font-size: 15px; font-weight: 600">24,3 z 62 km</span>
-      </div>
-    </div>
-    <span style="position: absolute; right: 8px; bottom: 6px; font-size: 10px; color: #3E524F">© Mapy.com, © OpenStreetMap</span>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="paper" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".014" numOctaves="4" seed="9"/>
+    <feColorMatrix values="0 0 0 0 .62  0 0 0 0 .48  0 0 0 0 .26  0 0 0 .9 -.25"/>
+    <feComposite in2="SourceGraphic" operator="in"/>
+  </filter>
+  <radialGradient id="vig" cx="50%" cy="50%" r="72%"><stop offset="60%" stop-color="#6E4E24" stop-opacity="0"/><stop offset="100%" stop-color="#6E4E24" stop-opacity=".42"/></radialGradient>
+  <clipPath id="kruh" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+</defs></svg>
+<div class="fa">
+  <div class="parch" style="width:390px;height:844px;position:absolute;inset:0"><img src="assets/mapa-vyprava-mapa.jpg" alt=""><svg class="ov" viewBox="0 0 390 844" aria-hidden="true"><rect width="390" height="844" fill="#E7D4AB" filter="url(#paper)" style="mix-blend-mode:multiply" opacity=".9"/><rect width="390" height="844" fill="url(#vig)"/><circle cx="333.9" cy="764.8" r="18.5" fill="#EADBB5" stroke="#9B2C22" stroke-width="1.8"/><image href="assets/foto-levy-hradec.jpg" x="317.9" y="748.8" width="32" height="32" clip-path="url(#kruh)" preserveAspectRatio="xMidYMid slice"/><circle cx="345.79999999999995" cy="776.6999999999999" r="5.5" fill="#9B2C22" stroke="#F2D9B0" stroke-width="1"/><path d="M343.29999999999995 776.6999999999999 l1.8 1.8 3.2 -3.4" stroke="#F2D9B0" stroke-width="1.3" fill="none"/><rect x="231.8" y="754.8" width="79.1" height="20" fill="#EADBB5" fill-opacity=".92" stroke="#3A2A1C" stroke-width=".6"/><text x="237.8" y="769.0" font-family="IM Fell English, serif" font-style="italic" font-size="12.5" fill="#3A2A1C">Levý Hradec</text><circle cx="303.5" cy="765.6" r="5.2" fill="#9B2C22" stroke="#F3E6C4" stroke-width="1.6"/><circle cx="261.9" cy="723.1" r="5.2" fill="#9B2C22" stroke="#F3E6C4" stroke-width="1.6"/><circle cx="284.5" cy="608.5" r="5.2" fill="#9B2C22" stroke="#F3E6C4" stroke-width="1.6"/><circle cx="248.3" cy="557.5" r="5.2" fill="#9B2C22" stroke="#F3E6C4" stroke-width="1.6"/><circle cx="191" cy="458.6" r="5.2" fill="#9B2C22" stroke="#F3E6C4" stroke-width="1.6"/><circle cx="133.3" cy="408.2" r="13" fill="#EADBB5" stroke="#9B2C22" stroke-width="1.8"/><path d="M129.3 412.2 v-6 l2 -3 2 3 v-3 h4 v9 z" fill="#9B2C22"/><circle cx="145.20000000000002" cy="420.09999999999997" r="5.5" fill="#9B2C22" stroke="#F2D9B0" stroke-width="1"/><path d="M142.70000000000002 420.09999999999997 l1.8 1.8 3.2 -3.4" stroke="#F2D9B0" stroke-width="1.3" fill="none"/><circle cx="85.9" cy="362.5" r="4.6" fill="#F3E6C4" stroke="#3A2A1C" stroke-width="1.3"/><circle cx="90.9" cy="293" r="18.5" fill="#EADBB5" stroke="#E7A44B" stroke-width="2.6"/><image href="assets/foto-nelahozeves.jpg" x="74.9" y="277" width="32" height="32" clip-path="url(#kruh)" preserveAspectRatio="xMidYMid slice"/><rect x="113.9" y="283" width="115.7" height="20" fill="#EADBB5" fill-opacity=".92" stroke="#3A2A1C" stroke-width=".6"/><text x="119.9" y="297.2" font-family="IM Fell English, serif" font-style="italic" font-size="12.5" fill="#3A2A1C">Zámek Nelahozeves</text><circle cx="81.9" cy="305" r="4.6" fill="#F3E6C4" stroke="#3A2A1C" stroke-width="1.3"/><circle cx="113.5" cy="243.6" r="18.5" fill="#EADBB5" stroke="#3A2A1C" stroke-width="1.8"/><image href="assets/foto-veltrusy.jpg" x="97.5" y="227.6" width="32" height="32" clip-path="url(#kruh)" preserveAspectRatio="xMidYMid slice" style="filter:grayscale(1) brightness(.85)"/><rect x="136.5" y="233.6" width="97.4" height="20" fill="#EADBB5" fill-opacity=".92" stroke="#3A2A1C" stroke-width=".6"/><text x="142.5" y="247.79999999999998" font-family="IM Fell English, serif" font-style="italic" font-size="12.5" fill="#3A2A1C">Zámek Veltrusy</text><circle cx="165.6" cy="197.7" r="4.6" fill="#F3E6C4" stroke="#3A2A1C" stroke-width="1.3"/><circle cx="168.9" cy="169" r="4.6" fill="#F3E6C4" stroke="#3A2A1C" stroke-width="1.3"/><circle cx="156.9" cy="130.6" r="4.6" fill="#F3E6C4" stroke="#3A2A1C" stroke-width="1.3"/><circle cx="258.4" cy="43.9" r="4.6" fill="#F3E6C4" stroke="#3A2A1C" stroke-width="1.3"/><circle cx="278.7" cy="47.2" r="4.6" fill="#F3E6C4" stroke="#3A2A1C" stroke-width="1.3"/><circle cx="330.5" cy="35" r="13" fill="#EADBB5" stroke="#3A2A1C" stroke-width="1.8"/><path d="M326.5 39 v-6 l2 -3 2 3 v-3 h4 v9 z" fill="#3A2A1C"/><circle cx="110" cy="392" r="13" fill="#9B2C22" opacity=".18"/><circle cx="110" cy="392" r="6.5" fill="#9B2C22" stroke="#F6EBD0" stroke-width="2.4"/><g transform="translate(340 560) scale(0.95)">
+      <circle r="21" fill="#EADBB5" fill-opacity=".8" stroke="#3A2A1C" stroke-width=".8"/><circle r="17" fill="none" stroke="#3A2A1C" stroke-width=".5"/>
+      <polygon points="0,-24 4,-4 24,0 4,4 0,24 -4,4 -24,0 -4,-4" fill="#3A2A1C"/><polygon points="0,-24 4,-4 0,0 -4,-4" fill="#9B2C22"/>
+      <polygon points="14,-14 2,-2 -14,14 -2,2" fill="#3A2A1C" opacity=".45"/><polygon points="-14,-14 -2,2 14,14 2,-2" fill="#3A2A1C" opacity=".45"/>
+      <text y="-28" text-anchor="middle" font-family="IM Fell English, serif" font-size="10" fill="#3A2A1C">S</text></g></svg></div>
+  <span class="attr" style="bottom:252px">© OpenStreetMap</span>
+  <div style="position:absolute;left:12px;right:12px;top:52px;z-index:2;background:rgba(15,26,30,.92);border-radius:14px;padding:11px 14px;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="fell" style="font-size:21px">Vltavská stezka</span><span class="num amber" style="font-weight:600;font-size:13px">35,6 / 62 km</span></div>
+    <div style="display:flex;gap:4px"><div style="flex:18.8;height:5px;border-radius:3px;background:#E7A44B"></div><div style="flex:16.7;height:5px;border-radius:3px;background:#E7A44B"></div><div style="flex:14.9;height:5px;border-radius:3px;background:linear-gradient(90deg,#E7A44B 2%,#2E3D42 0)"></div><div style="flex:11.6;height:5px;border-radius:3px;background:#2E3D42"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:11.5px" class="muted"><span>Etapa 3 ze 4 · 11 míst na 14,9 km</span><span>Skutečná trasa podél řeky</span></div>
   </div>
-  <div style="flex: 1; background: #FFFFFF; border-radius: 22px 22px 0 0; margin-top: -22px; position: relative; padding: 16px 20px 0; display: flex; flex-direction: column; gap: 14px; border-top: 1px solid #D5DAD2">
-    <div style="width: 40px; height: 4px; border-radius: 2px; background: #D5DAD2; align-self: center"></div>
-    <div style="display: flex; justify-content: space-between; align-items: baseline">
-      <span style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6E6B">Další zastávka</span>
-      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 22px; color: #C8431F; font-variant-numeric: tabular-nums">4,2 km</span>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 4px">
-      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.01em">Zámek Veltrusy</span>
-      <span style="font-size: 14px; color: #5B6E6B; line-height: 1.45">Barokní zámek v parku nad Vltavou. Odemkne se v km 28,5, ještě dnes při běžné chůzi.</span>
-    </div>
-    <div style="display: flex; gap: 8px; flex-wrap: wrap">
-      <span style="font-size: 13px; padding: 6px 10px; border-radius: 999px; background: #E4EBE2">Etapa 2 ze 4</span>
-      <span style="font-size: 13px; padding: 6px 10px; border-radius: 999px; background: #E4EBE2">Malý objev za 1,6 km</span>
-      <span style="font-size: 13px; padding: 6px 10px; border-radius: 999px; background: #E4EBE2">3 ze 14 míst</span>
-    </div>
-    <a href="Zastavka.dc.html" style="display: block; text-align: center; text-decoration: none; border: 1.5px solid #17302E; color: #17302E; font-weight: 600; font-size: 15px; padding: 12px; border-radius: 12px">Ukázat poslední zastávku, Trojský zámek</a>
+  <div style="position:absolute;right:12px;top:170px;z-index:2;display:flex;flex-direction:column;gap:8px">
+    <span style="width:38px;height:38px;border-radius:10px;background:rgba(15,26,30,.88);display:flex;align-items:center;justify-content:center;font-size:20px">+</span>
+    <span style="width:38px;height:38px;border-radius:10px;background:rgba(15,26,30,.88);display:flex;align-items:center;justify-content:center;font-size:20px">−</span>
+    <span style="width:38px;height:38px;border-radius:10px;background:rgba(15,26,30,.88);display:flex;align-items:center;justify-content:center;font-size:16px">◎</span>
   </div>
-  <div style="display: flex; border-top: 1px solid #D5DAD2; background: #FFFFFF; padding: 8px 8px 28px">
-    <a href="Domu.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #5B6E6B; font-size: 12px; font-weight: 500">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Domů</a>
-    <a href="Vyprava.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #C8431F; font-size: 12px; font-weight: 600">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z M9 4v14 M15 6v14"/></svg>Výprava</a>
-    <a href="Objevovat.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #5B6E6B; font-size: 12px; font-weight: 500">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Objevovat</a>
-    <a href="Kronika.dc.html" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; text-decoration: none; color: #5B6E6B; font-size: 12px; font-weight: 500">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z M5 17a3 3 0 013-3h11"/></svg>Kronika</a>
+  <div style="position:absolute;left:12px;right:12px;bottom:96px;z-index:2;background:#0F1A1E;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,.4)">
+    <a href="Zastavka.dc.html" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
+      <div class="ph" style="width:66px;height:66px;border-radius:12px;flex:none;background-image:url('assets/foto-nelahozeves.jpg')"></div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px"><span class="sc amber" style="font-size:13.5px">Další zastávka</span><span class="fell" style="font-size:22px;line-height:1.05">Zámek Nelahozeves</span><span class="muted" style="font-size:12px">dojdete zítra při běžné chůzi</span></div>
+      <span class="fell num" style="font-size:25px;white-space:nowrap">3,0 km</span>
+    </a>
+    <div class="rule"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span><span class="muted">Malý objev za 1,4 km:</span> Lobeček</span><span class="gold">›</span></div>
   </div>
+  <nav class="nav"><a href="Domu.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Domů</a><a href="Vyprava.dc.html" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z M9 4v14 M15 6v14"/></svg>Výprava</a><a href="Objevovat.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Objevovat</a><a href="Kronika.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z M5 17a3 3 0 013-3h11"/></svg>Kronika</a></nav>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>

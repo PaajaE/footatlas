@@ -1,0 +1,348 @@
+{
+  "vyprava": "Vltavská stezka",
+  "pozn": "Ukázkový obsah pro mockupy. Polohy jsou přibližné a před použitím se musí ověřit (dva zdroje, spec 7.3). Kilometry dopočítá trasa.mjs podle skutečného toku Vltavy.",
+  "start": [
+    14.418,
+    50.0645
+  ],
+  "cil": [
+    14.472,
+    50.353
+  ],
+  "etapy": [
+    {
+      "n": 1,
+      "nazev": "Pražskou kotlinou",
+      "konec": "roztoky"
+    },
+    {
+      "n": 2,
+      "nazev": "Údolím pod hradišti",
+      "konec": "kralupy"
+    },
+    {
+      "n": 3,
+      "nazev": "Zámky nad řekou",
+      "konec": "vranany"
+    },
+    {
+      "n": 4,
+      "nazev": "K soutoku",
+      "konec": "melnik"
+    }
+  ],
+  "mista": [
+    {
+      "id": "vysehrad",
+      "druh": "zastavka",
+      "nazev": "Vyšehrad",
+      "lon": 14.418,
+      "lat": 50.0645,
+      "foto": "vysehrad",
+      "text": "Skalní ostroh nad řekou, start výpravy."
+    },
+    {
+      "id": "vyton",
+      "druh": "objev",
+      "nazev": "Výtoň",
+      "lon": 14.415,
+      "lat": 50.0688,
+      "text": "Bývalá celnice, kde se platilo za dřevo plavené po řece."
+    },
+    {
+      "id": "naplavka",
+      "druh": "objev",
+      "nazev": "Rašínovo nábřeží",
+      "lon": 14.4135,
+      "lat": 50.0745,
+      "text": "Náplavka, kde kdysi kotvily vory."
+    },
+    {
+      "id": "karluv-most",
+      "druh": "objev",
+      "nazev": "Karlův most",
+      "lon": 14.4114,
+      "lat": 50.0865,
+      "foto": "karluv-most",
+      "text": "Kamenný most ze 14. století."
+    },
+    {
+      "id": "stvanice",
+      "druh": "objev",
+      "nazev": "Ostrov Štvanice",
+      "lon": 14.433,
+      "lat": 50.096,
+      "text": "Ostrov, kde se kdysi štvala zvěř."
+    },
+    {
+      "id": "holesovice",
+      "druh": "objev",
+      "nazev": "Holešovický přístav",
+      "lon": 14.447,
+      "lat": 50.105,
+      "text": "Přístav z doby, kdy po Vltavě jezdily nákladní lodě."
+    },
+    {
+      "id": "libensky-most",
+      "druh": "objev",
+      "nazev": "Libeňský most",
+      "lon": 14.461,
+      "lat": 50.102,
+      "text": "Kubistický most přes řeku a ostrov."
+    },
+    {
+      "id": "komora-troja",
+      "druh": "objev",
+      "nazev": "Plavební komora Troja",
+      "lon": 14.4439,
+      "lat": 50.1133,
+      "text": "Lodě tu překonávají jez."
+    },
+    {
+      "id": "cisarsky-ostrov",
+      "druh": "objev",
+      "nazev": "Císařský ostrov",
+      "lon": 14.416,
+      "lat": 50.113,
+      "text": "Největší pražský ostrov."
+    },
+    {
+      "id": "trojska-lavka",
+      "druh": "objev",
+      "nazev": "Trojská lávka",
+      "lon": 14.418,
+      "lat": 50.116,
+      "text": "Lávka mezi Trojou a Císařským ostrovem."
+    },
+    {
+      "id": "troja",
+      "druh": "zastavka",
+      "nazev": "Trojský zámek",
+      "lon": 14.4115,
+      "lat": 50.1165,
+      "foto": "troja",
+      "text": "Barokní letohrádek s francouzskou zahradou."
+    },
+    {
+      "id": "sedlec",
+      "druh": "objev",
+      "nazev": "Sedlecké skály",
+      "lon": 14.396,
+      "lat": 50.124,
+      "text": "Skalní stěny nad řekou, oblíbené lezci."
+    },
+    {
+      "id": "podmorani",
+      "druh": "objev",
+      "nazev": "Přívoz v Podbabě",
+      "lon": 14.3955,
+      "lat": 50.135,
+      "text": "Přívoz, který převáží přes řeku už staletí."
+    },
+    {
+      "id": "roztoky",
+      "druh": "zastavka",
+      "nazev": "Zámek Roztoky",
+      "lon": 14.398,
+      "lat": 50.158,
+      "foto": "roztoky",
+      "text": "Zámek s muzeem, konec první etapy."
+    },
+    {
+      "id": "levy-hradec",
+      "druh": "zastavka",
+      "nazev": "Levý Hradec",
+      "lon": 14.377,
+      "lat": 50.163,
+      "foto": "vltava-levy-hradec",
+      "text": "Hradiště, kde podle tradice stál první kostel v Čechách."
+    },
+    {
+      "id": "rez",
+      "druh": "objev",
+      "nazev": "Skály u Řeže",
+      "lon": 14.36,
+      "lat": 50.178,
+      "text": "Údolí se tu zužuje mezi skalami."
+    },
+    {
+      "id": "klecany",
+      "druh": "objev",
+      "nazev": "Klecanské hradiště",
+      "lon": 14.408,
+      "lat": 50.175,
+      "text": "Pravěké hradiště na druhém břehu."
+    },
+    {
+      "id": "husinec",
+      "druh": "objev",
+      "nazev": "Husinec",
+      "lon": 14.372,
+      "lat": 50.174,
+      "text": "Obec na pravém břehu naproti skalám."
+    },
+    {
+      "id": "libcice",
+      "druh": "objev",
+      "nazev": "Libčice nad Vltavou",
+      "lon": 14.36,
+      "lat": 50.199,
+      "text": "Bývalá voroplavecká obec."
+    },
+    {
+      "id": "rivnac",
+      "druh": "objev",
+      "nazev": "Řivnáč",
+      "lon": 14.353,
+      "lat": 50.213,
+      "text": "Ostroh s pravěkým hradištěm."
+    },
+    {
+      "id": "dolany",
+      "druh": "objev",
+      "nazev": "Dolany nad Vltavou",
+      "lon": 14.335,
+      "lat": 50.229,
+      "text": "Vesnice na pravém břehu kousek před Kralupy."
+    },
+    {
+      "id": "kralupy",
+      "druh": "zastavka",
+      "nazev": "Kralupy nad Vltavou",
+      "lon": 14.311,
+      "lat": 50.24,
+      "text": "Město na řece, konec druhé etapy."
+    },
+    {
+      "id": "lobecek",
+      "druh": "objev",
+      "nazev": "Lobeček",
+      "lon": 14.306,
+      "lat": 50.252,
+      "text": "Čtvrť na levém břehu s výhledem na zámek."
+    },
+    {
+      "id": "nelahozeves",
+      "druh": "zastavka",
+      "nazev": "Zámek Nelahozeves",
+      "lon": 14.299,
+      "lat": 50.262,
+      "foto": "nelahozeves2",
+      "text": "Renesanční zámek nad řekou s psaníčkovými sgrafity."
+    },
+    {
+      "id": "dvorak",
+      "druh": "objev",
+      "nazev": "Rodný dům Antonína Dvořáka",
+      "lon": 14.2985,
+      "lat": 50.264,
+      "text": "Skladatel se tu narodil roku 1841."
+    },
+    {
+      "id": "veltrusy",
+      "druh": "zastavka",
+      "nazev": "Zámek Veltrusy",
+      "lon": 14.326,
+      "lat": 50.272,
+      "foto": "veltrusy",
+      "text": "Barokní zámek v rozlehlém parku nad Vltavou."
+    },
+    {
+      "id": "cerveny-mlyn",
+      "druh": "objev",
+      "nazev": "Červený mlýn",
+      "lon": 14.333,
+      "lat": 50.281,
+      "text": "Romantická stavba v zámeckém parku."
+    },
+    {
+      "id": "lesik",
+      "druh": "objev",
+      "nazev": "Lužní les",
+      "lon": 14.342,
+      "lat": 50.293,
+      "text": "Les, který řeka pravidelně zaplavuje."
+    },
+    {
+      "id": "rip",
+      "druh": "objev",
+      "nazev": "Výhled na Říp",
+      "lon": 14.3257,
+      "lat": 50.297,
+      "text": "Na obzoru se poprvé ukáže hora Říp."
+    },
+    {
+      "id": "veprek",
+      "druh": "objev",
+      "nazev": "Vepřek",
+      "lon": 14.352,
+      "lat": 50.298,
+      "text": "Vesnička na okraji říční nivy."
+    },
+    {
+      "id": "stara-vltava",
+      "druh": "objev",
+      "nazev": "Slepé rameno",
+      "lon": 14.365,
+      "lat": 50.312,
+      "text": "Staré koryto, kde se zastavila voda."
+    },
+    {
+      "id": "vranany",
+      "druh": "zastavka",
+      "nazev": "Plavební kanál Vraňany",
+      "lon": 14.372,
+      "lat": 50.322,
+      "text": "Kanál, který zkracuje plavbu k Labi. Konec třetí etapy."
+    },
+    {
+      "id": "lounky",
+      "druh": "objev",
+      "nazev": "Lužec nad Vltavou",
+      "lon": 14.399,
+      "lat": 50.32,
+      "text": "Obec s kostelem na terase nad nivou."
+    },
+    {
+      "id": "nivy",
+      "druh": "objev",
+      "nazev": "Polabská rovina",
+      "lon": 14.42,
+      "lat": 50.33,
+      "text": "Krajina se otevírá, na obzoru Říp."
+    },
+    {
+      "id": "tune",
+      "druh": "objev",
+      "nazev": "Říční tůně",
+      "lon": 14.4423,
+      "lat": 50.318,
+      "text": "Tůně, kde se v létě drží žáby a vážky."
+    },
+    {
+      "id": "vyhled-melnik",
+      "druh": "objev",
+      "nazev": "První pohled na Mělník",
+      "lon": 14.4737,
+      "lat": 50.3247,
+      "text": "Na ostrohu se objeví zámek a kostel."
+    },
+    {
+      "id": "horin",
+      "druh": "objev",
+      "nazev": "Zámek Hořín",
+      "lon": 14.4783,
+      "lat": 50.3396,
+      "text": "Zámek s parkem kousek před soutokem."
+    },
+    {
+      "id": "melnik",
+      "druh": "zastavka",
+      "nazev": "Soutok v Mělníku",
+      "lon": 14.472,
+      "lat": 50.353,
+      "foto": "melnik",
+      "text": "Vltava se tu vlévá do Labe. Cíl výpravy."
+    }
+  ]
+}

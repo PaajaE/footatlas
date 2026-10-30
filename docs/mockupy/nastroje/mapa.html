@@ -1,0 +1,88 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>html,body{margin:0}#map{width:var(--w);height:var(--h)}.maplibregl-ctrl-attrib{display:none}</style>
+</head><body><div id="map"></div>
+<script>
+const P = {
+  bg:'#E9D8B0', land:'#E4D0A3', wood:'#D3C595', park:'#DBCF9F', water:'#AFC3BC', waterLine:'#9FB6AE',
+  bld:'#D9C397', bldLine:'#B59D73', road:'#8A6B45', roadMinor:'#A58A62', path:'#7A5A36',
+  rail:'#5E4630', text:'#3A2A1C', halo:'#E9D8B0', border:'#9B2C22'
+};
+function parchment(style){
+  for (const l of style.layers){
+    const id=l.id, t=l.type; l.paint=l.paint||{}; l.layout=l.layout||{};
+    if(t==='background') l.paint['background-color']=P.bg;
+    else if(t==='fill'){
+      delete l.paint['fill-pattern'];
+      let c=P.land;
+      if(/water/.test(id)) c=P.water;
+      else if(/wood|forest/.test(id)) c=P.wood;
+      else if(/park|grass|landcover|meadow|cemetery|pitch|farm/.test(id)) c=P.park;
+      else if(/building/.test(id)) {c=P.bld; l.paint['fill-outline-color']=P.bldLine;}
+      else if(/ice|glacier|sand/.test(id)) c=P.bg;
+      l.paint['fill-color']=c; if(!/building/.test(id)) delete l.paint['fill-outline-color'];
+      if(/landuse|landcover/.test(id) && !/wood|forest/.test(id)) l.paint['fill-opacity']=.6;
+      if(/residential|suburb|urban/.test(id)) { l.paint['fill-color']='#D2B98A'; l.paint['fill-opacity']=.75; }
+    }
+    else if(t==='fill-extrusion'){ l.layout.visibility='none'; }
+    else if(t==='line'){
+      let c=P.roadMinor;
+      if(/water/.test(id)) c=P.waterLine;
+      else if(/casing/.test(id)) c=P.bg;
+      else if(/motorway|trunk|primary/.test(id)) c=P.road;
+      else if(/path|track|pedestrian|footway|cycle/.test(id)) {c=P.path; l.paint['line-dasharray']=[2,1.5];}
+      else if(/rail|transit/.test(id)) c=P.rail;
+      else if(/boundary|admin/.test(id)) { l.layout.visibility='none'; }
+      else if(/aeroway/.test(id)) c=P.roadMinor;
+      l.paint['line-color']=c;
+    }
+    else if(t==='symbol'){
+      if(/poi|aeroway|transit|airport|station|shield|highway-shield|oneway/.test(id)){ l.layout.visibility='none'; continue; }
+      if(l.layout['text-field']) l.layout['text-field']=['coalesce',['get','name:cs'],['get','name:latin'],['get','name']];
+      l.paint['text-color']=/water/.test(id)?'#4F6A66':P.text;
+      l.paint['text-halo-color']=P.halo; l.paint['text-halo-width']=1.4;
+      if(/place|label_|water/.test(id)) l.layout['text-font']=['Noto Sans Italic'];
+      if(l.layout['icon-image']) l.paint['icon-opacity']=0;
+    }
+    else if(t==='raster'){ l.layout.visibility='none'; }
+    else if(t==='hillshade'){ l.paint['hillshade-shadow-color']='#7A5A2E'; l.paint['hillshade-highlight-color']=P.bg; }
+  }
+  return style;
+}
+window.setup = async (opts) => {
+  document.documentElement.style.setProperty('--w', opts.w+'px');
+  document.documentElement.style.setProperty('--h', opts.h+'px');
+  let style = await (await fetch('https://tiles.openfreemap.org/styles/liberty')).json();
+  if (opts.parchment) style = parchment(style);
+  window.map = new maplibregl.Map({container:'map', style, center:opts.center||[14.4,50.2], zoom:opts.zoom||10, pixelRatio:2, attributionControl:false, fadeDuration:0, preserveDrawingBuffer:true});
+  await new Promise(r=>map.once('load',r));
+  if (opts.bounds) map.fitBounds(opts.bounds,{padding:opts.pad||20,duration:0});
+  await new Promise(r=>map.once('idle',r));
+  return true;
+};
+window.riverLines = () => {
+  const feats = map.querySourceFeatures('openmaptiles',{sourceLayer:'waterway'}).filter(f=>/Vltava/.test(f.properties.name||'') );
+  const lines=[]; for(const f of feats){ const g=f.geometry; if(g.type==='LineString') lines.push(g.coordinates); else if(g.type==='MultiLineString') lines.push(...g.coordinates); }
+  return lines;
+};
+window.addRoute = (route, cut, colors) => {
+  const done = route.slice(0,cut+1), rest = route.slice(cut);
+  map.addSource('done',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:done}}});
+  map.addSource('rest',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:rest}}});
+  map.addLayer({id:'rest-halo',type:'line',source:'rest',paint:{'line-color':colors.halo,'line-width':colors.w+3,'line-opacity':.7},layout:{'line-cap':'round','line-join':'round'}});
+  map.addLayer({id:'rest',type:'line',source:'rest',paint:{'line-color':colors.plan,'line-width':colors.w-.6,'line-dasharray':[1,2]},layout:{'line-cap':'round','line-join':'round'}});
+  map.addLayer({id:'done-halo',type:'line',source:'done',paint:{'line-color':colors.halo,'line-width':colors.w+3,'line-opacity':.85},layout:{'line-cap':'round','line-join':'round'}});
+  map.addLayer({id:'done',type:'line',source:'done',paint:{'line-color':colors.done,'line-width':colors.w},layout:{'line-cap':'round','line-join':'round'}});
+};
+window.addLife = (line, done) => {
+  map.addSource('life',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:line}}});
+  map.addSource('lifeDone',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:done}}});
+  map.addLayer({id:'life',type:'line',source:'life',paint:{'line-color':'#3A2A1C','line-width':1.4,'line-dasharray':[2,2]},layout:{'line-cap':'round'}});
+  map.addLayer({id:'lifeDone-halo',type:'line',source:'lifeDone',paint:{'line-color':'#F3E6C4','line-width':5,'line-opacity':.8},layout:{'line-cap':'round'}});
+  map.addLayer({id:'lifeDone',type:'line',source:'lifeDone',paint:{'line-color':'#9B2C22','line-width':2.6},layout:{'line-cap':'round'}});
+};
+window.project = (pts) => pts.map(p=>{const q=map.project(p);return [Math.round(q.x*10)/10, Math.round(q.y*10)/10];});
+window.idle = () => new Promise(r=>{ if(map.loaded()&&map.areTilesLoaded()) setTimeout(r,300); else map.once('idle',()=>setTimeout(r,300)); });
+</script></body></html>

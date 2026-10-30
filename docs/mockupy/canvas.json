@@ -16,7 +16,8 @@
   "order": ["Main.dc.html", "Domu.dc.html", "Vyprava.dc.html", "Zastavka.dc.html", "Kronika.dc.html", "Pohlednice.dc.html", "Objevovat.dc.html"],
   "notes": {
     "t1": { "x": 0, "y": -240, "text": "FootAtlas: klíčové obrazovky MVP", "kind": "title1", "maxW": 3210 },
-    "n1": { "x": 0, "y": -110, "text": "Ukázkový obsah. Texty zastávek a fakta jsou jen ilustrace a před použitím je nutné je ověřit (dva zdroje).", "w": 520, "fill": "orange" }
+    "n1": { "x": 0, "y": -110, "text": "Ukázkový obsah. Texty zastávek a fakta jsou jen ilustrace a před použitím je nutné je ověřit (dva zdroje). Fotky z Wikimedia Commons, autoři a licence v assets/ZDROJE.md. Mapa © OpenStreetMap.", "w": 520, "fill": "orange" },
+    "n2": { "x": 600, "y": -110, "text": "Vizuální směr Velká výprava: skutečné fotky, mapa v pergamenu, rumělková trasa. Vltavská stezka 62 km, 9 zastávek a 29 malých objevů. Stav: 35,6 km, právě dokončená etapa 2.", "w": 620, "fill": "yellow" }
   },
   "designSystems": []
 }
