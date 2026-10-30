@@ -1,0 +1,12 @@
+name = "footatlas-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+# Tajemství (nikdy sem): MAPY_API_KEY
+#   lokálně:   apps/api/.dev.vars  (je v .gitignore)
+#   produkce:  wrangler secret put MAPY_API_KEY
+
+# Až vznikne bucket s balíčky výprav, odkomentovat:
+# [[r2_buckets]]
+# binding = "CONTENT"
+# bucket_name = "footatlas-content"
