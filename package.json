@@ -2,9 +2,20 @@
   "name": "footatlas",
   "private": true,
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ],
+    "patchedDependencies": {
+      "react-native-health-connect": "patches/react-native-health-connect.patch"
+    }
   }
 }

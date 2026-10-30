@@ -1,4 +1,4 @@
-import type { DailyRecord } from "./motion.js";
+import type { DailyRecord } from "./motion";
 
 /**
  * Vzdálenost započítaná do výpravy: jen pohyb po okamžiku zahájení (spec 6.3).

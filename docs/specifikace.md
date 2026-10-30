@@ -209,7 +209,7 @@ Cíl: do sedmi dnů uživatel zažije import své historie, první objev, dokon�
 
 1. **Úvod** – jedna obrazovka, jedna věta vize, bez registrace.
 2. **Historie** – tři volby: *Načíst historii ze zdravotních dat* (doporučeno), *Začít od nuly*, *Zadat odhad ručně*. U načtení se jasně vysvětlí, proč a co se čte. Při odmítnutí oprávnění se nabídne ruční zadání. Na Androidu jde o dvě oprávnění: čtení dat a čtení historie starší než 30 dní.
-3. **Karta života (první „wow“)** – výsledek importu: „Za život jste ušli 14 200 km. To je z Prahy do Tokia (asi 9 100 km) a ještě dalších 5 000 km navíc.“ Srovnání se počítá z tabulky vzdáleností měst v aplikaci, aby čísla vždy seděla. Karta se dá sdílet jako obrázek.
+3. **Karta života (první „wow“)** – výsledek importu: „Za život jste ušli 14 200 km. To je z Prahy do Tokia (asi 9 100 km) a ještě dalších 5 100 km navíc.“ Srovnání se počítá z tabulky vzdáleností měst v aplikaci, aby čísla vždy seděla. Karta se dá sdílet jako obrázek.
 4. **První výprava** – tři doporučené krátké výpravy (50–100 km), každá s mapou, délkou a odhadem doby. Uživatel jednu zvolí a spustí.
 5. **Domů** – první obrazovka ukazuje start, další zastávku a vzdálenost k ní.
 

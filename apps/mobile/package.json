@@ -3,10 +3,16 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@footatlas/core": "workspace:*",
+    "@kingstinct/react-native-healthkit": "^16.2.0",
     "expo": "~58.0.21",
+    "expo-build-properties": "~58.0.11",
+    "expo-dev-client": "~58.0.17",
     "expo-status-bar": "~58.0.4",
     "react": "19.3.0",
-    "react-native": "0.88.1"
+    "react-native": "0.88.1",
+    "react-native-health-connect": "^4.1.3",
+    "react-native-nitro-modules": "^0.37.1"
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
@@ -14,8 +20,8 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "private": true
