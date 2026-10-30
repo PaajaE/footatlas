@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Button, Card, Screen, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
 import { formatKm } from "../../format";
@@ -26,9 +26,11 @@ export default function PlaceDetail() {
   return (
     <Screen>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <T variant="small" accent>
-          ‹ Zpět
-        </T>
+        <Pressable accessibilityRole="button" accessibilityLabel="Zpět" onPress={() => router.back()} style={{ minHeight: 44, justifyContent: "center" }}>
+          <T variant="strong" accent>
+            ‹ Zpět
+          </T>
+        </Pressable>
         <T variant="small">
           {place.kind === "stop" ? "Zastávka" : "Malý objev"} · km {(place.atM / 1000).toFixed(1).replace(".", ",")}
         </T>

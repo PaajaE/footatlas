@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import type { ColorValue } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Path } from "react-native-svg";
 import { useTheme } from "../../theme/ThemeProvider";
 
@@ -31,6 +32,7 @@ const BookIcon = ({ color }: IconProps) => (
 
 export default function TabLayout() {
   const { colors, fonts } = useTheme();
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -38,7 +40,14 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontFamily: fonts.bodyMedium, fontSize: 12 },
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.line },
+        // Výšku zadáváme výslovně (včetně dolní bezpečné oblasti), jinak se popisky na webu ořezávají.
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.line,
+          height: 62 + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: 6 + insets.bottom,
+        },
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >

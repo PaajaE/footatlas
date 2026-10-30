@@ -43,6 +43,21 @@ export function ExpeditionMap({ route, cumulative, places, walkedM, height, onPl
     const py = (lat: number) => height - (offY + (lat - minY) * scale);
 
     const you = positionAt(route, cumulative, walkedM);
+
+    // Popisky zastávek bez překryvů: bere se v pořadí po trase a popisek, který by zasáhl už položený, se vynechá.
+    const taken: Array<{ x0: number; x1: number; y0: number; y1: number }> = [];
+    const labelled = new Set<string>();
+    for (const p of places) {
+      if (p.kind !== "stop") continue;
+      const x0 = px(p.lon) + 10;
+      const y0 = py(p.lat) - 8;
+      const box = { x0, x1: x0 + p.name.length * 5.8 + 4, y0, y1: y0 + 14 };
+      const clash = taken.some((t) => box.x0 < t.x1 && box.x1 > t.x0 && box.y0 < t.y1 && box.y1 > t.y0);
+      if (!clash) {
+        taken.push(box);
+        labelled.add(p.id);
+      }
+    }
     const full = route.map((p, i) => `${i ? "L" : "M"}${px(p.lon).toFixed(1)} ${py(p.lat).toFixed(1)}`).join(" ");
     const doneIdx = Math.max(1, you.segment + 1);
     const done =
@@ -71,7 +86,7 @@ export function ExpeditionMap({ route, cumulative, places, walkedM, height, onPl
                 stroke={reached ? colors.accent : colors.fg}
                 strokeWidth={stop ? 2.5 : 1.5}
               />
-              {stop && (
+              {stop && labelled.has(p.id) && (
                 <>
                   {/* Obrys textu barvou pozadí, aby byl čitelný přes trasu; paintOrder react-native-svg nepodporuje. */}
                   <SvgText x={x + 12} y={y + 4} fontFamily={fonts.bodyMedium} fontSize={11} fill={colors.surface} stroke={colors.surface} strokeWidth={4}>

@@ -5,7 +5,7 @@ import { changeSentence, summarizeChange } from "@footatlas/core";
 import { Button, Card, Screen, StageBar, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
 import { formatDayLong, formatKm, pluralPlaces } from "../../format";
-import { healthSourceName } from "../../health/names";
+import { fromHealthSource } from "../../health/names";
 import { useExpedition } from "../../state/ExpeditionProvider";
 import { useTheme } from "../../theme/ThemeProvider";
 
@@ -40,7 +40,7 @@ export default function Home() {
             Počítá se jen pohyb od chvíle, kdy vyrazíte. Vaše historie zůstává v kronice.
           </T>
           <Button label="Vyrazit" onPress={ex.start} />
-          <T variant="small">Při startu vás aplikace požádá o čtení kroků a vzdálenosti z {healthSourceName()}.</T>
+          <T variant="small">Při startu vás aplikace požádá o čtení kroků a vzdálenosti {fromHealthSource()}.</T>
         </Card>
         <StatusNote />
         <DevLink onPress={() => router.push("/dev")} />
@@ -143,7 +143,7 @@ export default function Home() {
       return (
         <T variant="small">
           {status.reason === "denied"
-            ? `Čtení z ${healthSourceName()} nebylo povoleno. Postup se bez něj nepočítá.`
+            ? `Čtení ${fromHealthSource()} nebylo povoleno. Postup se bez něj nepočítá.`
             : `Zdravotní data nejsou na tomto zařízení dostupná (${status.reason}).`}
         </T>
       );
