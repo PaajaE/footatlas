@@ -18,7 +18,8 @@ bin="$(command -v pmtiles || command -v go-pmtiles || true)"
 # Nejnovější denní build (zveřejňují se s malým zpožděním, zkusí se pár dní zpět).
 build=""
 for i in $(seq 0 14); do
-  d="$(date -u -d "-$i day" +%Y%m%d)"
+  # GNU date (-d) i BSD/macOS date (-v)
+  d="$(date -u -d "-$i day" +%Y%m%d 2>/dev/null || date -u -v-"$i"d +%Y%m%d)"
   code="$(curl -s -o /dev/null -I -w '%{http_code}' "https://build.protomaps.com/$d.pmtiles" || true)"
   if [ "$code" = "200" ]; then build="https://build.protomaps.com/$d.pmtiles"; break; fi
 done
