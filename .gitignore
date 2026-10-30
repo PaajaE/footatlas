@@ -9,3 +9,7 @@ dist
 *.keystore
 *.jks
 .claude/worktrees/
+
+# Mapy: generované soubory a velké binárky (viz docs/mapy-osm.md)
+tools/maps/out/
+*.pmtiles
