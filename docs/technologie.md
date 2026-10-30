@@ -34,12 +34,8 @@ Verdikt: pro MVP **ne**. Jádro (datový model, pravidla započítávání, výp
 Princip: aplikace funguje offline a data žijí na zařízení. Server slouží jen k doručení obsahu a volitelně k záloze.
 
 - **Obsah výprav** jako statické balíčky (JSON + obrázky) na **Cloudflare R2** (bez poplatků za egress, velkorysý bezplatný tarif) nebo Pages. Verzovat, podepisovat, kešovat. Žádný server není potřeba.
-- **Mapy**: primárně **Mapy.com API** (podklady Seznamu, pro ČR a střední Evropu nejlepší turistická/outdoorová kartografie; k dispozici i routing, geokódování a výškový profil). V aplikaci přes **MapLibre** s rastrovými dlaždicemi. Před zavedením ověřit v podmínkách služby a ceníku:
-  - bezplatný limit a cena po jeho překročení (kredity za dlaždice a požadavky),
-  - povinná atribuce (logo a copyright),
-  - **zákaz nebo omezení cachování a offline použití dlaždic**. To ovlivňuje plán prodávat offline mapy jako placený doplněk (viz spec. 11.2),
-  - jak chránit klíč v mobilní aplikaci: klíč v balíčku jde snadno vytáhnout, proto dlaždice a dotazy vést přes tenkou **Cloudflare Worker proxy** s limitem požadavků.
-- **Záložní/doplňková varianta**: vlastní vektorové dlaždice formátem PMTiles (Protomaps, OpenStreetMap) na R2. Hodí se pro zahraniční výpravy mimo kvalitní pokrytí Mapy.com a pro legální offline mapy. Veřejné servery dlaždic OSM nejsou určené pro produkční provoz aplikace.
+- **Mapy**: výchozí jsou **vlastní vektorové dlaždice z OpenStreetMap** (formát PMTiles, hostované na Cloudflare R2) s vlastním pergamenovým stylem v **MapLibre** (rozhodnutí 0001 v `docs/rozhodnuti.md`). Proč: vzhled z mockupů nejde udělat z hotových rastrových dlaždic, styl i data máme pod kontrolou a offline mapy (spec 11.2) nejsou omezené cizí licencí. Atribuce © přispěvatelé OpenStreetMap je povinná (ODbL). Rozsah dat řešit po výřezech (Česko, případně koridory výprav), velikost a náklady ověřit.
+- **Mapy.com jako přepínač**: druhý, volitelný podklad pro uživatele, kteří chtějí podrobnější turistickou mapu. Je to rastr (nelze přebarvit), proto zůstává `apps/api` s proxy a klíčem na serveru. Před zapnutím ověřit v podmínkách služby limity, atribuci a zákaz nebo omezení cachování a offline použití (offline platí jen pro vlastní OSM mapu). Mapy.com dál slouží i pro hledání míst, trasování a výškový profil.
 - **Cloudflare Workers + D1/KV**: jen pokud bude potřeba API (ověření nákupu, sdílení karet, volitelná synchronizace). V bezplatných limitech by MVP mělo vystačit; limity je nutné ověřit.
 - **Supabase**: vhodný, až se zavede volitelný účet a synchronizace (Auth + Postgres + RLS). Bezplatný projekt se po týdnu nečinnosti pozastavuje a má malé limity, pro start je to v pořádku, pro produkci počítat s tarifem. Do MVP bych ho nezaváděl, abychom se vyhnuli správě zdravotních dat na serveru (GDPR).
 - **Nákupy**: RevenueCat (bezplatně do určitého obratu) nebo přímo StoreKit a Play Billing.
@@ -86,3 +82,8 @@ Závěry:
 
 - Jaké zařízení máte k dispozici pro testování (Android i iPhone, hodinky)?
 - Apple Developer program (99 USD/rok) je nutný pro testování HealthKit na zařízení a pro vydání; Google Play (jednorázově 25 USD).
+
+## Známá omezení a otevřená rozhodnutí
+
+- **Android: vzdálenost zahrnuje všechny aktivity.** Agregace `Distance` v Health Connectu počítá i jízdu na kole a další pohyb, kdežto iOS čte jen chůzi a běh (`DistanceWalkingRunning`), takže výsledky se mezi platformami liší a spec 6.3 (výchozí chůze a běh) neplatí. Řešení bez zařízení nelze ověřit; možnosti: (a) na Androidu brát kroky jako hlavní zdroj, (b) odečíst vzdálenost v relacích `ExerciseSession` jiných typů než chůze, běh a turistika. Rozhodnout po ověření na reálných datech.
+- **Rozsah mapových dat.** Vlastní PMTiles z OSM je nutné vyrobit a hostovat (výřez Česka, nebo koridory výprav). Zbývá ověřit velikost souborů, limity R2 a Workerů pro čtení rozsahů a postup aktualizace dat.
