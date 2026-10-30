@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Kronika · noc</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Work Sans',system-ui,sans-serif}
+.fa{--bg:#2B241C;--surface:#372E24;--ink:#F1E6D2;--muted:#B5A68D;--line:#4A3E31;--accent:#C2522F;--accent-fg:#FFF4E6;--ochre:#D9B068;--nav:#241E17;--panel:rgba(43,36,28,.95);--track:#4A3E31;--lock:#6E6252;--seal:#C2522F;--seal-fg:#FFF0DC;--free:#8CCB9F;--shadow:rgba(0,0,0,.4)}
+.fa{width:390px;height:844px;box-sizing:border-box;background:var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='390' height='844'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='4' seed='9'/><feColorMatrix values='0 0 0 0 .62  0 0 0 0 .48  0 0 0 0 .26  0 0 0 .9 -.25'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.18'/></svg>");background-blend-mode:multiply;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:'Work Sans',system-ui,sans-serif}
+.fa *{box-sizing:border-box}
+.fell{font-family:'IM Fell English',Georgia,serif;font-weight:400}
+.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;letter-spacing:.05em;color:var(--ochre)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.melt{position:absolute;left:0;right:0;top:0;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%)}
+.edges{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.soft{-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%)}
+.top{position:relative;padding:54px 20px 0;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.top a{color:inherit;text-decoration:none}
+.eyebrow{display:flex;align-items:center;gap:8px;font-family:'IM Fell English SC',Georgia,serif;font-size:15px;letter-spacing:.06em;color:var(--ochre)}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;width:20px;background:var(--ochre);opacity:.7}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.med{border-radius:50%;flex:none;background-size:cover;background-position:center;border:1.5px solid var(--ochre);outline:1px solid var(--line);outline-offset:3px;position:relative}
+.badge{position:absolute;right:-6px;bottom:-5px;width:20px;height:20px;background:var(--seal);color:var(--seal-fg);font-size:11px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.dot{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--lock);color:var(--muted)}
+.seal{width:36px;height:36px;flex:none;background:var(--seal);color:var(--seal-fg);display:flex;align-items:center;justify-content:center;font-size:14px;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.rule{height:1px;background:var(--line)}
+.btn{display:block;text-align:center;text-decoration:none;font-weight:600;font-size:16px;padding:15px;border-radius:14px}
+.btn.pri{background:var(--accent);color:var(--accent-fg)}
+.btn.sec{border:1.5px solid var(--line);color:var(--ink)}
+.map{position:relative;overflow:hidden;flex:none}
+.map img{display:block;width:100%;height:100%}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.attr{position:absolute;right:8px;bottom:5px;font-size:9px;color:var(--muted)}
+.nav{display:flex;justify-content:space-around;padding:10px 6px 30px;font-size:12px;flex:none;margin-top:auto;background:var(--nav);color:var(--muted);border-top:1px solid var(--line)}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;text-decoration:none;color:inherit}
+.nav a.on{color:var(--accent);font-weight:600}
+</style>
+</helmet>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <clipPath id="kruh" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+</defs></svg>
+<div class="fa">
+<div style="padding:56px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <h1 class="fell" style="margin:0;font-size:34px">Kronika</h1>
+    <div style="display:flex;gap:18px;font-size:14px;border-bottom:1px solid var(--line)"><span style="padding-bottom:8px;border-bottom:2px solid var(--accent);font-weight:600">Statistiky</span><span class="muted">Životní cesta</span><span class="muted">Výpravy</span></div>
+  </div>
+  <div style="padding:14px 20px 0;display:flex;align-items:baseline;justify-content:space-between">
+    <div><span class="fell num" style="font-size:44px">14 200</span> <span class="fell" style="font-size:20px">km</span></div><span class="muted" style="font-size:13px">celkem od roku 2016</span>
+  </div>
+  <div style="padding:10px 20px 0;display:flex;align-items:flex-end;gap:5px;height:92px"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:26px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">16</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:38px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">17</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:43px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">18</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:48px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">19</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:62px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">20</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:67px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">21</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:59px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">22</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:60px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">23</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:64px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">24</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:65px;border-radius:3px 3px 0 0;background:var(--track)"></div><span class="muted" style="font-size:10px">25</span></div><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:70px;border-radius:3px 3px 0 0;background:var(--accent)"></div><span class="muted" style="font-size:10px">26</span></div></div>
+  <div style="padding:12px 20px 0;display:flex;gap:8px">
+    <div class="card" style="flex:1;padding:9px 11px"><div class="fell num" style="font-size:21px">1 650 km</div><div class="muted" style="font-size:11.5px">letos do října</div></div>
+    <div class="card" style="flex:1;padding:9px 11px"><div class="fell num" style="font-size:21px">3 912</div><div class="muted" style="font-size:11.5px">dní se záznamem</div></div>
+    <div class="card" style="flex:1;padding:9px 11px"><div class="fell num" style="font-size:21px">24 km</div><div class="muted" style="font-size:11.5px">nejdelší den</div></div>
+  </div>
+  <div style="padding:16px 20px 0;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="sc" style="font-size:15px">Životní cesta · Tichý oceán</span><span class="num" style="font-size:13px;font-weight:600">5 100 z 8 300 km</span></div>
+    <div class="map soft" style="width:358px;height:150px;margin:0 -16px"><img src="assets/mapa-svet-kronika-noc.jpg" alt=""><svg viewBox="0 0 358 150" aria-hidden="true"><circle cx="31.4" cy="60.6" r="4" fill="#C2522F" stroke="#372E24" stroke-width="1.4"/><path d="M233.3 92.5 v-14 l9 3.5 -9 3.5" fill="#C2522F" stroke="#F1E6D2" stroke-width=".8"/><circle cx="326.4" cy="65.3" r="14" fill="#E0704A" opacity=".2"/><circle cx="326.4" cy="65.3" r="6.5" fill="#E0704A" stroke="#FFF6E6" stroke-width="2.4"/></svg></div>
+    <span class="muted" style="font-size:12.5px">Ještě 3 200 km do San Franciska. Při vašem tempu zhruba za 19 měsíců. Ověřeno 85 %, odhad z kroků 15 %. Mapa © OpenStreetMap.</span>
+  </div>
+  <div style="padding:14px 20px 0;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:14px">Objevená místa</span><span style="font-size:13px;font-weight:600;color:var(--accent)">22 míst</span></div>
+    <div style="display:flex;gap:16px;align-items:center"><div class="med" style="width:46px;height:46px;background-image:url('assets/foto-vysehrad.jpg')"><span class="badge">✓</span></div><div class="med" style="width:46px;height:46px;background-image:url('assets/foto-karluv-most.jpg')"><span class="badge">✓</span></div><div class="med" style="width:46px;height:46px;background-image:url('assets/foto-troja.jpg')"><span class="badge">✓</span></div><div class="med" style="width:46px;height:46px;background-image:url('assets/foto-roztoky.jpg')"><span class="badge">✓</span></div><div class="med" style="width:46px;height:46px;background-image:url('assets/foto-levy-hradec.jpg')"><span class="badge">✓</span></div><div class="med" style="width:46px;height:46px;background-image:url('assets/foto-libcice.jpg')"><span class="badge">✓</span></div><span class="muted" style="font-size:13px">+ 16</span></div>
+  </div>
+  <nav class="nav"><a href="Domu-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Domů</a><a href="Vyprava-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z M9 4v14 M15 6v14"/></svg>Výprava</a><a href="Objevovat-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Objevovat</a><a href="Kronika-noc.dc.html" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z M5 17a3 3 0 013-3h11"/></svg>Kronika</a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

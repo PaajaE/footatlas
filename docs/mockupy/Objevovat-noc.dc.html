@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Objevovat · noc</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Work Sans',system-ui,sans-serif}
+.fa{--bg:#2B241C;--surface:#372E24;--ink:#F1E6D2;--muted:#B5A68D;--line:#4A3E31;--accent:#C2522F;--accent-fg:#FFF4E6;--ochre:#D9B068;--nav:#241E17;--panel:rgba(43,36,28,.95);--track:#4A3E31;--lock:#6E6252;--seal:#C2522F;--seal-fg:#FFF0DC;--free:#8CCB9F;--shadow:rgba(0,0,0,.4)}
+.fa{width:390px;height:844px;box-sizing:border-box;background:var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='390' height='844'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='4' seed='9'/><feColorMatrix values='0 0 0 0 .62  0 0 0 0 .48  0 0 0 0 .26  0 0 0 .9 -.25'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.18'/></svg>");background-blend-mode:multiply;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:'Work Sans',system-ui,sans-serif}
+.fa *{box-sizing:border-box}
+.fell{font-family:'IM Fell English',Georgia,serif;font-weight:400}
+.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;letter-spacing:.05em;color:var(--ochre)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.melt{position:absolute;left:0;right:0;top:0;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%)}
+.edges{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.soft{-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%)}
+.top{position:relative;padding:54px 20px 0;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.top a{color:inherit;text-decoration:none}
+.eyebrow{display:flex;align-items:center;gap:8px;font-family:'IM Fell English SC',Georgia,serif;font-size:15px;letter-spacing:.06em;color:var(--ochre)}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;width:20px;background:var(--ochre);opacity:.7}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.med{border-radius:50%;flex:none;background-size:cover;background-position:center;border:1.5px solid var(--ochre);outline:1px solid var(--line);outline-offset:3px;position:relative}
+.badge{position:absolute;right:-6px;bottom:-5px;width:20px;height:20px;background:var(--seal);color:var(--seal-fg);font-size:11px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.dot{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--lock);color:var(--muted)}
+.seal{width:36px;height:36px;flex:none;background:var(--seal);color:var(--seal-fg);display:flex;align-items:center;justify-content:center;font-size:14px;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
+.rule{height:1px;background:var(--line)}
+.btn{display:block;text-align:center;text-decoration:none;font-weight:600;font-size:16px;padding:15px;border-radius:14px}
+.btn.pri{background:var(--accent);color:var(--accent-fg)}
+.btn.sec{border:1.5px solid var(--line);color:var(--ink)}
+.map{position:relative;overflow:hidden;flex:none}
+.map img{display:block;width:100%;height:100%}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.attr{position:absolute;right:8px;bottom:5px;font-size:9px;color:var(--muted)}
+.nav{display:flex;justify-content:space-around;padding:10px 6px 30px;font-size:12px;flex:none;margin-top:auto;background:var(--nav);color:var(--muted);border-top:1px solid var(--line)}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;text-decoration:none;color:inherit}
+.nav a.on{color:var(--accent);font-weight:600}
+</style>
+</helmet>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <clipPath id="kruh" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+</defs></svg>
+<div class="fa">
+<div style="padding:56px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <h1 class="fell" style="margin:0;font-size:34px">Objevovat</h1>
+    <div style="display:flex;gap:6px;font-size:12.5px;white-space:nowrap">
+      <span style="padding:6px 12px;border-radius:16px;background:var(--accent);color:var(--accent-fg);font-weight:600">Vše</span>
+      <span style="padding:6px 11px;border-radius:16px;border:1px solid var(--line)">Zdarma</span><span style="padding:6px 11px;border-radius:16px;border:1px solid var(--line)">Skutečné trasy</span><span style="padding:6px 11px;border-radius:16px;border:1px solid var(--line)">Do 100 km</span>
+    </div>
+  </div>
+  <div style="padding:16px 20px 0;display:flex;flex-direction:column;gap:8px">
+    <span class="sc" style="font-size:15px">Právě procházíte</span>
+    <a href="Vyprava-noc.dc.html" class="card" style="display:flex;overflow:hidden;text-decoration:none;color:inherit">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <div style="height:92px;background-size:cover;background-position:center 30%;background-image:url('assets/foto-veltrusy.jpg')"></div>
+        <div style="padding:8px 12px;display:flex;flex-direction:column;gap:1px">
+          <span class="fell" style="font-size:22px;line-height:1">Vltavská stezka</span>
+          <span class="muted num" style="font-size:12.5px">35,6 z 62 km · etapa 3 ze 4</span>
+        </div>
+      </div>
+      <div class="map " style="width:116px;height:150px;border-left:1px solid var(--line)"><img src="assets/mapa-objevovat-trasa-noc.jpg" alt=""><svg viewBox="0 0 116 150" aria-hidden="true"><circle cx="35.5" cy="57.3" r="14" fill="#E0704A" opacity=".2"/><circle cx="35.5" cy="57.3" r="6.5" fill="#E0704A" stroke="#FFF6E6" stroke-width="2.4"/><circle cx="65" cy="138" r="3.5" fill="#372E24" stroke="#F1E6D2" stroke-width="1.2"/><circle cx="81.6" cy="12" r="3.5" fill="#372E24" stroke="#F1E6D2" stroke-width="1.2"/></svg></div>
+    </a>
+    <span class="muted" style="font-size:12.5px">10 zastávek a 28 malých objevů. Zbývá 16 míst, nejbližší za 1,4 km.</span>
+  </div>
+  <div style="padding:14px 20px 0;display:flex;flex-direction:column;gap:8px">
+    <span class="sc" style="font-size:15px">Další cesty</span>
+    <div class="card" style="display:flex;overflow:hidden;height:86px">
+      <div style="width:104px;flex:none;background-size:cover;background-position:center;background-image:url('assets/foto-krkonose.jpg')"></div>
+      <div style="flex:1;min-width:0;padding:8px 12px;display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><span class="fell" style="font-size:20px;line-height:1.05">Horský hřeben</span><span style="font-size:11px;font-weight:600;color:var(--free)">Zdarma</span></div>
+        <span class="muted" style="font-size:12.5px">78 km · 4 etapy · střední</span>
+        <span style="font-size:12px"><span class="sc" style="font-size:12.5px">Skutečná trasa</span> · 46 míst</span>
+      </div></div><div class="card" style="display:flex;overflow:hidden;height:86px">
+      <div style="width:104px;flex:none;background-size:cover;background-position:center;background-image:url('assets/foto-melnik.jpg')"></div>
+      <div style="flex:1;min-width:0;padding:8px 12px;display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><span class="fell" style="font-size:20px;line-height:1.05">Podél Labe</span><span style="font-size:11px;font-weight:600;color:var(--accent)">Balíček</span></div>
+        <span class="muted" style="font-size:12.5px">240 km · 12 etap · náročná</span>
+        <span style="font-size:12px"><span class="sc" style="font-size:12.5px">Zjednodušená trasa</span> · 128 míst</span>
+      </div></div><div class="card" style="display:flex;overflow:hidden;height:86px">
+      <div style="width:104px;flex:none;background-size:cover;background-position:center;background-image:url('assets/foto-mesic.jpg')"></div>
+      <div style="flex:1;min-width:0;padding:8px 12px;display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><span class="fell" style="font-size:20px;line-height:1.05">Cesta na Měsíc</span><span style="font-size:11px;font-weight:600;color:var(--free)">Zdarma</span></div>
+        <span class="muted" style="font-size:12.5px">384 400 km · na roky</span>
+        <span style="font-size:12px"><span class="sc" style="font-size:12.5px">Symbolická cesta</span> · milníky</span>
+      </div></div>
+  </div>
+  <p class="muted" style="margin:10px 20px 0;font-size:12px">Rozjetou výpravu vždy dokončíte zdarma. Platí se jen za nové cesty.</p>
+  <nav class="nav"><a href="Domu-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Domů</a><a href="Vyprava-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z M9 4v14 M15 6v14"/></svg>Výprava</a><a href="Objevovat-noc.dc.html" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Objevovat</a><a href="Kronika-noc.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z M5 17a3 3 0 013-3h11"/></svg>Kronika</a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

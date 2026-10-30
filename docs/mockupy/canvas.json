@@ -11,12 +11,20 @@
     "Zastavka.dc.html": { "x": 1410, "y": 0, "w": 390, "h": 844, "title": "4 Zastávka" },
     "Kronika.dc.html": { "x": 1880, "y": 0, "w": 390, "h": 844, "title": "5 Kronika" },
     "Pohlednice.dc.html": { "x": 2350, "y": 0, "w": 390, "h": 844, "title": "6 Konec etapy" },
-    "Objevovat.dc.html": { "x": 2820, "y": 0, "w": 390, "h": 844, "title": "7 Objevovat" }
+    "Objevovat.dc.html": { "x": 2820, "y": 0, "w": 390, "h": 844, "title": "7 Objevovat" },
+    "Main-noc.dc.html": { "x": 0, "y": 964, "w": 390, "h": 844, "title": "1 Karta života · noc" },
+    "Domu-noc.dc.html": { "x": 470, "y": 964, "w": 390, "h": 844, "title": "2 Domů · noc" },
+    "Vyprava-noc.dc.html": { "x": 940, "y": 964, "w": 390, "h": 844, "title": "3 Výprava, mapa · noc" },
+    "Zastavka-noc.dc.html": { "x": 1410, "y": 964, "w": 390, "h": 844, "title": "4 Zastávka · noc" },
+    "Kronika-noc.dc.html": { "x": 1880, "y": 964, "w": 390, "h": 844, "title": "5 Kronika · noc" },
+    "Pohlednice-noc.dc.html": { "x": 2350, "y": 964, "w": 390, "h": 844, "title": "6 Konec etapy · noc" },
+    "Objevovat-noc.dc.html": { "x": 2820, "y": 964, "w": 390, "h": 844, "title": "7 Objevovat · noc" }
   },
-  "order": ["Main.dc.html", "Domu.dc.html", "Vyprava.dc.html", "Zastavka.dc.html", "Kronika.dc.html", "Pohlednice.dc.html", "Objevovat.dc.html"],
+  "order": ["Main.dc.html", "Domu.dc.html", "Vyprava.dc.html", "Zastavka.dc.html", "Kronika.dc.html", "Pohlednice.dc.html", "Objevovat.dc.html", "Main-noc.dc.html", "Domu-noc.dc.html", "Vyprava-noc.dc.html", "Zastavka-noc.dc.html", "Kronika-noc.dc.html", "Pohlednice-noc.dc.html", "Objevovat-noc.dc.html"],
   "notes": {
     "t1": { "x": 0, "y": -240, "text": "FootAtlas: klíčové obrazovky MVP", "kind": "title1", "maxW": 3210 },
-    "n1": { "x": 0, "y": -110, "text": "Ukázkový obsah. Texty zastávek a fakta jsou jen ilustrace a před použitím je nutné je ověřit (dva zdroje).", "w": 520, "fill": "orange" }
+    "n1": { "x": 0, "y": -110, "text": "Ukázkový obsah. Texty zastávek a fakta jsou jen ilustrace a před použitím je nutné je ověřit (dva zdroje). Fotky z Wikimedia Commons, autoři a licence v assets/ZDROJE.md. Mapa © OpenStreetMap.", "w": 520, "fill": "orange" },
+    "n2": { "x": 600, "y": -110, "text": "Vizuální směr: světlý pergamen jako výchozí, noční pergamen podle nastavení telefonu (druhá řada). Skutečné fotky a skutečná mapa, rumělková trasa. Sdílený obrázek karty a pohlednice je vždy světlý. Vltavská stezka 62 km, 10 zastávek a 28 malých objevů. Stav: 35,6 km, právě dokončená etapa 2.", "w": 620, "fill": "yellow" }
   },
   "designSystems": []
 }
