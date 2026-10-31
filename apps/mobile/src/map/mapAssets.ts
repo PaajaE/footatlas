@@ -1,10 +1,7 @@
 import { Asset } from "expo-asset";
 import { Directory, File, Paths } from "expo-file-system";
 import { GLYPH_FILES } from "./glyphFiles";
-
-/** Koridor Vltavské stezky ±5 km, zoom 0–15 (`tools/maps/copy-to-app.sh` ho zkopíruje do `assets/map`). */
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const TILES_MODULE: number = require("../../assets/map/vltava-koridor5.pmtiles");
+import { MAP_FILE, mapFileUrl } from "./mapSource";
 
 export interface MapAssets {
   /** Adresa zdroje dlaždic ve tvaru, který čte MapLibre (soubor v úložišti aplikace). */
@@ -16,10 +13,9 @@ export interface MapAssets {
 let ready: Promise<MapAssets> | null = null;
 
 /**
- * Připraví mapová data: přibalené soubory se zkopírují z balíčku do úložiště aplikace, protože MapLibre
- * čte `pmtiles://` jen ze souboru (z APK ne). Kopie nese otisk souboru v názvu, takže nová verze dat
- * se zkopíruje znovu a stará se smaže. Dokončená kopie se pozná podle značky `.ok`, přerušená se zopakuje.
- * Selhání se zkusí příště znovu.
+ * Připraví mapová data: dlaždice se při prvním spuštění stáhnou ze serveru (26 MB) do úložiště aplikace, protože
+ * MapLibre čte `pmtiles://` jen ze souboru; písma jsou malá a přibalená v APK. Stažený soubor se ověří podle velikosti
+ * a dokončení se pozná podle značky `.ok`, nedokončené stahování se zopakuje. Při selhání se zkusí příště znovu.
  */
 export function prepareMapAssets(): Promise<MapAssets> {
   ready ??= doPrepare().catch((e) => {
@@ -39,22 +35,20 @@ async function doPrepare(): Promise<MapAssets> {
   const dir = new Directory(Paths.document, "map");
   dir.create({ intermediates: true, idempotent: true });
 
-  const tiles = await localFile(TILES_MODULE);
-  const name = `vltava-koridor5-${tiles.hash.slice(0, 12)}.pmtiles`;
-  const target = new File(dir, name);
-  const marker = new File(dir, `${name}.ok`);
-  if (!(target.exists && marker.exists)) {
+  const target = new File(dir, MAP_FILE.name);
+  const marker = new File(dir, `${MAP_FILE.name}.ok`);
+  if (!(target.exists && marker.exists && target.size === MAP_FILE.sizeBytes)) {
     if (marker.exists) marker.delete();
     if (target.exists) target.delete();
-    await tiles.file.copy(target);
-    if (tiles.file.size && target.size !== tiles.file.size) {
+    await File.downloadFileAsync(mapFileUrl(), target);
+    if (target.size !== MAP_FILE.sizeBytes) {
       target.delete();
-      throw new Error("Kopie mapových dat je neúplná.");
+      throw new Error(`Stažená mapa má ${target.size} B místo ${MAP_FILE.sizeBytes} B.`);
     }
     marker.create({ overwrite: true });
   }
   for (const item of dir.list()) {
-    if (item instanceof File && item.name.startsWith("vltava-koridor5-") && !item.name.startsWith(name)) item.delete();
+    if (item instanceof File && item.name.startsWith("vltava-koridor5-") && !item.name.startsWith(MAP_FILE.name)) item.delete();
   }
 
   const glyphDir = new Directory(dir, "glyphs");

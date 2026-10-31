@@ -1,7 +1,7 @@
 const { getDefaultConfig } = require("expo/metro-config");
 
 const config = getDefaultConfig(__dirname);
-// Mapová data se přibalují jako soubory: dlaždice (PMTiles) a písma (PBF).
-config.resolver.assetExts.push("pmtiles", "pbf");
+// Písma map (PBF) se přibalují jako soubory; dlaždice (PMTiles) se stahují ze serveru.
+config.resolver.assetExts.push("pbf");
 
 module.exports = config;

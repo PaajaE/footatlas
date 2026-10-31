@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Sestaví podepsané release APK pro instalaci mimo Google Play.
 # Použití: tools/release-apk.sh            (výstup dist/footatlas-<verze>-<versionCode>.apk)
+# Mapa se stahuje ze serveru (extra.apiBaseUrl v app.json musí být nastaveno), v APK není.
 # Potřebuje klíč a hesla v ~/.gradle/gradle.properties (FOOTATLAS_*), viz docs/release-apk.md.
 set -euo pipefail
 
@@ -15,9 +16,6 @@ done
 KS="$(grep '^FOOTATLAS_KEYSTORE=' "$PROPS" | cut -d= -f2-)"
 [ -f "$KS" ] || { echo "Klíč $KS neexistuje" >&2; exit 1; }
 [ -d "$ANDROID_HOME" ] || { echo "ANDROID_HOME ($ANDROID_HOME) neexistuje" >&2; exit 1; }
-
-# Mapová data se přibalují do APK; velký soubor PMTiles není v gitu (viz docs/mapy-osm.md).
-[ -f "$MOBILE/assets/map/vltava-koridor5.pmtiles" ] || "$ROOT/tools/maps/copy-to-app.sh"
 
 cd "$MOBILE"
 # Složka android/ je generovaná; --clean zaručí, že vznikne ze šablony a pluginů, ne z minulého stavu.

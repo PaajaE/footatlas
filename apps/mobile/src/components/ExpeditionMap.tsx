@@ -8,7 +8,7 @@ import { prepareMapAssets, type MapAssets } from "../map/mapAssets";
 import { useTheme } from "../theme/ThemeProvider";
 import type { ExpeditionMapProps } from "./expeditionMapProps";
 import { RouteSketch } from "./RouteSketch";
-import { T } from "./ui";
+import { Button, T } from "./ui";
 
 export type { ExpeditionMapProps };
 
@@ -24,8 +24,10 @@ const EMPTY = { type: "FeatureCollection" as const, features: [] };
  */
 export function ExpeditionMap(props: ExpeditionMapProps) {
   const [state, setState] = useState<Assets>({ kind: "loading" });
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let live = true;
+    setState({ kind: "loading" });
     prepareMapAssets().then(
       (assets) => live && setState({ kind: "ready", assets }),
       (e) => live && setState({ kind: "failed", message: e instanceof Error ? e.message : String(e) }),
@@ -33,17 +35,21 @@ export function ExpeditionMap(props: ExpeditionMapProps) {
     return () => {
       live = false;
     };
-  }, []);
+  }, [attempt]);
 
   if (state.kind !== "ready") {
     return (
       <View>
         <RouteSketch {...props} />
-        {state.kind === "failed" && (
-          <T variant="small" style={{ paddingHorizontal: 20, paddingTop: 4 }}>
-            Podkladová mapa se nenačetla ({state.message}).
-          </T>
-        )}
+        <View style={{ paddingHorizontal: 20, paddingTop: 6, gap: 6 }}>
+          {state.kind === "loading" && <T variant="small">Připravuji mapu; při prvním spuštění se stahuje (26 MB), potřebuje připojení.</T>}
+          {state.kind === "failed" && (
+            <>
+              <T variant="small">Podkladová mapa se nenačetla ({state.message}).</T>
+              <Button kind="secondary" label="Zkusit znovu" onPress={() => setAttempt((n) => n + 1)} />
+            </>
+          )}
+        </View>
       </View>
     );
   }
