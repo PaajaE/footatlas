@@ -4,6 +4,7 @@ import {
   isPaused,
   markSeen as markSessionSeen,
   pauseSession,
+  resolveStepLength,
   resumeSession,
   sessionSlices,
   sessionStart,
@@ -11,10 +12,12 @@ import {
   walkedInSlicesM,
   type ExpeditionSession,
   type ExpeditionState,
+  type StepLength,
+  type StepProfile,
 } from "@footatlas/core";
 import { vltavska } from "../data/vltavska";
 import { healthSource } from "../health";
-import { DEFAULT_DEMO, loadDemo, loadSession, saveDemo, saveSession, type DemoState } from "./storage";
+import { DEFAULT_DEMO, loadDemo, loadSession, loadStepProfile, saveDemo, saveSession, saveStepProfile, type DemoState } from "./storage";
 
 export type DataStatus =
   | { kind: "loading" }
@@ -30,6 +33,10 @@ interface ExpeditionContextValue {
   active: boolean;
   paused: boolean;
   status: DataStatus;
+  stepProfile: StepProfile;
+  /** Délka kroku, kterou se kroky přepočítávají na vzdálenost. */
+  stepLength: StepLength;
+  setStepProfile: (p: StepProfile) => Promise<void>;
   walkedM: number;
   state: ExpeditionState;
   start: () => Promise<void>;
@@ -51,8 +58,12 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   /** Vzdálenost výpravy z posledního načtení zdravotních dat. */
   const [measuredM, setMeasuredM] = useState(0);
   const [status, setStatus] = useState<DataStatus>({ kind: "loading" });
+  const [stepProfile, setStepProfileState] = useState<StepProfile>({});
+  const stepLength = useMemo(() => resolveStepLength(stepProfile), [stepProfile]);
   const sessionRef = useRef<ExpeditionSession | null>(null);
   sessionRef.current = session;
+  const stepLengthRef = useRef(stepLength.meters);
+  stepLengthRef.current = stepLength.meters;
 
   const persistSession = useCallback(async (next: ExpeditionSession | null) => {
     setSession(next);
@@ -77,9 +88,9 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
       const now = new Date();
       const slices = sessionSlices(s, now);
       const [daily, intervalM] = await Promise.all([
-        healthSource.readDaily(sessionStart(s), now),
+        healthSource.readDaily(sessionStart(s), now, stepLengthRef.current),
         Promise.all(
-          slices.map((x) => (x.whole || !healthSource.readInterval ? null : healthSource.readInterval(x.from, x.to))),
+          slices.map((x) => (x.whole || !healthSource.readInterval ? null : healthSource.readInterval(x.from, x.to, stepLengthRef.current))),
         ),
       ]);
       setMeasuredM(walkedInSlicesM(slices, daily, intervalM));
@@ -91,7 +102,9 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const [d, s] = await Promise.all([loadDemo(), loadSession()]);
+      const [d, s, p] = await Promise.all([loadDemo(), loadSession(), loadStepProfile()]);
+      stepLengthRef.current = resolveStepLength(p).meters;
+      setStepProfileState(p);
       setDemoState(d);
       setSession(s);
       setReady(true);
@@ -99,6 +112,17 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
       else setStatus({ kind: "ok" });
     })();
   }, [refreshFor]);
+
+  const setStepProfile = useCallback(
+    async (p: StepProfile) => {
+      stepLengthRef.current = resolveStepLength(p).meters;
+      setStepProfileState(p);
+      await saveStepProfile(p);
+      // Vzdálenost se z kroků počítá znovu, neukládá se (rozhodnutí 0004).
+      if (!demo.enabled) await refreshFor(sessionRef.current);
+    },
+    [demo.enabled, refreshFor],
+  );
 
   const start = useCallback(async () => {
     const s = startSession(vltavska.id, new Date());
@@ -183,6 +207,9 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     active,
     paused,
     status,
+    stepProfile,
+    stepLength,
+    setStepProfile,
     walkedM,
     state,
     start,

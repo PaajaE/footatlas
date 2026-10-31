@@ -21,13 +21,15 @@ export interface HealthSource {
    * Denní součty od `from` do `to` (včetně), po lokálních dnech, bez duplicit
    * mezi zdroji (řeší platforma agregací). Dny bez pohybu se nevracejí.
    */
-  readDaily(from: Date, to: Date): Promise<DailyRecord[]>;
+  readDaily(from: Date, to: Date, stepLengthM?: number): Promise<DailyRecord[]>;
   /**
    * Vzdálenost v metrech za interval [from, to) mimo hranice dnů (např. od okamžiku
    * zahájení výpravy), podle stejného pravidla jako `readDaily`. Volitelné: zdroj bez něj
    * započítá části dne celým dnem (viz `walkedInSlicesM`).
    */
-  readInterval?(from: Date, to: Date): Promise<number>;
+  readInterval?(from: Date, to: Date, stepLengthM?: number): Promise<number>;
+  /** Počet kroků za interval [from, to), pro kalibraci délky kroku. Volitelné. */
+  readSteps?(from: Date, to: Date): Promise<number>;
 }
 
 /**

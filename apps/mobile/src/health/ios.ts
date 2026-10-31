@@ -43,7 +43,7 @@ export const iosHealthSource: HealthSource = {
     return { read: true, history: true };
   },
 
-  async readDaily(from: Date, to: Date): Promise<DailyRecord[]> {
+  async readDaily(from: Date, to: Date, stepLengthM?: number): Promise<DailyRecord[]> {
     const [dist, steps] = await Promise.all([
       dailySums(DISTANCE, "m", from, to),
       dailySums(STEPS, "count", from, to),
@@ -51,7 +51,7 @@ export const iosHealthSource: HealthSource = {
     const days = new Set([...dist.keys(), ...steps.keys()]);
     const out: DailyRecord[] = [];
     for (const day of [...days].sort()) {
-      const rec = toDailyRecord(day, dist.get(day) ?? 0, steps.get(day) ?? 0);
+      const rec = toDailyRecord(day, dist.get(day) ?? 0, steps.get(day) ?? 0, stepLengthM);
       if (rec) out.push(rec);
     }
     return out;

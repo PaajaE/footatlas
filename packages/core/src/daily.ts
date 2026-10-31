@@ -47,11 +47,12 @@ export function addToDay(byDay: Map<string, number>, day: string, value: number)
 export function mergeDaily(
   distanceM: ReadonlyMap<string, number>,
   steps: ReadonlyMap<string, number>,
+  stepLengthM?: number,
 ): DailyRecord[] {
   const days = new Set([...distanceM.keys(), ...steps.keys()]);
   const out: DailyRecord[] = [];
   for (const day of [...days].sort()) {
-    const rec = toDailyRecordStepsFirst(day, distanceM.get(day) ?? 0, steps.get(day) ?? 0);
+    const rec = toDailyRecordStepsFirst(day, distanceM.get(day) ?? 0, steps.get(day) ?? 0, stepLengthM);
     if (rec) out.push(rec);
   }
   return out;

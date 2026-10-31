@@ -40,3 +40,14 @@ Datum: 30. 10. 2026 · Stav: přijato, přehodnotit s daty z hodinek
 - Důvod: na reálném telefonu byla `Distance` jen za jeden den a i ta neúplná, kdežto kroky za šest týdnů; `Distance` navíc zahrnuje kolo.
 - iOS se nemění (čte `DistanceWalkingRunning`, vzdálenost má přednost).
 - Podrobnosti a co zbývá ověřit: `docs/technologie.md`, Známá omezení.
+
+## 0006 Osobní délka kroku
+Datum: 30. 10. 2026 · Stav: přijato
+
+- Na Androidu (a u iOS při chybějící vzdálenosti) je vzdálenost kroky × délka kroku, takže přesnost celé aplikace stojí na této jedné hodnotě. Pevných 0,75 m je průměr, u vysokého nebo malého člověka chyba v řádu 10 % i víc.
+- Délka kroku se určuje ve třech úrovních (`packages/core/src/steplength.ts`): **kalibrace nebo ruční hodnota** > **odhad z výšky** (0,415 pro muže, 0,413 pro ženy, 0,414 neuvedeno; vzorec běžný u krokoměrů, Fitbit, Garmin a další) > **obecný průměr 0,75 m**. Aplikace vždy ukazuje, odkud hodnota je.
+- Kalibrace: uživatel zadá délku trasy, kterou ušel (např. změřenou v mapě), aplikace přečte kroky za dobu měření ze zdravotních dat a vypočítá délku kroku. Odmítne méně než 300 kroků a výsledek mimo 30–150 cm. Garmin dělá totéž.
+- Okno důvěry vůči `Distance` (rozhodnutí 0005) se odvozuje od odhadu z kroků, takže se s osobní délkou kroku posouvá samo.
+- Výška, pohlaví a délka kroku se ukládají jen v telefonu (AsyncStorage). Po změně se vzdálenost výpravy přepočítá, neukládá se (rozhodnutí 0004).
+- Zatím neřešeno: kalibrace na iOS (`readSteps` chybí v `ios.ts`; iOS ale zapisuje vlastní `walkingStepLength`, vhodný jako výchozí hodnota), automatické učení z dat (až po kronice v SQLite), délka kroku při běhu je delší než při chůzi.
+- NEOVĚŘENO na telefonu: přesnost kalibrace na krátkém úseku. Health Connect zapisuje kroky v záznamech po desítkách minut a při čtení je dělí poměrně podle času, takže na krátkém měření může být chyba. Proto se doporučuje aspoň 400 m a rozumný odmítací limit.

@@ -66,19 +66,24 @@ export const androidHealthSource: HealthSource = {
     return { read: has("Steps") || has("Distance"), history: has("ReadHealthDataHistory") };
   },
 
-  async readDaily(from: Date, to: Date): Promise<DailyRecord[]> {
+  async readDaily(from: Date, to: Date, stepLengthM?: number): Promise<DailyRecord[]> {
     await initialize();
     // Bez oprávnění k historii Health Connect bez chyby tiše ořízne data na ~30 dní před prvním udělením.
     const [dist, steps] = await Promise.all([
       dailySums("Distance", from, to),
       dailySums("Steps", from, to),
     ]);
-    return mergeDaily(dist, steps);
+    return mergeDaily(dist, steps, stepLengthM);
   },
 
-  async readInterval(from: Date, to: Date): Promise<number> {
+  async readSteps(from: Date, to: Date): Promise<number> {
+    await initialize();
+    return intervalSum("Steps", from, to);
+  },
+
+  async readInterval(from: Date, to: Date, stepLengthM?: number): Promise<number> {
     await initialize();
     const [dist, steps] = await Promise.all([intervalSum("Distance", from, to), intervalSum("Steps", from, to)]);
-    return toDailyRecordStepsFirst("", dist, steps)?.distanceM ?? 0;
+    return toDailyRecordStepsFirst("", dist, steps, stepLengthM)?.distanceM ?? 0;
   },
 };

@@ -32,7 +32,7 @@ export default function Home() {
       <Screen>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <T variant="small">{formatDayLong(new Date())}</T>
-          <DevLink onPress={() => router.push("/dev")} />
+          <HeaderLinks />
         </View>
         <T variant="display">{vltavska.name}</T>
         <T variant="body">{vltavska.summary}</T>
@@ -64,7 +64,7 @@ export default function Home() {
         <T variant="small" style={{ flex: 1, textAlign: "right" }} numberOfLines={1}>
           {ex.demo.enabled ? "Ukázkový postup" : paused ? "Výprava je pozastavena" : vltavska.name}
         </T>
-        <DevLink onPress={() => router.push("/dev")} />
+        <HeaderLinks />
       </View>
 
       {state.completed ? (
@@ -141,6 +141,19 @@ export default function Home() {
       <StatusNote />
     </Screen>
   );
+
+  function HeaderLinks() {
+    return (
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Pressable accessibilityRole="link" accessibilityLabel="Délka kroku" onPress={() => router.push("/delka-kroku")} hitSlop={12} style={{ paddingVertical: 4, paddingLeft: 8 }}>
+          <T variant="small" accent>
+            Délka kroku
+          </T>
+        </Pressable>
+        <DevLink onPress={() => router.push("/dev")} />
+      </View>
+    );
+  }
 
   function StatusNote() {
     if (status.kind === "unavailable") {
