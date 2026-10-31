@@ -6,7 +6,7 @@ import {
   requestPermission,
   SdkAvailabilityStatus,
 } from "react-native-health-connect";
-import { addToDay, mergeDaily, periodStartDayKey, toDailyRecordStepsFirst, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource } from "@footatlas/core";
+import { addToDay, mergeDaily, periodStartDayKey, toDailyRecordStepsFirst, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource, type RawDay } from "@footatlas/core";
 
 const READ_STEPS = { accessType: "read", recordType: "Steps" } as const;
 const READ_DISTANCE = { accessType: "read", recordType: "Distance" } as const;
@@ -64,6 +64,14 @@ export const androidHealthSource: HealthSource = {
     const granted = await requestPermission([READ_STEPS, READ_DISTANCE, READ_HISTORY]);
     const has = (t: string) => granted.some((p: any) => p.recordType === t);
     return { read: has("Steps") || has("Distance"), history: has("ReadHealthDataHistory") };
+  },
+
+  async readRawDaily(from: Date, to: Date): Promise<RawDay[]> {
+    await initialize();
+    const [dist, steps] = await Promise.all([dailySums("Distance", from, to), dailySums("Steps", from, to)]);
+    return [...new Set([...dist.keys(), ...steps.keys()])]
+      .sort()
+      .map((day) => ({ day, steps: steps.get(day) ?? 0, distanceM: dist.get(day) ?? 0 }));
   },
 
   async readDaily(from: Date, to: Date, stepLengthM?: number): Promise<DailyRecord[]> {

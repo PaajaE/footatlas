@@ -51,3 +51,14 @@ Datum: 30. 10. 2026 · Stav: přijato
 - Výška, pohlaví a délka kroku se ukládají jen v telefonu (AsyncStorage). Po změně se vzdálenost výpravy přepočítá, neukládá se (rozhodnutí 0004).
 - Zatím neřešeno: kalibrace na iOS (`readSteps` chybí v `ios.ts`; iOS ale zapisuje vlastní `walkingStepLength`, vhodný jako výchozí hodnota), automatické učení z dat (až po kronice v SQLite), délka kroku při běhu je delší než při chůzi.
 - NEOVĚŘENO na telefonu: přesnost kalibrace na krátkém úseku. Health Connect zapisuje kroky v záznamech po desítkách minut a při čtení je dělí poměrně podle času, takže na krátkém měření může být chyba. Proto se doporučuje aspoň 400 m a rozumný odmítací limit.
+
+## 0007 Kronika se ukládá do SQLite
+Datum: 30. 10. 2026 · Stav: přijato, první část hotová
+
+- Zdravotní data se čtou do lokální databáze `footatlas.db` (`expo-sqlite`, `apps/mobile/src/db`), ukládají se **surové** kroky a vzdálenost po dnech a zdrojích, vedle nich vybraná hodnota podle pravidla z core (`packages/core/src/chronicle.ts`, verze pravidla `RULE_VERSION`) a délka kroku, se kterou se spočítala.
+- Po změně délky kroku nebo pravidla se dny přepočítají z uložených surových hodnot, bez nového čtení zdravotních dat. Dny, které zdroj přestal vracet, se nemažou.
+- Čtení se spouští jen na výzvu uživatele (tlačítko „Načíst historii“, spec 9.1) a potom automaticky při otevření aplikace, posledních 7 dní kvůli pozdě synchronizovaným datům.
+- Stav výpravy zůstává zatím v AsyncStorage; přesun do SQLite je další krok.
+- Na webu se databáze nepoužívá (prázdná kronika pro náhled obrazovek).
+- Testy: `packages/core/src/chronicle.test.ts` (pravidla) a `apps/mobile/src/db/db.test.ts` (migrace, zápis a přepočet nad `node:sqlite`).
+- Ověřeno na telefonu: první import 61 dní za pár sekund (332 km = 443 656 kroků × 0,75 m, shoduje se s diagnostikou), po restartu aplikace jsou data v databázi. NEOVĚŘENO: rychlost importu s historií za roky, chování při přerušení importu.

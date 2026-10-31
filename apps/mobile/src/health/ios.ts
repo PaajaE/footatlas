@@ -3,7 +3,7 @@ import {
   queryStatisticsCollectionForQuantity,
   requestAuthorization,
 } from "@kingstinct/react-native-healthkit";
-import { localDateKey, toDailyRecord, type AccessResult, type Availability, type DailyRecord, type HealthSource } from "@footatlas/core";
+import { localDateKey, toDailyRecord, type AccessResult, type Availability, type DailyRecord, type HealthSource, type RawDay } from "@footatlas/core";
 
 const DISTANCE = "HKQuantityTypeIdentifierDistanceWalkingRunning" as const;
 const STEPS = "HKQuantityTypeIdentifierStepCount" as const;
@@ -41,6 +41,13 @@ export const iosHealthSource: HealthSource = {
     // iOS neprozradí, zda uživatel čtení povolil; prázdná data pak znamenají "nepovoleno nebo bez dat".
     await requestAuthorization({ toRead: [DISTANCE, STEPS] });
     return { read: true, history: true };
+  },
+
+  async readRawDaily(from: Date, to: Date): Promise<RawDay[]> {
+    const [dist, steps] = await Promise.all([dailySums(DISTANCE, "m", from, to), dailySums(STEPS, "count", from, to)]);
+    return [...new Set([...dist.keys(), ...steps.keys()])]
+      .sort()
+      .map((day) => ({ day, steps: steps.get(day) ?? 0, distanceM: dist.get(day) ?? 0 }));
   },
 
   async readDaily(from: Date, to: Date, stepLengthM?: number): Promise<DailyRecord[]> {

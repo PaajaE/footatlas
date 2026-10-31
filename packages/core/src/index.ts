@@ -9,3 +9,4 @@ export * from "./periods";
 export * from "./session";
 export * from "./summary";
 export * from "./steplength";
+export * from "./chronicle";

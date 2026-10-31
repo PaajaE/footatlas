@@ -1,3 +1,4 @@
+import type { RawDay } from "./chronicle";
 import type { DailyRecord } from "./motion";
 
 export type Availability = "available" | "needs-install" | "unsupported";
@@ -28,6 +29,11 @@ export interface HealthSource {
    * započítá části dne celým dnem (viz `walkedInSlicesM`).
    */
   readInterval?(from: Date, to: Date, stepLengthM?: number): Promise<number>;
+  /**
+   * Surové denní součty (kroky a vzdálenost zvlášť, bez výběru pravidla) pro uložení do kroniky,
+   * aby šla hodnota po změně pravidla nebo délky kroku přepočítat bez nového čtení dat.
+   */
+  readRawDaily?(from: Date, to: Date): Promise<RawDay[]>;
   /** Počet kroků za interval [from, to), pro kalibraci délky kroku. Volitelné. */
   readSteps?(from: Date, to: Date): Promise<number>;
 }
