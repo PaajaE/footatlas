@@ -82,3 +82,22 @@ Datum: 30. 10. 2026 · Stav: přijato
 - Dosavadní vývojový build byl podepsaný debug klíčem, přechod na release klíč proto vyžadoval jednu odinstalaci (smazaná lokální data; kronika se načetla znovu z Health Connectu).
 - Backend se v této fázi nepoužívá; obsah je v APK. Mapa je otevřená věc: koridor 26 MB přibalit do APK a při prvním spuštění zkopírovat do úložiště aplikace (`pmtiles://` čte jen soubory v `files/`), nebo stahovat z hostingu.
 - Postup a stav ověření: `docs/release-apk.md`.
+
+## 0010 Mapa v aplikaci: MapLibre nad přibaleným koridorem
+Datum: 30. 10. 2026 · Stav: přijato, ověřeno na emulátoru Android 16 (vývojový i release build)
+
+- `ExpeditionMap` kreslí MapLibre Native: vlastní OSM dlaždice z koridoru Vltavské stezky (PMTiles, 26 MB), pergamenový styl z `packages/map-style`, trasa (ušlá plná, zbývající čárkovaná), zastávky, malé objevy a poloha jako vrstvy GeoJSON. Klepnutí na místo otevře zastávku. Popisky zastávek rozmísťuje MapLibre (kolize), ruční rozmisťování ze SVG náhledu odpadlo.
+- **Úvodní pohled** je kolem polohy a další zastávky (jako v mockupu), ne celá trasa; tlačítko „Celá trasa“ / „Moje poloha“ přepíná. Mapa podle motivu přepíná den a noc.
+- **Data jsou v APK.** Metro přibalí `assets/map/vltava-koridor5.pmtiles` a písma (Noto Sans Regular a Italic, rozsahy pro češtinu); při prvním spuštění se zkopírují do úložiště aplikace (`src/map/mapAssets.ts`), protože MapLibre čte `pmtiles://` jen ze souboru. Kopie nese otisk souboru v názvu, dokončená se pozná podle značky `.ok`. Backend se nepoužívá.
+- Velký soubor PMTiles není v gitu; `tools/maps/copy-to-app.sh` ho zkopíruje z `tools/maps/out/` (viz `docs/mapy-osm.md`), `tools/release-apk.sh` to dělá sám.
+- Záloha: web a selhání přípravy dat ukážou dosavadní náhled trasy (`RouteSketch`). Atribuce „© přispěvatelé OpenStreetMap“ je vidět přímo na mapě.
+- Silnice 1. až 3. třídy se ve stylu zobrazují od zoomu 9,5 (v přehledu celé trasy je jinak mapa nepřehledná).
+- Zbývá: iOS (knihovna má u `pmtiles://` na iOS otevřený problém), ověření na reálném telefonu a na slabších zařízeních, medailony s fotkami a pečeti ze mockupů, další výpravy (data pro další koridory, stahování).
+
+## 0011 Medailony zastávek a atribuce obrázků
+Datum: 30. 10. 2026 · Stav: přijato, ověřeno na emulátoru Android 16 (vývojový i release build, světlý i tmavý režim)
+
+- Zastávky na mapě jsou **medailony** podle mockupu: fotka v kruhovém ořezu s kroužkem, u dosažených odznak „došlo se“, další zastávka má tlustší kroužek, zamčené jsou šedé. Zastávka bez fotky má kruh s ikonou věže. Malé objevy jsou tečky (dosažené plné, ostatní prázdné).
+- Medailony jsou hotové obrázky (`apps/mobile/assets/map/medallions`, @3x, pro den a noc) vyrobené skriptem `tools/maps/make-medallions.py` z fotek v `docs/mockupy/assets`; vykresluje je MapLibre jako symbolovou vrstvu. Důvod proti nativním pohledům: stabilní vykreslení, popisky a ikony se rozmisťují společně (kolize) a ikony se zvětšují s přiblížením (v přehledu celé trasy jsou malé).
+- Fotky jsou z Wikimedia Commons (CC BY-SA a jiné) a platí pro ně povinná atribuce. Obrazovka **Zdroje a licence** (odkaz dole na Domů) je vypisuje spolu s daty OSM a písmy; zdroj pravdy je `src/data/credits.ts` a `docs/mockupy/assets/ZDROJE.md`. **Před vydáním ověřit autora a licenci u každého souboru** (u Trojského zámku autor v metadatech chybí) a nahradit fotky z mockupů ověřenými podle šablony zastávky (spec 7.3).
+- Metro pozná `@3x` variantu sám, v `require` se přípona škálování neuvádí.

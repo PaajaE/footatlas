@@ -2,7 +2,7 @@
   "expo": {
     "name": "FootAtlas",
     "slug": "footatlas",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -28,7 +28,7 @@
         "android.permission.health.READ_EXERCISE",
         "android.permission.health.READ_HEALTH_DATA_HISTORY"
       ],
-      "versionCode": 1
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -41,7 +41,10 @@
         "expo-build-properties",
         {
           "android": {
-            "minSdkVersion": 26
+            "minSdkVersion": 26,
+            "buildArchs": [
+              "arm64-v8a"
+            ]
           }
         }
       ],
@@ -59,7 +62,8 @@
       "expo-splash-screen",
       "@maplibre/maplibre-react-native",
       "expo-sqlite",
-      "./plugins/withReleaseSigning"
+      "./plugins/withReleaseSigning",
+      "expo-asset"
     ],
     "scheme": "footatlas",
     "experiments": {

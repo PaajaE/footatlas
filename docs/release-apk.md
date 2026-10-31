@@ -8,7 +8,7 @@ Stav: 30. 10. 2026. Postup pro samostatné podepsané APK, které jde nainstalov
 tools/release-apk.sh        # výstup: dist/footatlas-<verze>-<versionCode>.apk (složka dist/ není v gitu)
 ```
 
-Skript smaže a znovu vygeneruje `apps/mobile/android` (`expo prebuild --clean`), sestaví `assembleRelease` jen pro `arm64-v8a` (47 MB; všechny architektury by měly 148 MB) a vypíše otisk podpisu. Trvá kolem 3 minut (první build 7). Potřebuje JDK 17 a Android SDK (`ANDROID_HOME`, výchozí `~/Library/Android/sdk`).
+Mapa je v APK: skript zkopíruje `tools/maps/out/vltava-koridor5.pmtiles` do `apps/mobile/assets/map` (viz `docs/mapy-osm.md`), proto má APK 73 MB. Skript smaže a znovu vygeneruje `apps/mobile/android` (`expo prebuild --clean`), sestaví `assembleRelease` jen pro `arm64-v8a` (jen arm64-v8a, nastaveno v `app.json` přes `buildArchs`; emulátory x86 se nepodporují) a vypíše otisk podpisu. Trvá kolem 3 minut (první build 7). Potřebuje JDK 17 a Android SDK (`ANDROID_HOME`, výchozí `~/Library/Android/sdk`).
 
 Instalace do telefonu: `adb install -r dist/footatlas-1.0.0-1.apk`, nebo soubor přenést do telefonu a otevřít (povolit instalaci z neznámých zdrojů, Play Protect může chtít potvrzení).
 
@@ -32,6 +32,24 @@ Zvýšit `expo.android.versionCode` v `apps/mobile/app.json` (a podle potřeby `
 
 - Výprava a kalibrace délky kroku v release buildu (kronika ověřena).
 - Aktualizace přes starší release APK (jen jeden build zatím existuje).
-- Mapa: v appce zatím není (`ExpeditionMap` je SVG náhled, OSM mapa je jen ve spiku).
+- Mapa na reálném telefonu a na slabších zařízeních (na emulátoru Android 16 ověřena, viz níže).
 - Telefony jiné než testovací; telefon bez Health Connectu.
 - Odkaz „Délka kroku“ je jediná cesta k nastavení, diagnostika v release buildu není (obrazovka Podpora je v plánu).
+
+## Testování na emulátoru
+
+Na Macu s Apple Silicon běží emulátor arm64 nativně. Nastavení (jednorázově, 30. 10. 2026): příkazové nástroje Androidu do `~/Library/Android/sdk/cmdline-tools/latest`, obraz `system-images;android-36.1;google_apis_playstore;arm64-v8a`, zařízení `footatlas36` (Pixel 8, Android 16).
+
+```bash
+export ANDROID_HOME=$HOME/Library/Android/sdk
+$ANDROID_HOME/emulator/emulator -avd footatlas36 -gpu host -no-snapshot -no-audio &
+adb install -r dist/footatlas-1.2.0-3.apk
+adb shell cmd uimode night yes   # tmavý režim
+```
+
+Vývojový build se stejným podpisem se instaluje přes release bez ztráty dat. Metro: `npx expo start --dev-client --port 8082` a `adb reverse tcp:8082 tcp:8082` (8081 může obsadit jiné okno). Ukázkový postup bez zdravotních dat: odkaz `footatlas:///dev` v telefonu a „Zapnout ukázkový postup“.
+
+## Ověřeno na emulátoru (Android 16, arm64, 30. 10. 2026)
+
+- Verze 1.2.0 (versionCode 3): medailony zastávek z APK, světlý i tmavý režim, obrazovka Zdroje a licence.
+- Vývojový i release build: mapa se vykreslí z přibaleného souboru (čerstvá instalace, `pm clear`), české popisky z přibalených písem, den i noc, přepnutí přehled / poloha, klepnutí na místo otevře zastávku.
