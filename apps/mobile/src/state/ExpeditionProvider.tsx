@@ -2,6 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import {
   computeState,
   isPaused,
+  localDateKey,
+  journeyEvents,
   markSeen as markSessionSeen,
   pauseSession,
   resolveStepLength,
@@ -9,16 +11,17 @@ import {
   sessionSlices,
   sessionStart,
   startSession,
-  walkedInSlicesM,
+  walkedBySlice,
   type ExpeditionSession,
   type ExpeditionState,
+  type JourneyEvent,
   type StepLength,
   type StepProfile,
 } from "@footatlas/core";
 import { vltavska } from "../data/vltavska";
 import { healthSource } from "../health";
 import { DEFAULT_DEMO, loadDemo, loadStepProfile, saveDemo, saveStepProfile, type DemoState } from "./storage";
-import { loadSession, saveSession } from "./sessionStore";
+import { loadJourneyEvents, loadSession, recordJourneyEvents, saveSession } from "./sessionStore";
 
 export type DataStatus =
   | { kind: "loading" }
@@ -34,6 +37,8 @@ interface ExpeditionContextValue {
   active: boolean;
   paused: boolean;
   status: DataStatus;
+  /** Dosažená místa, etapy a cíl rozjeté výpravy s dnem dosažení (uložené v databázi). */
+  events: JourneyEvent[];
   stepProfile: StepProfile;
   /** Délka kroku, kterou se kroky přepočítávají na vzdálenost. */
   stepLength: StepLength;
@@ -59,6 +64,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   /** Vzdálenost výpravy z posledního načtení zdravotních dat. */
   const [measuredM, setMeasuredM] = useState(0);
   const [status, setStatus] = useState<DataStatus>({ kind: "loading" });
+  const [storedEvents, setEvents] = useState<JourneyEvent[]>([]);
   const [stepProfile, setStepProfileState] = useState<StepProfile>({});
   const stepLength = useMemo(() => resolveStepLength(stepProfile), [stepProfile]);
   const sessionRef = useRef<ExpeditionSession | null>(null);
@@ -74,6 +80,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   const refreshFor = useCallback(async (s: ExpeditionSession | null) => {
     if (!s) {
       setMeasuredM(0);
+      setEvents([]);
       setStatus({ kind: "ok" });
       return;
     }
@@ -94,8 +101,16 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
           slices.map((x) => (x.whole || !healthSource.readInterval ? null : healthSource.readInterval(x.from, x.to, stepLengthRef.current))),
         ),
       ]);
-      setMeasuredM(walkedInSlicesM(slices, daily, intervalM));
+      const perSlice = walkedBySlice(slices, daily, intervalM);
+      setMeasuredM(perSlice.reduce((sum, x) => sum + x.distanceM, 0));
       setStatus({ kind: "ok" });
+      // Den dosažení se počítá z dat, ne z okamžiku otevření aplikace; zapsané se už nemění.
+      try {
+        await recordJourneyEvents(journeyEvents(vltavska.plan, perSlice), now);
+        setEvents(await loadJourneyEvents());
+      } catch {
+        // Události jsou doplněk; chyba databáze nesmí shodit načtení postupu.
+      }
     } catch (e) {
       setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e) });
     }
@@ -106,6 +121,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
       const [d, s, p] = await Promise.all([loadDemo(), loadSession(), loadStepProfile()]);
       stepLengthRef.current = resolveStepLength(p).meters;
       setStepProfileState(p);
+      setEvents(await loadJourneyEvents().catch(() => []));
       setDemoState(d);
       setSession(s);
       setReady(true);
@@ -174,6 +190,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const resetAll = useCallback(async () => {
     await persistSession(null);
+    setEvents([]);
     setMeasuredM(0);
     setDemoState(DEFAULT_DEMO);
     await saveDemo(DEFAULT_DEMO);
@@ -181,6 +198,11 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   }, [persistSession]);
 
   const walkedM = demo.enabled ? demo.walkedM : session ? measuredM : 0;
+  // V ukázkovém postupu se události dopočítají na místě (jako by vše bylo ušlé dnes) a neukládají se.
+  const events = useMemo(
+    () => (demo.enabled ? journeyEvents(vltavska.plan, [{ day: localDateKey(new Date()), distanceM: demo.walkedM }]) : storedEvents),
+    [demo.enabled, demo.walkedM, storedEvents],
+  );
   const previousM = demo.enabled ? demo.seenM : (session?.lastSeenWalkedM ?? 0);
   const active = demo.enabled || session !== null;
   const paused = !demo.enabled && session !== null && isPaused(session);
@@ -208,6 +230,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     active,
     paused,
     status,
+    events,
     stepProfile,
     stepLength,
     setStepProfile,
