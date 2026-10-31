@@ -46,6 +46,7 @@ export default function Home() {
           <T variant="small">Při startu vás aplikace požádá o čtení kroků a vzdálenosti {fromHealthSource()}.</T>
         </Card>
         <StatusNote />
+        <CreditsLink />
       </Screen>
     );
   }
@@ -139,8 +140,17 @@ export default function Home() {
         </Card>
       )}
       <StatusNote />
+      <CreditsLink />
     </Screen>
   );
+
+  function CreditsLink() {
+    return (
+      <Pressable accessibilityRole="link" onPress={() => router.push("/zdroje")} hitSlop={12} style={{ paddingVertical: 8 }}>
+        <T variant="small">Zdroje a licence</T>
+      </Pressable>
+    );
+  }
 
   function HeaderLinks() {
     return (

@@ -2,7 +2,7 @@
   "expo": {
     "name": "FootAtlas",
     "slug": "footatlas",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -28,7 +28,7 @@
         "android.permission.health.READ_EXERCISE",
         "android.permission.health.READ_HEALTH_DATA_HISTORY"
       ],
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png",

@@ -77,6 +77,8 @@ Zařízení: motorola edge 50 fusion, Android 16. `@maplibre/maplibre-react-nati
 ## Mapa v aplikaci (rozhodnutí 0010)
 `ExpeditionMap` používá koridor z této kapitoly přibalený do APK. Příprava: `tools/maps/extract.sh packages/content/data/vltavska-stezka/route.json 5 15`, potom `tools/maps/copy-to-app.sh` (soubor je v `.gitignore`). Ověřeno na emulátoru Android 16, vývojový i release build; na reálném telefonu a na iOS ne.
 
+Zastávky mají medailony s fotkou (rozhodnutí 0011, `tools/maps/make-medallions.py`), atribuce fotek je v aplikaci na obrazovce Zdroje a licence.
+
 ## Co není ověřené
 - **Zobrazení na telefonu:** na Androidu ověřeno (viz spike výše), `pmtiles://` funguje přímo. Na iOS neověřeno; kdyby selhalo, záloha je Worker nad R2 vracející dlaždice `/tiles/{z}/{x}/{y}` nebo převod na MBTiles.
 - **Písma.** Při renderu se používají Noto Sans (OFL) z OpenFreeMap. Pro produkci je nutná vlastní kopie (např. na R2) a oddělit se od služby třetí strany.

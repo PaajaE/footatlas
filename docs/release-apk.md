@@ -8,7 +8,7 @@ Stav: 30. 10. 2026. Postup pro samostatné podepsané APK, které jde nainstalov
 tools/release-apk.sh        # výstup: dist/footatlas-<verze>-<versionCode>.apk (složka dist/ není v gitu)
 ```
 
-Mapa je v APK: skript zkopíruje `tools/maps/out/vltava-koridor5.pmtiles` do `apps/mobile/assets/map` (viz `docs/mapy-osm.md`), proto má APK 72 MB. Skript smaže a znovu vygeneruje `apps/mobile/android` (`expo prebuild --clean`), sestaví `assembleRelease` jen pro `arm64-v8a` (jen arm64-v8a, nastaveno v `app.json` přes `buildArchs`; emulátory x86 se nepodporují) a vypíše otisk podpisu. Trvá kolem 3 minut (první build 7). Potřebuje JDK 17 a Android SDK (`ANDROID_HOME`, výchozí `~/Library/Android/sdk`).
+Mapa je v APK: skript zkopíruje `tools/maps/out/vltava-koridor5.pmtiles` do `apps/mobile/assets/map` (viz `docs/mapy-osm.md`), proto má APK 73 MB. Skript smaže a znovu vygeneruje `apps/mobile/android` (`expo prebuild --clean`), sestaví `assembleRelease` jen pro `arm64-v8a` (jen arm64-v8a, nastaveno v `app.json` přes `buildArchs`; emulátory x86 se nepodporují) a vypíše otisk podpisu. Trvá kolem 3 minut (první build 7). Potřebuje JDK 17 a Android SDK (`ANDROID_HOME`, výchozí `~/Library/Android/sdk`).
 
 Instalace do telefonu: `adb install -r dist/footatlas-1.0.0-1.apk`, nebo soubor přenést do telefonu a otevřít (povolit instalaci z neznámých zdrojů, Play Protect může chtít potvrzení).
 
@@ -43,7 +43,7 @@ Na Macu s Apple Silicon běží emulátor arm64 nativně. Nastavení (jednorázo
 ```bash
 export ANDROID_HOME=$HOME/Library/Android/sdk
 $ANDROID_HOME/emulator/emulator -avd footatlas36 -gpu host -no-snapshot -no-audio &
-adb install -r dist/footatlas-1.1.0-2.apk
+adb install -r dist/footatlas-1.2.0-3.apk
 adb shell cmd uimode night yes   # tmavý režim
 ```
 
@@ -51,4 +51,5 @@ Vývojový build se stejným podpisem se instaluje přes release bez ztráty dat
 
 ## Ověřeno na emulátoru (Android 16, arm64, 30. 10. 2026)
 
+- Verze 1.2.0 (versionCode 3): medailony zastávek z APK, světlý i tmavý režim, obrazovka Zdroje a licence.
 - Vývojový i release build: mapa se vykreslí z přibaleného souboru (čerstvá instalace, `pm clear`), české popisky z přibalených písem, den i noc, přepnutí přehled / poloha, klepnutí na místo otevře zastávku.

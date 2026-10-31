@@ -1,8 +1,9 @@
-import { Camera, GeoJSONSource, Layer, Map, type CameraRef } from "@maplibre/maplibre-react-native";
+import { Camera, GeoJSONSource, Images, Layer, Map, type CameraRef } from "@maplibre/maplibre-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { buildStyle, routeLayers, themes } from "@footatlas/map-style";
 import { positionAt } from "@footatlas/core";
+import { MEDALLIONS } from "../map/medallionFiles";
 import { prepareMapAssets, type MapAssets } from "../map/mapAssets";
 import { useTheme } from "../theme/ThemeProvider";
 import type { ExpeditionMapProps } from "./expeditionMapProps";
@@ -13,7 +14,7 @@ export type { ExpeditionMapProps };
 
 type Assets = { kind: "loading" } | { kind: "ready"; assets: MapAssets } | { kind: "failed"; message: string };
 
-const FONT = ["Noto Sans Regular"];
+const ITALIC = ["Noto Sans Italic"];
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
 
 /**
@@ -78,18 +79,43 @@ function LiveMap({ route, cumulative, places, walkedM, height, onPlacePress, ass
     return { center: [lon, lat] as [number, number], zoom: Math.round(zoom * 10) / 10 };
   }, [places, walkedM, you]);
   const done = useMemo(() => [...coords.slice(0, Math.max(1, you.segment + 1)), [you.lon, you.lat] as [number, number]], [coords, you]);
+  const nextStopId = useMemo(() => places.find((p) => p.kind === "stop" && p.atM > walkedM)?.id, [places, walkedM]);
   const placesData = useMemo(
     () => ({
       type: "FeatureCollection" as const,
-      features: places.map((p) => ({
-        type: "Feature" as const,
-        id: p.id,
-        properties: { id: p.id, name: p.name, stop: p.kind === "stop", reached: p.atM <= walkedM },
-        geometry: { type: "Point" as const, coordinates: [p.lon, p.lat] },
-      })),
+      features: places.map((p) => {
+        const reached = p.atM <= walkedM;
+        const state = reached ? "reached" : p.id === nextStopId ? "next" : "locked";
+        return {
+          type: "Feature" as const,
+          id: p.id,
+          properties: {
+            id: p.id,
+            name: p.name,
+            stop: p.kind === "stop",
+            reached,
+            medallion: `${state}-${p.id}`,
+            // Menší číslo = přednost při rozmísťování: další zastávka, pak dosažené, pak zamčené.
+            rank: state === "next" ? 0 : reached ? 1 : 2,
+          },
+          geometry: { type: "Point" as const, coordinates: [p.lon, p.lat] },
+        };
+      }),
     }),
-    [places, walkedM],
+    [places, walkedM, nextStopId],
   );
+  // Medailony zastávek (fotka v kroužku, odznak „došlo se“, šedá pro zamčené) jsou hotové obrázky pro daný motiv.
+  const medallionImages = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const p of places) {
+      if (p.kind !== "stop") continue;
+      for (const state of ["reached", "next", "locked"]) {
+        const m = MEDALLIONS[`${name === "dark" ? "night" : "day"}-${state}-${p.id}`];
+        if (m !== undefined) out[`${state}-${p.id}`] = m;
+      }
+    }
+    return out;
+  }, [places, name]);
   const line = (c: Array<[number, number]>) => ({ type: "Feature" as const, properties: {}, geometry: { type: "LineString" as const, coordinates: c } });
   const point = { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [you.lon, you.lat] } };
 
@@ -105,6 +131,7 @@ function LiveMap({ route, cumulative, places, walkedM, height, onPlacePress, ass
   return (
     <View style={{ height, backgroundColor: colors.surface }} accessibilityLabel="Mapa trasy výpravy">
       <Map style={{ flex: 1 }} mapStyle={style as never} compass={false} logo={false} touchRotate={false} touchPitch={false} tintColor={mapTheme.palette.road}>
+        <Images images={medallionImages} />
         <Camera ref={camera} initialViewState={{ center: initial.center, zoom: initial.zoom }} />
 
         <GeoJSONSource id="route-rest" data={line(coords)}>
@@ -123,26 +150,33 @@ function LiveMap({ route, cumulative, places, walkedM, height, onPlacePress, ass
             if (typeof id === "string") onPlacePress?.(id);
           }}
         >
+          {/* Malé objevy: tečky (dosažené plné, ostatní prázdné), jako v mockupu. */}
           <Layer
-            id="places-circle"
+            id="places-discovery"
             type="circle"
+            filter={["!", ["get", "stop"]]}
             paint={{
-              "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, ["case", ["get", "stop"], 4, 2], 13, ["case", ["get", "stop"], 8, 4]],
+              "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2, 13, ["case", ["get", "reached"], 5.2, 4.6]],
               "circle-color": ["case", ["get", "reached"], colors.accent, colors.surface],
-              "circle-stroke-color": ["case", ["get", "reached"], colors.accent, colors.fg],
-              "circle-stroke-width": ["case", ["get", "stop"], 2.5, 1.5],
+              "circle-stroke-color": ["case", ["get", "reached"], colors.surface, colors.fg],
+              "circle-stroke-width": ["case", ["get", "reached"], 1.6, 1.3],
             }}
           />
+          {/* Zastávky: medailon s popiskem; ikona se s přiblížením zvětšuje, popisek ustoupí, když se nevejde. */}
           <Layer
-            id="places-label"
+            id="places-stop"
             type="symbol"
             filter={["get", "stop"]}
             layout={{
+              "icon-image": ["get", "medallion"],
+              "icon-size": ["interpolate", ["linear"], ["zoom"], 9, 0.36, 10.5, 0.6, 12, 0.95, 13, 1],
+              "icon-allow-overlap": true,
+              "symbol-sort-key": ["get", "rank"],
               "text-field": ["get", "name"],
-              "text-font": FONT,
-              "text-size": 12,
+              "text-font": ITALIC,
+              "text-size": 13,
               "text-anchor": "left",
-              "text-offset": [1.1, 0],
+              "text-offset": ["interpolate", ["linear"], ["zoom"], 9, ["literal", [0.9, 0]], 12, ["literal", [1.9, 0]]],
               "text-optional": true,
             }}
             paint={{ "text-color": colors.fg, "text-halo-color": colors.surface, "text-halo-width": 2 }}
