@@ -26,11 +26,11 @@ Zvýšit `expo.android.versionCode` v `apps/mobile/app.json` (a podle potřeby `
 ## Co je ověřeno (30. 10. 2026, motorola edge 50 fusion, Android 16)
 
 - APK podepsané vlastním klíčem (otisk výše), nainstalované, běží bez Metro serveru, bez odkazu „Vývoj“.
-- Systémový dialog Health Connectu pro FootAtlas se v release buildu otevře.
+- Systémový dialog Health Connectu se v release buildu otevře a po udělení oprávnění se načte kronika: 332 km, 43 dní od 18. 9. 2026, shodně s vývojovým buildem (SQLite, Health Connect i přepočet z kroků fungují v release buildu).
 
 ## Neověřeno
 
-- Čtení dat po udělení oprávnění v release buildu (Kronika, výprava, kalibrace).
+- Výprava a kalibrace délky kroku v release buildu (kronika ověřena).
 - Aktualizace přes starší release APK (jen jeden build zatím existuje).
 - Mapa: v appce zatím není (`ExpeditionMap` je SVG náhled, OSM mapa je jen ve spiku).
 - Telefony jiné než testovací; telefon bez Health Connectu.
