@@ -1,4 +1,5 @@
 import type { SQLiteDatabase } from "expo-sqlite";
+import { serialized } from "./lock";
 import { needsRecompute, toStoredDay, type RawDay, type SourceId, type StoredDay } from "@footatlas/core";
 
 interface Row {
@@ -54,7 +55,7 @@ export async function saveRaw(
 ): Promise<number> {
   const readAt = now.toISOString();
   let saved = 0;
-  await db.withExclusiveTransactionAsync(async (txn) => {
+  await serialized(() => db.withExclusiveTransactionAsync(async (txn) => {
     const stmt = await txn.prepareAsync(UPSERT);
     try {
       for (const r of raw) {
@@ -73,7 +74,7 @@ export async function saveRaw(
       source,
       readAt,
     );
-  });
+  }));
   return saved;
 }
 
@@ -86,7 +87,7 @@ export async function recomputeStale(db: SQLiteDatabase, platform: "android" | "
   const stale = all.filter((r) => needsRecompute(r, stepLengthM) && (r.source === "health_connect" || r.source === "healthkit"));
   if (stale.length === 0) return 0;
   const readAt = new Date().toISOString();
-  await db.withExclusiveTransactionAsync(async (txn) => {
+  await serialized(() => db.withExclusiveTransactionAsync(async (txn) => {
     const stmt = await txn.prepareAsync(UPSERT);
     try {
       for (const r of stale) {
@@ -98,6 +99,6 @@ export async function recomputeStale(db: SQLiteDatabase, platform: "android" | "
     } finally {
       await stmt.finalizeAsync();
     }
-  });
+  }));
   return stale.length;
 }

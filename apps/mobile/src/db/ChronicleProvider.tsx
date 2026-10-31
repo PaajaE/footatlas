@@ -1,10 +1,10 @@
-import { openDatabaseAsync, type SQLiteDatabase } from "expo-sqlite";
+import type { SQLiteDatabase } from "expo-sqlite";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { chronicleDays, chronicleStats, syncFrom, type DailyRecord, type SourceId } from "@footatlas/core";
 import { healthSource } from "../health";
 import { useExpedition } from "../state/ExpeditionProvider";
 import { lastReadAt as readLastReadAt, loadAllDays, recomputeStale, saveRaw } from "./chronicleStore";
-import { migrate } from "./schema";
+import { getDatabase } from "./database";
 import type { ChronicleValue, SyncState } from "./types";
 
 const Ctx = createContext<ChronicleValue | null>(null);
@@ -67,8 +67,7 @@ export function ChronicleProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const db = await openDatabaseAsync("footatlas.db");
-        await migrate(db);
+        const db = await getDatabase();
         if (cancelled) return;
         dbRef.current = db;
         await reload(db);

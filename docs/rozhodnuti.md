@@ -58,7 +58,9 @@ Datum: 30. 10. 2026 · Stav: přijato, první část hotová
 - Zdravotní data se čtou do lokální databáze `footatlas.db` (`expo-sqlite`, `apps/mobile/src/db`), ukládají se **surové** kroky a vzdálenost po dnech a zdrojích, vedle nich vybraná hodnota podle pravidla z core (`packages/core/src/chronicle.ts`, verze pravidla `RULE_VERSION`) a délka kroku, se kterou se spočítala.
 - Po změně délky kroku nebo pravidla se dny přepočítají z uložených surových hodnot, bez nového čtení zdravotních dat. Dny, které zdroj přestal vracet, se nemažou.
 - Čtení se spouští jen na výzvu uživatele (tlačítko „Načíst historii“, spec 9.1) a potom automaticky při otevření aplikace, posledních 7 dní kvůli pozdě synchronizovaným datům.
-- Stav výpravy zůstává zatím v AsyncStorage; přesun do SQLite je další krok.
+- Stav rozjeté výpravy je také v SQLite (`expedition_run`, `expedition_period`, migrace verze 2); core se nemění, `ExpeditionSession` se jen ukládá a načítá (`apps/mobile/src/db/expeditionStore.ts`). Souběžně může běžet jedna výprava (unikátní index nad stavem). Zápisy do databáze běží po jednom (`db/lock.ts`), aby se souběžná synchronizace kroniky a uložení výpravy nezablokovaly.
+- Starý stav z AsyncStorage se při prvním načtení převede, starý klíč se smaže až po ověření čtením zpět; stav v databázi má vždy přednost. Ověřeno na telefonu: databáze po aktualizaci měla verzi 2 a běžící výprava (od zahájení z dřívějška, 1 005 m „viděno“) se přenesla beze změny.
+- Zatím neukládáno: dokončené a opuštěné výpravy, události (`expedition_event`), milníky životní cesty.
 - Na webu se databáze nepoužívá (prázdná kronika pro náhled obrazovek).
 - Testy: `packages/core/src/chronicle.test.ts` (pravidla) a `apps/mobile/src/db/db.test.ts` (migrace, zápis a přepočet nad `node:sqlite`).
 - Ověřeno na telefonu: první import 61 dní za pár sekund (332 km = 443 656 kroků × 0,75 m, shoduje se s diagnostikou), po restartu aplikace jsou data v databázi. NEOVĚŘENO: rychlost importu s historií za roky, chování při přerušení importu.

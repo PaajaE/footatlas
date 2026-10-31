@@ -1,6 +1,6 @@
 # Kronika v SQLite (návrh)
 
-Stav: 30. 10. 2026. **Implementována první část** (rozhodnutí 0007): tabulky `daily_motion` a `source_state`, synchronizace Health Connectu, přepočet po změně délky kroku a statistiky na záložce Kronika. Ostatní tabulky (`manual_entry`, `expedition_*`, `life_milestone`) a Životní cesta zůstávají návrhem. API `expo-sqlite` bylo ověřeno proti dokumentaci SDK 58 a na telefonu (otevření, migrace, `withExclusiveTransactionAsync`, `prepareAsync`). Odchylka od schématu níž: `daily_motion` má navíc sloupec `step_length_m` (délka kroku, se kterou se den spočítal; podle něj se pozná, který den je po změně délky kroku k přepočtu).
+Stav: 30. 10. 2026. **Implementována první část** (rozhodnutí 0007): tabulky `daily_motion`, `source_state`, `expedition_run` a `expedition_period` (stav rozjeté výpravy včetně převodu z AsyncStorage), synchronizace Health Connectu, přepočet po změně délky kroku a statistiky na záložce Kronika. Ostatní tabulky (`manual_entry`, `expedition_event`, `life_milestone`) a Životní cesta zůstávají návrhem. API `expo-sqlite` bylo ověřeno proti dokumentaci SDK 58 a na telefonu (otevření, migrace, `withExclusiveTransactionAsync`, `prepareAsync`). Odchylka od schématu níž: `daily_motion` má navíc sloupec `step_length_m` (délka kroku, se kterou se den spočítal; podle něj se pozná, který den je po změně délky kroku k přepočtu).
 
 ## Proč a co se ukládá
 

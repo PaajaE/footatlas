@@ -17,7 +17,8 @@ import {
 } from "@footatlas/core";
 import { vltavska } from "../data/vltavska";
 import { healthSource } from "../health";
-import { DEFAULT_DEMO, loadDemo, loadSession, loadStepProfile, saveDemo, saveSession, saveStepProfile, type DemoState } from "./storage";
+import { DEFAULT_DEMO, loadDemo, loadStepProfile, saveDemo, saveStepProfile, type DemoState } from "./storage";
+import { loadSession, saveSession } from "./sessionStore";
 
 export type DataStatus =
   | { kind: "loading" }

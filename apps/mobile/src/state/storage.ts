@@ -30,6 +30,10 @@ export async function loadSession(): Promise<ExpeditionSession | null> {
   return parseSession(await readJson(SESSION_KEY));
 }
 
+export async function dropLegacySession(): Promise<void> {
+  await AsyncStorage.removeItem(SESSION_KEY);
+}
+
 export async function saveSession(s: ExpeditionSession | null): Promise<void> {
   if (s === null) await AsyncStorage.removeItem(SESSION_KEY);
   else await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(s));
