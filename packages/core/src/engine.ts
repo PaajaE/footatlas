@@ -1,5 +1,4 @@
 import { splitStages } from "./route";
-import type { DailyRecord } from "./motion";
 
 export type PlaceKind = "stop" | "discovery" | "milestone";
 
@@ -153,22 +152,4 @@ export function densityReport(plan: ExpeditionPlan): DensityReport {
     avgStopGapM: stopGaps.length ? stopGaps.reduce((a, b) => a + b, 0) / stopGaps.length : null,
     issues,
   };
-}
-
-export interface ActivePeriod {
-  /** Lokální datum YYYY-MM-DD, kdy se začalo počítat. */
-  from: string;
-  /** Datum pozastavení nebo opuštění; bez něj období trvá. Den pozastavení se už nepočítá. */
-  until?: string;
-}
-
-/**
- * Vzdálenost započítaná do výpravy podle období, kdy běžela (spec 5.3: pozastavení bez ztráty postupu,
- * po pozastavení se pohyb nepočítá). Záznamy jsou po dnech, takže den zahájení se započítá celý
- * a den pozastavení vůbec ne; je to záměrné zjednodušení.
- */
-export function distanceInPeriodsM(records: readonly DailyRecord[], periods: readonly ActivePeriod[]): number {
-  return records
-    .filter((r) => periods.some((p) => r.date >= p.from && (p.until === undefined || r.date < p.until)))
-    .reduce((sum, r) => sum + r.distanceM, 0);
 }

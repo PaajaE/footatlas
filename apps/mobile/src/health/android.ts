@@ -1,11 +1,12 @@
 import {
   aggregateGroupByPeriod,
+  aggregateRecord,
   getSdkStatus,
   initialize,
   requestPermission,
   SdkAvailabilityStatus,
 } from "react-native-health-connect";
-import { addToDay, mergeDaily, periodStartDayKey, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource } from "@footatlas/core";
+import { addToDay, mergeDaily, periodStartDayKey, toDailyRecordStepsFirst, yearChunks, type AccessResult, type Availability, type DailyRecord, type HealthSource, type RawDay } from "@footatlas/core";
 
 const READ_STEPS = { accessType: "read", recordType: "Steps" } as const;
 const READ_DISTANCE = { accessType: "read", recordType: "Distance" } as const;
@@ -34,6 +35,20 @@ async function dailySums(kind: Kind, from: Date, to: Date): Promise<Map<string, 
   return byDay;
 }
 
+/**
+ * Součet za libovolný interval. Ověřeno na telefonu (30. 10. 2026, diagnostika `probeOverlap`):
+ * záznam kroků přesahující hranici intervalu se započítá poměrně podle času (třetina doby ≈ 33 %,
+ * polovina ≈ 50 %), ne celý. Platí pro záznamy dlouhé 30–50 minut.
+ */
+async function intervalSum(kind: Kind, from: Date, to: Date): Promise<number> {
+  const r = (await aggregateRecord({
+    recordType: kind,
+    timeRangeFilter: { operator: "between", startTime: from.toISOString(), endTime: to.toISOString() },
+  } as never)) as Record<string, any>;
+  const value = kind === "Distance" ? r.DISTANCE?.inMeters : r.COUNT_TOTAL;
+  return typeof value === "number" ? value : 0;
+}
+
 export const androidHealthSource: HealthSource = {
   platform: "android",
 
@@ -51,13 +66,32 @@ export const androidHealthSource: HealthSource = {
     return { read: has("Steps") || has("Distance"), history: has("ReadHealthDataHistory") };
   },
 
-  async readDaily(from: Date, to: Date): Promise<DailyRecord[]> {
+  async readRawDaily(from: Date, to: Date): Promise<RawDay[]> {
+    await initialize();
+    const [dist, steps] = await Promise.all([dailySums("Distance", from, to), dailySums("Steps", from, to)]);
+    return [...new Set([...dist.keys(), ...steps.keys()])]
+      .sort()
+      .map((day) => ({ day, steps: steps.get(day) ?? 0, distanceM: dist.get(day) ?? 0 }));
+  },
+
+  async readDaily(from: Date, to: Date, stepLengthM?: number): Promise<DailyRecord[]> {
     await initialize();
     // Bez oprávnění k historii Health Connect bez chyby tiše ořízne data na ~30 dní před prvním udělením.
     const [dist, steps] = await Promise.all([
       dailySums("Distance", from, to),
       dailySums("Steps", from, to),
     ]);
-    return mergeDaily(dist, steps);
+    return mergeDaily(dist, steps, stepLengthM);
+  },
+
+  async readSteps(from: Date, to: Date): Promise<number> {
+    await initialize();
+    return intervalSum("Steps", from, to);
+  },
+
+  async readInterval(from: Date, to: Date, stepLengthM?: number): Promise<number> {
+    await initialize();
+    const [dist, steps] = await Promise.all([intervalSum("Distance", from, to), intervalSum("Steps", from, to)]);
+    return toDailyRecordStepsFirst("", dist, steps, stepLengthM)?.distanceM ?? 0;
   },
 };

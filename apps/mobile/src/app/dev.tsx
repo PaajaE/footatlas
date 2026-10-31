@@ -61,9 +61,10 @@ export default function Dev() {
 
       <Card style={{ gap: 10 }}>
         <T variant="strong">Motiv</T>
-        <View style={{ flexDirection: "row", gap: 8 }}>
+        {/* Tlačítka se zalamují celá a roztahují podle textu, aby se „Podle telefonu“ nelámalo. */}
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           {(["auto", "light", "dark"] as const).map((c) => (
-            <View key={c} style={{ flex: 1 }}>
+            <View key={c} style={{ flexGrow: 1 }}>
               <Button
                 kind={choice === c ? "primary" : "secondary"}
                 label={c === "auto" ? "Podle telefonu" : c === "light" ? "Světlý" : "Tmavý"}

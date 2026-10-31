@@ -56,7 +56,8 @@
       "expo-router",
       "expo-status-bar",
       "expo-splash-screen",
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      "expo-sqlite"
     ],
     "scheme": "footatlas",
     "experiments": {

@@ -1,4 +1,4 @@
-import { localDateKey, toDailyRecord } from "./health";
+import { localDateKey, toDailyRecordStepsFirst } from "./health";
 import type { DailyRecord } from "./motion";
 
 /** Začátek lokálního dne. */
@@ -40,15 +40,19 @@ export function addToDay(byDay: Map<string, number>, day: string, value: number)
   byDay.set(day, (byDay.get(day) ?? 0) + value);
 }
 
-/** Spojí denní součty vzdálenosti (m) a kroků do záznamů kroniky, seřazené podle dne. */
+/**
+ * Spojí denní součty vzdálenosti (m) a kroků do záznamů kroniky, seřazené podle dne.
+ * Pro Android: rozhoduje `toDailyRecordStepsFirst` (kroky hlavní, vzdálenost jen spolehlivá).
+ */
 export function mergeDaily(
   distanceM: ReadonlyMap<string, number>,
   steps: ReadonlyMap<string, number>,
+  stepLengthM?: number,
 ): DailyRecord[] {
   const days = new Set([...distanceM.keys(), ...steps.keys()]);
   const out: DailyRecord[] = [];
   for (const day of [...days].sort()) {
-    const rec = toDailyRecord(day, distanceM.get(day) ?? 0, steps.get(day) ?? 0);
+    const rec = toDailyRecordStepsFirst(day, distanceM.get(day) ?? 0, steps.get(day) ?? 0, stepLengthM);
     if (rec) out.push(rec);
   }
   return out;
