@@ -30,6 +30,26 @@ async function dailySums(id: typeof DISTANCE | typeof STEPS, unit: "m" | "count"
   return byDay;
 }
 
+/**
+ * Součet za libovolný interval [from, to). HealthKit sám dělí vzorky na hranicích kbelíků kolekce,
+ * proto se používá kolekce s jediným kbelíkem, který končí přesně v `to` a začíná o méně než minutu
+ * před `from` (interval je jen v celých minutách); filtr omezí vzorky na ty od `from`. Chyba je tedy
+ * nejvýš minuta pohybu na straně `from`. NEOVĚŘENO na iPhonu (rozhodnutí 0008).
+ */
+async function intervalSum(id: typeof DISTANCE | typeof STEPS, unit: "m" | "count", from: Date, to: Date): Promise<number> {
+  const ms = to.getTime() - from.getTime();
+  if (!(ms > 0)) return 0;
+  const minutes = Math.ceil(ms / 60_000);
+  const anchor = new Date(to.getTime() - minutes * 60_000);
+  const rows = await queryStatisticsCollectionForQuantity(id, ["cumulativeSum"], anchor, { minute: minutes }, {
+    unit,
+    filter: { date: { startDate: from, endDate: to } },
+  });
+  let sum = 0;
+  for (const r of rows) sum += r.sumQuantity?.quantity ?? 0;
+  return sum;
+}
+
 export const iosHealthSource: HealthSource = {
   platform: "ios",
 
@@ -62,5 +82,14 @@ export const iosHealthSource: HealthSource = {
       if (rec) out.push(rec);
     }
     return out;
+  },
+
+  async readInterval(from: Date, to: Date, stepLengthM?: number): Promise<number> {
+    const [dist, steps] = await Promise.all([intervalSum(DISTANCE, "m", from, to), intervalSum(STEPS, "count", from, to)]);
+    return toDailyRecord("", dist, steps, stepLengthM)?.distanceM ?? 0;
+  },
+
+  async readSteps(from: Date, to: Date): Promise<number> {
+    return intervalSum(STEPS, "count", from, to);
   },
 };

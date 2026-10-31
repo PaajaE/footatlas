@@ -64,3 +64,12 @@ Datum: 30. 10. 2026 · Stav: přijato, první část hotová
 - Na webu se databáze nepoužívá (prázdná kronika pro náhled obrazovek).
 - Testy: `packages/core/src/chronicle.test.ts` (pravidla) a `apps/mobile/src/db/db.test.ts` (migrace, zápis a přepočet nad `node:sqlite`).
 - Ověřeno na telefonu: první import 61 dní za pár sekund (332 km = 443 656 kroků × 0,75 m, shoduje se s diagnostikou), po restartu aplikace jsou data v databázi. NEOVĚŘENO: rychlost importu s historií za roky, chování při přerušení importu.
+
+## 0008 iOS: čtení intervalu a kroků pro kalibraci
+Datum: 30. 10. 2026 · Stav: přijato, NEOVĚŘENO na iPhonu
+
+- iOS teď umí `readInterval` (výprava od okamžiku zahájení a pozastavení, rozhodnutí 0004) i `readSteps` (kalibrace délky kroku, rozhodnutí 0006), takže den zahájení a pozastavení se na iOS nepočítá celý.
+- Implementace (`apps/mobile/src/health/ios.ts`, `intervalSum`) používá kolekci statistik s **jediným kbelíkem**, který končí přesně v `to`; HealthKit dělí vzorky na hranicích kbelíků sám. Interval kolekce je jen v celých minutách, takže kbelík začíná nejvýš o minutu před `from`; filtr omezí vzorky na ty od `from`. Chyba je tedy nejvýš minuta pohybu na straně `from`. Důvod, proč ne `queryStatisticsForQuantity` s rozsahem: nevíme, zda u vzorku přesahujícího hranici rozsahu započítá jen část, nebo celý (na Androidu jsme to museli změřit, viz Známá omezení).
+- Pravidlo na iOS zůstává „vzdálenost má přednost“ (`toDailyRecord`), délka kroku se použije jen při chybějící vzdálenosti.
+- Ověřeno: typecheck a export JS balíčku pro iOS (`expo export --platform ios`). **Neověřeno:** chování na zařízení. Postup ověření: na iPhonu v dev panelu porovnat součet `readInterval` za dnešek od 00:00 s denním součtem v aplikaci Zdraví, a interval přes hranici vzorku (např. 10:55–11:05) s poměrným očekáváním.
+- Zatím neřešeno: výchozí délka kroku z `HKQuantityTypeIdentifierWalkingStepLength` (vyžaduje další oprávnění ke čtení a nové dotazy v `ios.ts`).
