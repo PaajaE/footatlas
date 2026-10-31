@@ -45,6 +45,18 @@ export const MIGRATIONS: readonly string[] = [
     PRIMARY KEY (run_id, start_at)
   ) WITHOUT ROWID;
   `,
+  // Verze 3: co se na výpravě stalo (dosažená místa, etapy, cíl) a kdy, aby datum nezáviselo na otevření aplikace.
+  `
+  CREATE TABLE expedition_event (
+    run_id      INTEGER NOT NULL REFERENCES expedition_run (id) ON DELETE CASCADE,
+    kind        TEXT    NOT NULL CHECK (kind IN ('place', 'stage', 'finish')),
+    ref         TEXT    NOT NULL,
+    at_m        REAL    NOT NULL,
+    reached_day TEXT    NOT NULL,
+    noticed_at  TEXT    NOT NULL,
+    PRIMARY KEY (run_id, kind, ref)
+  ) WITHOUT ROWID;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
