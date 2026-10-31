@@ -51,9 +51,6 @@ export default function Expedition() {
         height={420}
         onPlacePress={(id) => router.push({ pathname: "/zastavka/[id]", params: { id } })}
       />
-      <T variant="small" style={{ paddingHorizontal: 20, paddingTop: 4 }}>
-        Náhled trasy bez podkladové mapy. Mapa přijde později.
-      </T>
 
       <View style={{ flex: 1, justifyContent: "flex-end", padding: 16 }}>
         <Card style={{ gap: 10 }}>
