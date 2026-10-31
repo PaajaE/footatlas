@@ -7,6 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ChronicleProvider } from "../db/ChronicleProvider";
 import { ExpeditionProvider } from "../state/ExpeditionProvider";
 import { ThemeProvider, useTheme } from "../theme/ThemeProvider";
 
@@ -20,6 +21,7 @@ function Shell() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.bg } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="zastavka/[id]" />
+        <Stack.Screen name="delka-kroku" />
         <Stack.Screen name="dev" options={{ presentation: "modal" }} />
       </Stack>
     </>
@@ -47,7 +49,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <ExpeditionProvider>
-          <Shell />
+          <ChronicleProvider>
+            <Shell />
+          </ChronicleProvider>
         </ExpeditionProvider>
       </ThemeProvider>
     </SafeAreaProvider>

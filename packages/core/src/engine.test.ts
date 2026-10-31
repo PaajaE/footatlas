@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan, computeState, densityReport, distanceInPeriodsM, type DailyRecord, type PlanPlace } from "./index";
+import { buildPlan, computeState, densityReport, type PlanPlace } from "./index";
 
 const place = (id: string, kind: PlanPlace["kind"], atM: number): PlanPlace => ({ id, kind, atM });
 
@@ -101,28 +101,5 @@ describe("hustota obsahu", () => {
   it("první místo daleko od startu je chyba", () => {
     const p = buildPlan({ totalM: 5_000, places: [place("a", "stop", 2_500)] });
     expect(densityReport(p).issues.some((i) => i.includes("První místo"))).toBe(true);
-  });
-});
-
-describe("období výpravy", () => {
-  const recs: DailyRecord[] = [
-    { date: "2026-10-01", distanceM: 1_000, confidence: "verified" },
-    { date: "2026-10-05", distanceM: 2_000, confidence: "verified" },
-    { date: "2026-10-10", distanceM: 4_000, confidence: "verified" },
-    { date: "2026-10-15", distanceM: 8_000, confidence: "verified" },
-  ];
-  it("jedno běžící období", () => {
-    expect(distanceInPeriodsM(recs, [{ from: "2026-10-05" }])).toBe(14_000);
-  });
-  it("pozastavení nepočítá den pozastavení a dny po něm", () => {
-    expect(distanceInPeriodsM(recs, [{ from: "2026-10-05", until: "2026-10-10" }])).toBe(2_000);
-  });
-  it("obnovení přidá druhé období", () => {
-    expect(
-      distanceInPeriodsM(recs, [
-        { from: "2026-10-01", until: "2026-10-05" },
-        { from: "2026-10-15" },
-      ]),
-    ).toBe(9_000);
   });
 });

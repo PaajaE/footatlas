@@ -24,4 +24,4 @@ pnpm install
 cd apps/mobile
 npx expo run:android      # telefon připojený přes USB, ladění zapnuto
 ```
-Ukázkový postup bez zdravotních dat: na Domů dole „Vývojářský panel“ (jen ve vývojovém buildu), „Zapnout ukázkový postup“.
+Ukázkový postup bez zdravotních dat: na Domů vpravo nahoře „Vývoj“ (jen ve vývojovém buildu), „Zapnout ukázkový postup“.

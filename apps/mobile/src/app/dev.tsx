@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
-import { View } from "react-native";
+import { useState } from "react";
+import { Platform, View } from "react-native";
 import { Button, Card, Screen, T } from "../components/ui";
 import { formatKm } from "../format";
 import { useExpedition } from "../state/ExpeditionProvider";
@@ -11,6 +12,17 @@ export default function Dev() {
   const ex = useExpedition();
   const { choice, setChoice } = useSchemeChoice();
   const { demo, setDemo } = ex;
+  const [diag, setDiag] = useState<string | null>(null);
+  const runDiag = async () => {
+    setDiag("Běží…");
+    try {
+      // Načítá se až při použití, aby web a iOS knihovnu Health Connect netahaly.
+      const { diagnoseHealth } = require("../health/diagnostics") as typeof import("../health/diagnostics");
+      setDiag(await diagnoseHealth());
+    } catch (e) {
+      setDiag(`Chyba: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  };
   const step = (m: number) => setDemo({ walkedM: Math.max(0, Math.min(62_000, demo.walkedM + m)) });
 
   return (
@@ -49,9 +61,10 @@ export default function Dev() {
 
       <Card style={{ gap: 10 }}>
         <T variant="strong">Motiv</T>
-        <View style={{ flexDirection: "row", gap: 8 }}>
+        {/* Tlačítka se zalamují celá a roztahují podle textu, aby se „Podle telefonu“ nelámalo. */}
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           {(["auto", "light", "dark"] as const).map((c) => (
-            <View key={c} style={{ flex: 1 }}>
+            <View key={c} style={{ flexGrow: 1 }}>
               <Button
                 kind={choice === c ? "primary" : "secondary"}
                 label={c === "auto" ? "Podle telefonu" : c === "light" ? "Světlý" : "Tmavý"}
@@ -73,6 +86,15 @@ export default function Dev() {
         <Button kind="secondary" label="Znovu načíst data" onPress={ex.refresh} />
         <Button kind="secondary" label="Smazat uložený stav" onPress={ex.resetAll} />
       </Card>
+
+      {Platform.OS === "android" && (
+        <Card style={{ gap: 10 }}>
+          <T variant="strong">Diagnostika Health Connect</T>
+          <T variant="muted">Porovná vzdálenost, kroky a relace cvičení za 60 dní. Výstup je v logu (FA_DIAG).</T>
+          <Button kind="secondary" label="Spustit diagnostiku" onPress={runDiag} />
+          {diag && <T variant="small">{diag}</T>}
+        </Card>
+      )}
 
       <Button kind="secondary" label="Prototyp importu historie" onPress={() => router.push("/import-prototype")} />
       <Button label="Hotovo" onPress={() => router.back()} />

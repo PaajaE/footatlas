@@ -2,19 +2,23 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import {
   computeState,
   isPaused,
-  localDateKey,
   markSeen as markSessionSeen,
   pauseSession,
+  resolveStepLength,
   resumeSession,
-  sessionWalkedM,
+  sessionSlices,
+  sessionStart,
   startSession,
-  type DailyRecord,
+  walkedInSlicesM,
   type ExpeditionSession,
   type ExpeditionState,
+  type StepLength,
+  type StepProfile,
 } from "@footatlas/core";
 import { vltavska } from "../data/vltavska";
 import { healthSource } from "../health";
-import { DEFAULT_DEMO, loadDemo, loadSession, saveDemo, saveSession, type DemoState } from "./storage";
+import { DEFAULT_DEMO, loadDemo, loadStepProfile, saveDemo, saveStepProfile, type DemoState } from "./storage";
+import { loadSession, saveSession } from "./sessionStore";
 
 export type DataStatus =
   | { kind: "loading" }
@@ -30,6 +34,10 @@ interface ExpeditionContextValue {
   active: boolean;
   paused: boolean;
   status: DataStatus;
+  stepProfile: StepProfile;
+  /** Délka kroku, kterou se kroky přepočítávají na vzdálenost. */
+  stepLength: StepLength;
+  setStepProfile: (p: StepProfile) => Promise<void>;
   walkedM: number;
   state: ExpeditionState;
   start: () => Promise<void>;
@@ -48,10 +56,15 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [demo, setDemoState] = useState<DemoState>(DEFAULT_DEMO);
   const [session, setSession] = useState<ExpeditionSession | null>(null);
-  const [records, setRecords] = useState<DailyRecord[]>([]);
+  /** Vzdálenost výpravy z posledního načtení zdravotních dat. */
+  const [measuredM, setMeasuredM] = useState(0);
   const [status, setStatus] = useState<DataStatus>({ kind: "loading" });
+  const [stepProfile, setStepProfileState] = useState<StepProfile>({});
+  const stepLength = useMemo(() => resolveStepLength(stepProfile), [stepProfile]);
   const sessionRef = useRef<ExpeditionSession | null>(null);
   sessionRef.current = session;
+  const stepLengthRef = useRef(stepLength.meters);
+  stepLengthRef.current = stepLength.meters;
 
   const persistSession = useCallback(async (next: ExpeditionSession | null) => {
     setSession(next);
@@ -60,7 +73,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const refreshFor = useCallback(async (s: ExpeditionSession | null) => {
     if (!s) {
-      setRecords([]);
+      setMeasuredM(0);
       setStatus({ kind: "ok" });
       return;
     }
@@ -68,12 +81,20 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     try {
       const availability = await healthSource.availability();
       if (availability !== "available") {
-        setRecords([]);
+        setMeasuredM(0);
         setStatus({ kind: "unavailable", reason: availability });
         return;
       }
-      const from = new Date(`${s.periods[0]!.from}T00:00:00`);
-      setRecords(await healthSource.readDaily(from, new Date()));
+      // Celé dny z denních součtů, části dne (den zahájení, pozastavení, obnovení) čtením intervalu.
+      const now = new Date();
+      const slices = sessionSlices(s, now);
+      const [daily, intervalM] = await Promise.all([
+        healthSource.readDaily(sessionStart(s), now, stepLengthRef.current),
+        Promise.all(
+          slices.map((x) => (x.whole || !healthSource.readInterval ? null : healthSource.readInterval(x.from, x.to, stepLengthRef.current))),
+        ),
+      ]);
+      setMeasuredM(walkedInSlicesM(slices, daily, intervalM));
       setStatus({ kind: "ok" });
     } catch (e) {
       setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e) });
@@ -82,7 +103,9 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const [d, s] = await Promise.all([loadDemo(), loadSession()]);
+      const [d, s, p] = await Promise.all([loadDemo(), loadSession(), loadStepProfile()]);
+      stepLengthRef.current = resolveStepLength(p).meters;
+      setStepProfileState(p);
       setDemoState(d);
       setSession(s);
       setReady(true);
@@ -91,16 +114,25 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     })();
   }, [refreshFor]);
 
-  const today = () => localDateKey(new Date());
+  const setStepProfile = useCallback(
+    async (p: StepProfile) => {
+      stepLengthRef.current = resolveStepLength(p).meters;
+      setStepProfileState(p);
+      await saveStepProfile(p);
+      // Vzdálenost se z kroků počítá znovu, neukládá se (rozhodnutí 0004).
+      if (!demo.enabled) await refreshFor(sessionRef.current);
+    },
+    [demo.enabled, refreshFor],
+  );
 
   const start = useCallback(async () => {
-    const s = startSession(vltavska.id, today());
+    const s = startSession(vltavska.id, new Date());
     await persistSession(s);
     try {
       // Žádost o oprávnění až ve chvíli, kdy uživatel výpravu spouští (spec 9.1: nic se nežádá předem).
       const access = await healthSource.requestAccess();
       if (!access.read) {
-        setRecords([]);
+        setMeasuredM(0);
         setStatus({ kind: "unavailable", reason: "denied" });
         return;
       }
@@ -113,13 +145,17 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const pause = useCallback(async () => {
     const s = sessionRef.current;
-    if (s) await persistSession(pauseSession(s, today()));
-  }, [persistSession]);
+    if (!s) return;
+    const next = pauseSession(s, new Date());
+    await persistSession(next);
+    // Znovu načíst, aby se započítal pohyb až do okamžiku pozastavení.
+    await refreshFor(next);
+  }, [persistSession, refreshFor]);
 
   const resume = useCallback(async () => {
     const s = sessionRef.current;
     if (!s) return;
-    const next = resumeSession(s, today());
+    const next = resumeSession(s, new Date());
     await persistSession(next);
     await refreshFor(next);
   }, [persistSession, refreshFor]);
@@ -138,13 +174,13 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const resetAll = useCallback(async () => {
     await persistSession(null);
-    setRecords([]);
+    setMeasuredM(0);
     setDemoState(DEFAULT_DEMO);
     await saveDemo(DEFAULT_DEMO);
     setStatus({ kind: "ok" });
   }, [persistSession]);
 
-  const walkedM = demo.enabled ? demo.walkedM : session ? sessionWalkedM(records, session) : 0;
+  const walkedM = demo.enabled ? demo.walkedM : session ? measuredM : 0;
   const previousM = demo.enabled ? demo.seenM : (session?.lastSeenWalkedM ?? 0);
   const active = demo.enabled || session !== null;
   const paused = !demo.enabled && session !== null && isPaused(session);
@@ -172,6 +208,9 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     active,
     paused,
     status,
+    stepProfile,
+    stepLength,
+    setStepProfile,
     walkedM,
     state,
     start,
