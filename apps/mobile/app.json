@@ -68,6 +68,9 @@
     "scheme": "footatlas",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "apiBaseUrl": ""
     }
   }
 }

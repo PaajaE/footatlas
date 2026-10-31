@@ -8,7 +8,7 @@ Stav: 30. 10. 2026. Postup pro samostatné podepsané APK, které jde nainstalov
 tools/release-apk.sh        # výstup: dist/footatlas-<verze>-<versionCode>.apk (složka dist/ není v gitu)
 ```
 
-Mapa je v APK: skript zkopíruje `tools/maps/out/vltava-koridor5.pmtiles` do `apps/mobile/assets/map` (viz `docs/mapy-osm.md`), proto má APK 73 MB. Skript smaže a znovu vygeneruje `apps/mobile/android` (`expo prebuild --clean`), sestaví `assembleRelease` jen pro `arm64-v8a` (jen arm64-v8a, nastaveno v `app.json` přes `buildArchs`; emulátory x86 se nepodporují) a vypíše otisk podpisu. Trvá kolem 3 minut (první build 7). Potřebuje JDK 17 a Android SDK (`ANDROID_HOME`, výchozí `~/Library/Android/sdk`).
+Mapa v APK není, stahuje se při prvním spuštění z R2 (`extra.apiBaseUrl` v `app.json` musí být nastaveno, rozhodnutí 0013). Skript smaže a znovu vygeneruje `apps/mobile/android` (`expo prebuild --clean`), sestaví `assembleRelease` jen pro `arm64-v8a` (jen arm64-v8a, nastaveno v `app.json` přes `buildArchs`; emulátory x86 se nepodporují) a vypíše otisk podpisu. Trvá kolem 3 minut (první build 7). Potřebuje JDK 17 a Android SDK (`ANDROID_HOME`, výchozí `~/Library/Android/sdk`).
 
 Instalace do telefonu: `adb install -r dist/footatlas-1.0.0-1.apk`, nebo soubor přenést do telefonu a otevřít (povolit instalaci z neznámých zdrojů, Play Protect může chtít potvrzení).
 

@@ -6,7 +6,7 @@ compatibility_date = "2026-10-01"
 #   lokálně:   apps/api/.dev.vars  (je v .gitignore)
 #   produkce:  wrangler secret put MAPY_API_KEY
 
-# Až vznikne bucket s balíčky výprav, odkomentovat:
-# [[r2_buckets]]
-# binding = "CONTENT"
-# bucket_name = "footatlas-content"
+# Mapy a balíčky výprav (bucket vytvořen 31. 10. 2026)
+[[r2_buckets]]
+binding = "CONTENT"
+bucket_name = "footatlas-content"
