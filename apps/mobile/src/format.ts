@@ -29,3 +29,11 @@ export function pluralPlaces(n: number): string {
   if (n >= 2 && n <= 4) return `${n} místa`;
   return `${n} míst`;
 }
+
+/** Den YYYY-MM-DD jako „30. října 2026“. */
+export function formatDay(day: string): string {
+  const y = Number(day.slice(0, 4));
+  const m = Number(day.slice(5, 7)) - 1;
+  const d = Number(day.slice(8, 10));
+  return `${d}. ${MONTHS[m]} ${y}`;
+}

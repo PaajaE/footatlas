@@ -10,3 +10,4 @@ export * from "./session";
 export * from "./summary";
 export * from "./steplength";
 export * from "./chronicle";
+export * from "./journey";

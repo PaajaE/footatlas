@@ -102,6 +102,14 @@ Datum: 30. 10. 2026 · Stav: přijato, ověřeno na emulátoru Android 16 (vývo
 - Fotky jsou z Wikimedia Commons (CC BY-SA a jiné) a platí pro ně povinná atribuce. Obrazovka **Zdroje a licence** (odkaz dole na Domů) je vypisuje spolu s daty OSM a písmy; zdroj pravdy je `src/data/credits.ts` a `docs/mockupy/assets/ZDROJE.md`. **Před vydáním ověřit autora a licenci u každého souboru** (u Trojského zámku autor v metadatech chybí) a nahradit fotky z mockupů ověřenými podle šablony zastávky (spec 7.3).
 - Metro pozná `@3x` variantu sám, v `require` se přípona škálování neuvádí.
 
+## 0012 Dny dosažení míst se ukládají
+Datum: 31. 10. 2026 · Stav: přijato, ověřeno na emulátoru (ukázkový postup); reálná data zatím ne
+
+- Dosažená místa, dokončené etapy a cíl výpravy se ukládají do tabulky `expedition_event` (migrace verze 3) **s dnem, kdy je výprava dosáhla**, ne s dnem, kdy to aplikace zjistila při otevření. Den počítá čistá funkce `journeyEvents` (`packages/core/src/journey.ts`) z vzdáleností po úsecích výpravy (`walkedBySlice`): první úsek, ve kterém kumulativní součet dosáhl kilometru místa.
+- Zapsané události se nepřepisují (`INSERT OR IGNORE`): den prvního dosažení zůstane, i když se později změní data (pozdní synchronizace hodinek) nebo délka kroku. Smazání výpravy smaže i její události.
+- Kronika ukazuje sekci Výprava: dokončené etapy, odemčená místa s datem (posledních pět, ostatní na tlačítko). V ukázkovém postupu se události dopočítají na místě a neukládají se.
+- Neřeší se: dokončená výprava jako samostatný záznam (stav `completed`), znovu spuštěná výprava, historie dřívějších výprav v Kronice.
+
 ## 0013 Mapa se stahuje z Cloudflare R2, ne z APK ani z gitu
 Datum: 31. 10. 2026 · Stav: přijato, nasazeno; stahování ověřeno proti produkci na emulátoru Android 16 (release build)
 
