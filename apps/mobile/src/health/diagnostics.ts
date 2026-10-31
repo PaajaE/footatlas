@@ -1,5 +1,6 @@
 import {
   aggregateGroupByPeriod,
+  aggregateRecord,
   ExerciseType,
   getGrantedPermissions,
   initialize,
@@ -55,6 +56,66 @@ async function dailyAggregate(kind: "Distance" | "Steps", from: Date, to: Date):
     const v = kind === "Distance" ? r.result.DISTANCE?.inMeters : r.result.COUNT_TOTAL;
     if (typeof v === "number") out.set(periodStartDayKey(r.startTime), v);
   }
+  return out;
+}
+
+/**
+ * Pokus s přesahem záznamu přes hranici intervalu (rozhodnutí 0004, NEOVĚŘENO): vezme skutečné
+ * záznamy kroků a agreguje jen jejich první třetinu a první polovinu. Poměrné započítání
+ * dá ≈ 33 % a 50 % počtu, celý záznam 100 %. Zapisuje nic, jen čte.
+ */
+async function probeOverlap(recs: any[]): Promise<string[]> {
+  const out: string[] = [];
+  const candidates = recs
+    .map((r) => ({ r, ms: Date.parse(r.endTime) - Date.parse(r.startTime) }))
+    .filter((x) => x.ms >= 10 * 60_000 && (x.r.count ?? 0) >= 200)
+    .sort((a, b) => b.r.count - a.r.count)
+    .slice(0, 4);
+  if (candidates.length === 0) return ["Přesah: žádný záznam kroků delší než 10 min s ≥ 200 kroky."];
+  for (const { r, ms } of candidates) {
+    const start = Date.parse(r.startTime);
+    const row: string[] = [];
+    for (const frac of [1 / 3, 1 / 2]) {
+      const res = (await aggregateRecord({
+        recordType: "Steps",
+        timeRangeFilter: { operator: "between", startTime: new Date(start).toISOString(), endTime: new Date(start + ms * frac).toISOString() },
+      } as never)) as Record<string, any>;
+      const got = res.COUNT_TOTAL ?? 0;
+      row.push(`${Math.round(frac * 100)} % času → ${got} (${Math.round((got / r.count) * 100)} % záznamu)`);
+    }
+    out.push(`Přesah: záznam ${r.startTime.slice(0, 16)} ${Math.round(ms / 60000)} min, ${r.count} kroků, ${r.metadata?.dataOrigin ?? "?"}: ${row.join("; ")}`);
+  }
+  return out;
+}
+
+/** Součty podle zdroje a dne proti agregaci: ukáže, kolik duplicit agregace odstranila. */
+function originReport(stepRecs: any[], aggSteps: Map<string, number>, dayOf: (ms: number) => string): string[] {
+  const perOrigin = new Map<string, number>();
+  const perDay = new Map<string, Map<string, number>>();
+  for (const r of stepRecs) {
+    const o = r.metadata?.dataOrigin ?? "?";
+    const n = r.count ?? 0;
+    perOrigin.set(o, (perOrigin.get(o) ?? 0) + n);
+    const day = dayOf(Date.parse(r.startTime));
+    const m = perDay.get(day) ?? new Map<string, number>();
+    m.set(o, (m.get(o) ?? 0) + n);
+    perDay.set(day, m);
+  }
+  const out = [`Zdroje kroků (surově): ${[...perOrigin].map(([k, v]) => `${k} ${v}`).join(", ") || "žádné"}`];
+  let multi = 0;
+  let rawTotal = 0;
+  let aggTotal = 0;
+  for (const [day, m] of perDay) {
+    const raw = [...m.values()].reduce((a, b) => a + b, 0);
+    const agg = aggSteps.get(day) ?? 0;
+    rawTotal += raw;
+    aggTotal += agg;
+    if (m.size > 1) {
+      multi++;
+      if (multi <= 8) out.push(`Více zdrojů ${day}: ${[...m].map(([k, v]) => `${k} ${v}`).join(", ")}; součet ${raw}, agregace ${agg}`);
+    }
+  }
+  out.push(`Dní s více zdroji kroků: ${multi}; surový součet ${rawTotal}, agregace ${aggTotal}`);
   return out;
 }
 
@@ -158,6 +219,8 @@ export async function diagnoseHealth(days = 60): Promise<string> {
     `Agregace Distance ${(totAgg / 1000).toFixed(1)} km, kroky ${totSteps} (≈${((totSteps * 0.75) / 1000).toFixed(1)} km při 0,75 m), ` +
     `v relacích chůze/běh/turistika ${(totFoot / 1000).toFixed(1)} km, v jiných relacích ${(totOther / 1000).toFixed(1)} km, ` +
     `mimo relace ${(totNone / 1000).toFixed(1)} km (surové záznamy, mohou obsahovat duplicity mezi zdroji).`;
+  const extra = [...originReport(stepRecs as any[], aggSteps, dayOf), ...(await probeOverlap(stepRecs as any[]))];
+  for (const line of extra) log(line);
   log(`summary ${summary}`);
-  return summary;
+  return [summary, ...extra].join("\n");
 }

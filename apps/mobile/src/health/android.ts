@@ -36,8 +36,9 @@ async function dailySums(kind: Kind, from: Date, to: Date): Promise<Map<string, 
 }
 
 /**
- * Součet za libovolný interval. Předpoklad (NEOVĚŘENO na telefonu): Health Connect záznam
- * přesahující hranici intervalu započítá poměrnou částí, ne celý.
+ * Součet za libovolný interval. Ověřeno na telefonu (30. 10. 2026, diagnostika `probeOverlap`):
+ * záznam kroků přesahující hranici intervalu se započítá poměrně podle času (třetina doby ≈ 33 %,
+ * polovina ≈ 50 %), ne celý. Platí pro záznamy dlouhé 30–50 minut.
  */
 async function intervalSum(kind: Kind, from: Date, to: Date): Promise<number> {
   const r = (await aggregateRecord({
