@@ -73,3 +73,12 @@ Datum: 30. 10. 2026 · Stav: přijato, NEOVĚŘENO na iPhonu
 - Pravidlo na iOS zůstává „vzdálenost má přednost“ (`toDailyRecord`), délka kroku se použije jen při chybějící vzdálenosti.
 - Ověřeno: typecheck a export JS balíčku pro iOS (`expo export --platform ios`). **Neověřeno:** chování na zařízení. Postup ověření: na iPhonu v dev panelu porovnat součet `readInterval` za dnešek od 00:00 s denním součtem v aplikaci Zdraví, a interval přes hranici vzorku (např. 10:55–11:05) s poměrným očekáváním.
 - Zatím neřešeno: výchozí délka kroku z `HKQuantityTypeIdentifierWalkingStepLength` (vyžaduje další oprávnění ke čtení a nové dotazy v `ios.ts`).
+
+## 0009 Release APK mimo Google Play, lokální build, vlastní klíč
+Datum: 30. 10. 2026 · Stav: přijato
+
+- Pro vlastní a zkušební použití stačí podepsané APK, Google Play se nepoužívá. Build běží lokálně přes Gradle (`tools/release-apk.sh`), ne přes EAS: bez účtu a fronty, bezplatný tarif EAS má omezený počet buildů.
+- Podpis vlastním klíčem mimo repozitář; plugin `withReleaseSigning` nikdy nepoužije veřejný debug klíč ze šablony. Jen `arm64-v8a`.
+- Dosavadní vývojový build byl podepsaný debug klíčem, přechod na release klíč proto vyžadoval jednu odinstalaci (smazaná lokální data; kronika se načetla znovu z Health Connectu).
+- Backend se v této fázi nepoužívá; obsah je v APK. Mapa je otevřená věc: koridor 26 MB přibalit do APK a při prvním spuštění zkopírovat do úložiště aplikace (`pmtiles://` čte jen soubory v `files/`), nebo stahovat z hostingu.
+- Postup a stav ověření: `docs/release-apk.md`.
