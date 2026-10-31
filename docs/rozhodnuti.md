@@ -103,10 +103,10 @@ Datum: 30. 10. 2026 · Stav: přijato, ověřeno na emulátoru Android 16 (vývo
 - Metro pozná `@3x` variantu sám, v `require` se přípona škálování neuvádí.
 
 ## 0013 Mapa se stahuje z Cloudflare R2, ne z APK ani z gitu
-Datum: 31. 10. 2026 · Stav: přijato; stahování ověřeno proti lokálnímu Workeru, nasazení do produkce čeká na schválení
+Datum: 31. 10. 2026 · Stav: přijato, nasazeno; stahování ověřeno proti produkci na emulátoru Android 16 (release build)
 
 - Koridor Vltavské stezky (26 MB PMTiles) **není v gitu ani v APK**. Leží v R2 bucketu `footatlas-content` pod `maps/<název>-<12 znaků SHA-256>.pmtiles` a aplikace ho při prvním spuštění stáhne do úložiště (`src/map/mapAssets.ts`), ověří velikost a použije jako `pmtiles://file://…`. Název s otiskem obsahu znamená, že se soubor nemění a smí se kešovat navždy; nová verze dat = nový název, nová verze aplikace (`src/map/mapSource.ts` generuje `tools/maps/publish.sh`).
 - Doručuje ho Worker `apps/api` (`GET /content/<klíč>`, HEAD, `Range`, `ETag`, `Cache-Control: immutable` pro `maps/`). Bucket zůstává soukromý, veřejný je jen Worker. Adresa serveru je v `app.json` v `extra.apiBaseUrl`.
 - Důvod: velké binárky nepatří do gitu (každá verze zůstane v historii navždy) a ani do APK (při více výpravách by rostlo); R2 nemá poplatky za odchozí data a Worker dává kontrolu nad kešováním.
 - První spuštění potřebuje připojení (26 MB); do té doby a při selhání se ukazuje náhled trasy se zprávou a tlačítkem „Zkusit znovu“. Písma map (0,6 MB) zůstávají v APK.
-- **Stav 31. 10. 2026:** bucket `footatlas-content` je vytvořený a soubor v něm nahraný; Worker ještě není nasazený (nasazení do produkce jsem nespustil bez výslovného souhlasu, `cd apps/api && npx wrangler deploy`). Po nasazení doplnit `extra.apiBaseUrl` a sestavit aplikaci. Neověřeno: stahování přes skutečný server na reálné síti a na telefonu, použití vlastní domény místo `workers.dev`.
+- **Stav 31. 10. 2026:** Worker `footatlas-api` je nasazený na `https://footatlas-api.ecerpavel.workers.dev` (vazba `CONTENT` → `footatlas-content`), adresa je v `app.json` (`extra.apiBaseUrl`). Ověřeno: `/health`, HEAD, `Range`, 404 pro chybějící klíč i pokus o průchod cestou, SHA-256 staženého souboru shodný s originálem; release APK 1.3.1 (5) po `pm clear` stáhl mapu z produkce a vykreslil ji. Neověřeno: reálný telefon a iOS, vlastní doména místo `workers.dev`.
