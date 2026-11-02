@@ -234,3 +234,105 @@ export function revealLayers(theme: MapTheme): StyleLayer[] {
   });
   return [fill("reveal-cover-inner", REVEAL_INNER, 0.55), fill("reveal-cover-outer", REVEAL_OUTER, 1)];
 }
+
+/** Zdroj GeoJSON míst (zastávky a malé objevy); vlastnosti viz `PlaceFeatureProps` v aplikaci. */
+export const PLACES_SOURCE = "places";
+/** Zdroj GeoJSON polohy výpravy. */
+export const YOU_SOURCE = "you";
+
+/**
+ * Vrstvy míst nad mapou: kresby (loď, zámek, most), razítka malých objevů, pečeti zastávek a štítek s metry
+ * u další zastávky. Obrázky pojmenovává `tools/maps/make-medallions.py`, vlastnosti dodává aplikace
+ * (`image`, `drawing`, `label`, `state`, `stop`, `rank`, `name`). Velikost ikon roste s přiblížením
+ * (přehled / trasa / detail).
+ */
+export function placeLayers(theme: MapTheme): StyleLayer[] {
+  const a = theme.atlas;
+  const sym = (id: string, layout: Record<string, unknown>, paint: Record<string, unknown>, extra: Partial<StyleLayer> = {}): StyleLayer => ({
+    id,
+    type: "symbol",
+    source: PLACES_SOURCE,
+    layout,
+    paint,
+    ...extra,
+  });
+  const labelPaint = (halo: number) => ({ "text-color": a.label, "text-halo-color": a.labelHalo, "text-halo-width": halo });
+  return [
+    sym(
+      "places-drawing",
+      {
+        "icon-image": ["concat", "drawing-", ["get", "drawing"]],
+        "icon-size": ["interpolate", ["linear"], ["zoom"], 11.5, 0.5, 15, 0.85],
+        "icon-offset": ["literal", [0, -34]],
+        "icon-allow-overlap": false,
+        "symbol-sort-key": ["get", "rank"],
+      },
+      { "icon-opacity": 0.85 },
+      { minzoom: 11.5, filter: ["!=", ["get", "drawing"], ""] },
+    ),
+    sym(
+      "places-discovery",
+      {
+        "icon-image": ["get", "image"],
+        "icon-size": ["interpolate", ["linear"], ["zoom"], 8, 0.3, 10.5, 0.5, 13, 0.72, 15, 0.9],
+        "icon-allow-overlap": true,
+        "symbol-sort-key": ["get", "rank"],
+        "text-field": ["step", ["zoom"], "", 12.3, ["get", "name"]],
+        "text-font": ATLAS_LABEL_FONT,
+        "text-size": 13,
+        "text-anchor": "left",
+        "text-offset": ["literal", [1.5, 0]],
+        "text-optional": true,
+      },
+      labelPaint(1.8),
+      { filter: ["!", ["get", "stop"]] },
+    ),
+    sym(
+      "places-stop",
+      {
+        "icon-image": ["get", "image"],
+        "icon-size": ["interpolate", ["linear"], ["zoom"], 9, 0.4, 10.5, 0.62, 12, 0.92, 13.5, 1.1],
+        "icon-allow-overlap": true,
+        "symbol-sort-key": ["get", "rank"],
+        "text-field": ["get", "name"],
+        "text-font": ATLAS_LABEL_FONT,
+        "text-size": 14,
+        "text-anchor": "left",
+        "text-offset": ["interpolate", ["linear"], ["zoom"], 9, ["literal", [1.0, 0]], 12, ["literal", [2.0, 0]]],
+        "text-optional": true,
+      },
+      labelPaint(2),
+      { filter: ["get", "stop"] },
+    ),
+    sym(
+      "places-next-label",
+      {
+        "icon-image": "pill",
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": ["literal", [1, 7, 1, 7]],
+        "icon-allow-overlap": true,
+        "text-field": ["get", "label"],
+        "text-font": ATLAS_LABEL_FONT,
+        "text-size": 12,
+        "text-anchor": "top",
+        "text-offset": ["interpolate", ["linear"], ["zoom"], 10, ["literal", [0, 1.5]], 13.5, ["literal", [0, 2.5]]],
+        "text-allow-overlap": true,
+      },
+      { "text-color": a.paper },
+      { minzoom: 10, filter: ["==", ["get", "state"], "next"] },
+    ),
+  ];
+}
+
+/** Poloha výpravy: rumělkový bod s papírovým kroužkem a měkkou svatozáří (zdroj `you`). */
+export function youLayers(theme: MapTheme): StyleLayer[] {
+  return [
+    { id: "you-halo", type: "circle", source: YOU_SOURCE, paint: { "circle-radius": 15, "circle-color": theme.route.done, "circle-opacity": 0.2 } },
+    {
+      id: "you-dot",
+      type: "circle",
+      source: YOU_SOURCE,
+      paint: { "circle-radius": 8, "circle-color": theme.route.done, "circle-stroke-color": theme.atlas.paper, "circle-stroke-width": 3 },
+    },
+  ];
+}

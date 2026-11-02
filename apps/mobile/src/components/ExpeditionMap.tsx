@@ -2,17 +2,21 @@ import { Camera, GeoJSONSource, Images, Layer, Map, type CameraRef } from "@mapl
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import {
-  ATLAS_LABEL_FONT,
   ATLAS_PATTERNS,
   ATLAS_SKETCH_START,
+  PLACES_SOURCE,
   REVEAL_INNER,
   REVEAL_OUTER,
+  YOU_SOURCE,
+  type StyleLayer,
   buildAtlasStyle,
   patternName,
+  placeLayers,
   revealLayers,
   revealMask,
   routeLayers,
   themes,
+  youLayers,
 } from "@footatlas/map-style";
 import { positionAt } from "@footatlas/core";
 import { placeProps } from "../map/atlasPlaces";
@@ -152,7 +156,7 @@ function LiveMap({ route, cumulative, places, walkedM, height, onPlacePress, ass
   const point = { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [you.lon, you.lat] } };
 
   // Vrstvy z map-style jsou prostý popis stylu (bez typů knihovny); knihovna je přijímá tak, jak jsou.
-  const toLayers = (list: ReturnType<typeof routeLayers>, source: string, extra: Record<string, unknown> = {}) =>
+  const toLayers = (list: StyleLayer[], source: string, extra: Record<string, unknown> = {}) =>
     list
       .filter((l) => l.source === source)
       .map(({ source: _s, ...l }) => {
@@ -220,88 +224,12 @@ function LiveMap({ route, cumulative, places, walkedM, height, onPlacePress, ass
             if (typeof id === "string") onPlacePress?.(id);
           }}
         >
-          {/* Kresby k místům podle názvu (loď u přívozu, zámek, most), nad pečetí; mizí, když se nevejdou. */}
-          <Layer
-            id="places-drawing"
-            type="symbol"
-            minzoom={11.5}
-            filter={["!=", ["get", "drawing"], ""]}
-            layout={{
-              "icon-image": ["concat", "drawing-", ["get", "drawing"]],
-              "icon-size": ["interpolate", ["linear"], ["zoom"], 11.5, 0.5, 15, 0.85],
-              "icon-offset": ["literal", [0, -34]],
-              "icon-allow-overlap": false,
-              "symbol-sort-key": ["get", "rank"],
-            }}
-            paint={{ "icon-opacity": 0.85 }}
-          />
-          {/* Malé objevy: inkoustové razítko (dosažené) nebo tečkovaný kroužek s otazníkem; název až v detailu. */}
-          <Layer
-            id="places-discovery"
-            type="symbol"
-            filter={["!", ["get", "stop"]]}
-            layout={{
-              "icon-image": ["get", "image"],
-              "icon-size": ["interpolate", ["linear"], ["zoom"], 8, 0.3, 10.5, 0.5, 13, 0.72, 15, 0.9],
-              "icon-allow-overlap": true,
-              "symbol-sort-key": ["get", "rank"],
-              "text-field": ["step", ["zoom"], "", 12.3, ["get", "name"]],
-              "text-font": ATLAS_LABEL_FONT,
-              "text-size": 13,
-              "text-anchor": "left",
-              "text-offset": ["literal", [1.5, 0]],
-              "text-optional": true,
-            }}
-            paint={{ "text-color": mapTheme.atlas.label, "text-halo-color": mapTheme.atlas.labelHalo, "text-halo-width": 1.8 }}
-          />
-          {/* Zastávky: pečeť (dosažená), šedý medailon (další), šrafovaný kroužek (zamčená). Velikost roste s přiblížením. */}
-          <Layer
-            id="places-stop"
-            type="symbol"
-            filter={["get", "stop"]}
-            layout={{
-              "icon-image": ["get", "image"],
-              "icon-size": ["interpolate", ["linear"], ["zoom"], 9, 0.4, 10.5, 0.62, 12, 0.92, 13.5, 1.1],
-              "icon-allow-overlap": true,
-              "symbol-sort-key": ["get", "rank"],
-              "text-field": ["get", "name"],
-              "text-font": ATLAS_LABEL_FONT,
-              "text-size": 14,
-              "text-anchor": "left",
-              "text-offset": ["interpolate", ["linear"], ["zoom"], 9, ["literal", [1.0, 0]], 12, ["literal", [2.0, 0]]],
-              "text-optional": true,
-            }}
-            paint={{ "text-color": mapTheme.atlas.label, "text-halo-color": mapTheme.atlas.labelHalo, "text-halo-width": 2 }}
-          />
-          {/* Štítek s metry pod medailonem další zastávky: tmavá pilulka roztažená pod text. */}
-          <Layer
-            id="places-next-label"
-            type="symbol"
-            minzoom={10}
-            filter={["==", ["get", "state"], "next"]}
-            layout={{
-              "icon-image": "pill",
-              "icon-text-fit": "both",
-              "icon-text-fit-padding": ["literal", [1, 7, 1, 7]],
-              "icon-allow-overlap": true,
-              "text-field": ["get", "label"],
-              "text-font": ATLAS_LABEL_FONT,
-              "text-size": 12,
-              "text-anchor": "top",
-              "text-offset": ["interpolate", ["linear"], ["zoom"], 10, ["literal", [0, 1.5]], 13.5, ["literal", [0, 2.5]]],
-              "text-allow-overlap": true,
-            }}
-            paint={{ "text-color": colors.bg }}
-          />
+          {/* Kresby (loď u přívozu, zámek, most), razítka objevů, pečeti zastávek a štítek metrů; viz `placeLayers`. */}
+          {toLayers(placeLayers(mapTheme), PLACES_SOURCE)}
         </GeoJSONSource>
 
-        <GeoJSONSource id="you" data={point}>
-          <Layer id="you-halo" type="circle" paint={{ "circle-radius": 15, "circle-color": colors.accent, "circle-opacity": 0.2 }} />
-          <Layer
-            id="you-dot"
-            type="circle"
-            paint={{ "circle-radius": 8, "circle-color": colors.accent, "circle-stroke-color": colors.surface, "circle-stroke-width": 3 }}
-          />
+        <GeoJSONSource id={YOU_SOURCE} data={point}>
+          {toLayers(youLayers(mapTheme), YOU_SOURCE)}
         </GeoJSONSource>
       </Map>
       {frame ? <AtlasFrame title={frame} zoom={view?.zoom ?? initial.zoom} lat={view?.lat ?? initial.center[1]} insetTop={insetTop} /> : null}

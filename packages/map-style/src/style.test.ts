@@ -10,6 +10,8 @@ import {
   REVEAL_OUTER,
   buildAtlasStyle,
   buildStyle,
+  placeLayers,
+  youLayers,
   parchmentDay,
   parchmentNight,
   patternName,
@@ -141,6 +143,27 @@ describe.each(Object.values(themes))("atlas $id", (theme) => {
     }
     expect(ATLAS_LABEL_FONT[0]).toBe("IM Fell English Italic");
     expect(style.layers.find((l) => l.id === "water-label")!.layout!["symbol-placement"]).toBe("line");
+  });
+
+  it("všechny barvy atlasu (styl, místa, poloha, krytí) pocházejí z tokenů motivu", () => {
+    const allowed = new Set(
+      [...Object.values(theme.atlas), ...Object.values(theme.route).filter((x): x is string => typeof x === "string")].map((x) => x.toLowerCase()),
+    );
+    const used = (JSON.stringify(style) + JSON.stringify([...placeLayers(theme), ...youLayers(theme), ...revealLayers(theme)])).match(HEX) ?? [];
+    expect(used.length).toBeGreaterThan(20);
+    for (const color of used) expect(allowed.has(color.toLowerCase()), color).toBe(true);
+  });
+
+  it("vrstvy míst: kresby, razítka objevů, pečeti zastávek a štítek metrů, popisky IM Fell", () => {
+    const layers = placeLayers(theme);
+    expect(layers.map((l) => l.id)).toEqual(["places-drawing", "places-discovery", "places-stop", "places-next-label"]);
+    for (const l of layers) {
+      expect(l.source).toBe("places");
+      expect(l.layout!["icon-image"]).toBeDefined();
+    }
+    for (const l of layers.filter((l) => l.layout!["text-field"])) expect(l.layout!["text-font"]).toEqual(ATLAS_LABEL_FONT);
+    expect(JSON.stringify(layers.find((l) => l.id === "places-stop")!.layout!["icon-size"])).toContain("zoom");
+    expect(youLayers(theme).map((l) => l.source)).toEqual(["you", "you"]);
   });
 
   it("krycí vrstvy mají papírovou barvu a vlastní zdroje", () => {
