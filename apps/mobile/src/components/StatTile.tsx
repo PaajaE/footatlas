@@ -20,7 +20,7 @@ export function StatTile({ label, value, unit, note }: { label: string; value: s
         backgroundColor: colors.surface,
       }}
     >
-      <T variant="small" style={{ fontSize: 12, lineHeight: 16, color: colors.muted }}>
+      <T variant="small" style={{ fontSize: 12, lineHeight: 14, color: colors.muted }}>
         {label}
       </T>
       <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 28, color: colors.fg }} numberOfLines={1}>
@@ -28,7 +28,7 @@ export function StatTile({ label, value, unit, note }: { label: string; value: s
         {unit ? ` ${unit}` : ""}
       </T>
       {note && (
-        <T variant="small" style={{ fontSize: 12, lineHeight: 16, color: colors.mutedStrong }} numberOfLines={1}>
+        <T variant="small" style={{ fontSize: 12, lineHeight: 14, color: colors.mutedStrong }} numberOfLines={2}>
           {note}
         </T>
       )}

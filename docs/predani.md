@@ -55,6 +55,10 @@ Hotovo: návrat „Inkoust“ (`/navrat`, `src/navrat.ts`, `FlightMap`), přích
 ### Balík A (větev `claude/balik-a-zaklad`, rozhodnutí 0019)
 Hotovo: tokeny (světlé i noční), sdílené komponenty (pečeť, medailon, záhlaví, dlaždice, čip, karta s popiskem), nové Domů a detail zastávky včetně zamčeného místa. Chybí haptika dopadu pečeti (není `expo-haptics`), „Poslat jako pohlednici“ (balík D). Na zařízení neověřeno.
 
+### Domů: shoda s prototypem (větev `claude/domu-shoda`)
+
+Domů znovu srovnáno s `08-domu.jpg` / `19-domu-noc.jpg` a `Domu.dc.html` při 390×844 (srovnání vedle sebe: `docs/domu-shoda/`). Opraveno: záhlaví (30/34 px, linka 1 px, odsazení 16 a mezery 16 jen na Domů přes `Screen top/gap`), „12,5 z 62 km“ bez zdvojené jednotky, dlaždice (12/24/12 px, poloměr 14), **medailon 72 px s čárkovaným kroužkem přes celý čtverec** (dřív jen ~55 px), karta další zastávky (14 px odsazení, hádanka 18/24, nižší tlačítko `compact`), „Kam dnes dojdu?“, kapitoly s jedním pruhem. Pořadí sekcí: záhlaví, etapa, dlaždice, další zastávka, (Od posledně), Kam dnes dojdu?, Nedávno objeveno, Kapitoly. `ReturnCard` je kompaktní, stojí až pod další zastávkou a ukazuje se jen při ≥ 300 m nebo novém místě; „Od posledně se nic nezměnilo“ (`SinceLastCard`) je pryč. Ukázkový postup pro snímek: `{"enabled":true,"walkedM":10437,"seenM":10437}` (40 m před Trojou; hodnota 12 460 z zadání je už za Trojou, další je pak Roztoky).
+
 ## 4. Úkoly
 
 Priorita: **P0** hned, **P1** jádro prožitku, **P2** potom. Číslování fází odpovídá `docs/navrh-prozitek.md`, kapitola 7.
