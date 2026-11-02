@@ -41,22 +41,27 @@ export function Screen({
   scroll = true,
   refreshing = false,
   onRefresh,
+  top = 24,
+  gap = 18,
 }: {
   children: React.ReactNode;
   scroll?: boolean;
   refreshing?: boolean;
   onRefresh?: () => void;
+  /** Odsazení nahoře a mezera mezi sekcemi; Domů má podle prototypu 16 a 16. */
+  top?: number;
+  gap?: number;
 }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const pad: ViewStyle = { paddingTop: 24, paddingHorizontal: 20 };
+  const pad: ViewStyle = { paddingTop: top, paddingHorizontal: 20 };
   // Odsazení od stavového řádku je na vnějším View, ne v obsahu posuvníku: při posouvání
   // pak obsah nevjede pod stavový řádek (Android kreslí od okraje k okraji).
   const outer = [styles.fill, { backgroundColor: colors.bg, paddingTop: insets.top }];
   if (!scroll) return <View style={outer}><View style={[styles.fill, pad]}>{children}</View></View>;
   return (
     <View style={outer}>
-      <ScrollBody pad={pad} refreshing={refreshing} onRefresh={onRefresh}>{children}</ScrollBody>
+      <ScrollBody pad={pad} gap={gap} refreshing={refreshing} onRefresh={onRefresh}>{children}</ScrollBody>
     </View>
   );
 }
@@ -64,18 +69,20 @@ export function Screen({
 function ScrollBody({
   children,
   pad,
+  gap,
   refreshing,
   onRefresh,
 }: {
   children: React.ReactNode;
   pad: ViewStyle;
+  gap: number;
   refreshing: boolean;
   onRefresh?: () => void;
 }) {
   const { colors } = useTheme();
   return (
     <ScrollView
-      contentContainerStyle={[pad, { paddingBottom: 32, gap: 18 }]}
+      contentContainerStyle={[pad, { paddingBottom: 32, gap }]}
       showsVerticalScrollIndicator={false}
       refreshControl={
         onRefresh ? (
@@ -107,11 +114,14 @@ export function Button({
   onPress,
   kind = "primary",
   disabled,
+  compact,
 }: {
   label: string;
   onPress: () => void;
   kind?: "primary" | "secondary";
   disabled?: boolean;
+  /** Nižší tlačítko s menším písmem (46 px, 15), jako v kartách na Domů. */
+  compact?: boolean;
 }) {
   const { colors, fonts, radius } = useTheme();
   const primary = kind === "primary";
@@ -123,7 +133,7 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => [
         {
-          minHeight: 48,
+          minHeight: compact ? 46 : 48,
           alignItems: "center",
           justifyContent: "center",
           borderRadius: radius.button,
@@ -135,7 +145,7 @@ export function Button({
         },
       ]}
     >
-      <Text style={{ fontFamily: fonts.bodySemi, fontSize: 16, color: primary ? colors.accentFg : colors.fg }}>{label}</Text>
+      <Text style={{ fontFamily: fonts.bodySemi, fontSize: compact ? 15 : 16, color: primary ? colors.accentFg : colors.fg }}>{label}</Text>
     </Pressable>
   );
 }
