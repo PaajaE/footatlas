@@ -102,3 +102,19 @@ describe("isWithinLastDays", () => {
     expect(isWithinLastDays("2026-11-03", "2026-11-02", 7)).toBe(false);
   });
 });
+
+import { approachFraction, neighbours } from "./home";
+describe("okolí místa", () => {
+  const places = [{ id: "a" }, { id: "b" }, { id: "c" }];
+  it("neighbours", () => {
+    expect(neighbours(places, "b")).toEqual({ prev: { id: "a" }, next: { id: "c" } });
+    expect(neighbours(places, "a")).toEqual({ prev: undefined, next: { id: "b" } });
+    expect(neighbours(places, "x")).toEqual({});
+  });
+  it("approachFraction", () => {
+    expect(approachFraction(9_800, 9_832, 10_477)).toBe(0);
+    expect(approachFraction(10_437, 9_832, 10_477)).toBeCloseTo(0.94, 2);
+    expect(approachFraction(5, undefined, 100)).toBeCloseTo(0.05, 2);
+    expect(approachFraction(500, 0, 100)).toBe(1);
+  });
+});

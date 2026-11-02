@@ -1,17 +1,22 @@
 import { Pressable, View } from "react-native";
 import { tipOutcome, type Tip } from "../riddle";
 import { useTheme } from "../theme/ThemeProvider";
-import { Card, T } from "./ui";
+import { LabeledCard } from "./LabeledCard";
+import { T } from "./ui";
 import type { AppRiddle } from "../data/vltavska";
 
 /** Hádanka u zamčeného místa: tři možnosti, tip je dobrovolný, bez bodů a skóre. */
 export function RiddleCard({ riddle, tip, onTip }: { riddle: AppRiddle; tip: Tip | undefined; onTip: (t: Tip) => void }) {
-  const { colors, radius } = useTheme();
+  const { colors, fonts, radius } = useTheme();
   return (
-    <Card style={{ gap: 10 }}>
-      <T variant="label">Hádanka</T>
-      <T variant="title">{riddle.question}</T>
-      <View style={{ gap: 8 }} accessibilityRole="radiogroup">
+    <LabeledCard label="Hádanka" gap={10} style={{ padding: 16 }}>
+      <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 29, color: colors.fg }}>{riddle.question}</T>
+      <T variant="muted" style={{ color: colors.mutedStrong }}>
+        {tip === undefined
+          ? "Tipněte si, nic se nepočítá. Odpověď se ukáže, až místo odemknete."
+          : "Váš tip je uložený. Můžete ho změnit, než místo odemknete."}
+      </T>
+      <View style={{ gap: 10 }} accessibilityRole="radiogroup">
         {riddle.options.map((text, i) => {
           const selected = tip === i;
           return (
@@ -23,27 +28,22 @@ export function RiddleCard({ riddle, tip, onTip }: { riddle: AppRiddle; tip: Tip
               style={{
                 minHeight: 48,
                 justifyContent: "center",
-                paddingHorizontal: 14,
-                paddingVertical: 8,
+                paddingHorizontal: 16,
+                paddingVertical: 10,
                 borderRadius: radius.button,
                 borderWidth: selected ? 2 : 1.5,
                 borderColor: selected ? colors.accent : colors.line,
-                backgroundColor: selected ? colors.bg : "transparent",
+                backgroundColor: colors.chip,
               }}
             >
-              <T variant="body" style={selected ? { color: colors.accent } : undefined}>
+              <T variant="body" style={[{ fontSize: 16 }, selected ? { color: colors.accent, fontFamily: fonts.bodySemi } : undefined]}>
                 {text}
               </T>
             </Pressable>
           );
         })}
       </View>
-      <T variant="small">
-        {tip === undefined
-          ? "Tipnout si můžete, nic se nepočítá. Odpověď se ukáže, až místo odemknete."
-          : "Váš tip je uložený. Můžete ho změnit, než místo odemknete."}
-      </T>
-    </Card>
+    </LabeledCard>
   );
 }
 
@@ -52,11 +52,8 @@ export function TipResult({ riddle, tip }: { riddle: AppRiddle; tip: Tip | undef
   const outcome = tipOutcome(riddle.answer, tip);
   if (outcome === "none") return null;
   return (
-    <Card style={{ gap: 4 }}>
-      <T variant="label">{outcome === "correct" ? "Tipovali jste správně" : "Tohle překvapí"}</T>
-      <T variant="body">
-        {outcome === "correct" ? riddle.options[riddle.answer] : `Správně je: ${riddle.options[riddle.answer]}.`}
-      </T>
-    </Card>
+    <LabeledCard label={outcome === "correct" ? "Tipovali jste správně" : "Tohle překvapí"} gap={4}>
+      <T variant="body">{outcome === "correct" ? riddle.options[riddle.answer] : `Správně je: ${riddle.options[riddle.answer]}.`}</T>
+    </LabeledCard>
   );
 }

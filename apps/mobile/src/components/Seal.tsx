@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef } from "react";
-import { Animated, Easing, Image, View, type ImageSourcePropType } from "react-native";
+import { Animated, Easing, Image, Text, View, type ImageSourcePropType } from "react-native";
 import Svg, { Circle, Defs, G, Path, RadialGradient, Stop, Text as SvgText, TextPath } from "react-native-svg";
 import { DROP_MS, REDUCED_FADE_MS, RING_MS, grungeDash, progressArcs, ringPath, wobblyCircle } from "../seal";
 import { useTheme } from "../theme/ThemeProvider";
@@ -33,6 +33,27 @@ export type SealProps = Common &
  */
 export function Seal(props: SealProps) {
   const { size = 132, animate = false, delayMs = 0 } = props;
+  return (
+    <DropIn size={size} animate={animate} delayMs={delayMs} label={describe(props)}>
+      <Body {...props} size={size} />
+    </DropIn>
+  );
+}
+
+/** Dopad razítka: 600 ms s přestřelem, kruh kolem 700 ms. Při „Omezit pohyb“ jen prolnutí 400 ms. */
+function DropIn({
+  size,
+  animate,
+  delayMs,
+  label,
+  children,
+}: {
+  size: number;
+  animate: boolean;
+  delayMs: number;
+  label: string;
+  children: React.ReactNode;
+}) {
   const reduce = useReduceMotion();
   const progress = useRef(new Animated.Value(animate ? 0 : 1)).current;
   const ring = useRef(new Animated.Value(animate ? 0 : 1)).current;
@@ -65,12 +86,58 @@ export function Seal(props: SealProps) {
   };
 
   return (
-    <View style={{ width: size, height: size }} accessible accessibilityRole="image" accessibilityLabel={describe(props)}>
+    <View style={{ width: size, height: size }} accessible accessibilityRole="image" accessibilityLabel={label}>
       {motion && <PulseRing size={size} ring={ring} />}
-      <Animated.View style={style}>
-        <Body {...props} size={size} />
-      </Animated.View>
+      <Animated.View style={style}>{children}</Animated.View>
     </View>
+  );
+}
+
+/**
+ * Pečeť v rohu fotky na detailu místa: rumělkový vosk a tři řádky (místo, kilometr, den).
+ * U dlouhých názvů se místo názvu píše druh místa.
+ */
+export function SealBadge({
+  name,
+  kindLabel,
+  kmLabel,
+  dateLabel,
+  size = 88,
+  animate = false,
+  delayMs = 0,
+}: {
+  name: string;
+  kindLabel: string;
+  kmLabel: string;
+  dateLabel: string;
+  size?: number;
+  animate?: boolean;
+  delayMs?: number;
+}) {
+  const { fonts } = useTheme();
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const top = name.length <= 10 ? name : kindLabel;
+  return (
+    <DropIn size={size} animate={animate} delayMs={delayMs} label={`Pečeť: ${name}, ${kmLabel}, ${dateLabel}`}>
+      <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+        <Svg width={size} height={size} viewBox="0 0 88 88" style={{ position: "absolute" }}>
+          <Defs>
+            <RadialGradient id={`b${id}`} cx="40%" cy="35%" r="70%">
+              <Stop offset="0" stopColor={WAX.light} />
+              <Stop offset="0.6" stopColor={WAX.mid} />
+              <Stop offset="1" stopColor={WAX.dark} />
+            </RadialGradient>
+          </Defs>
+          <Circle cx={44} cy={46} r={42} fill={WAX.shadow} opacity={0.35} />
+          <Circle cx={44} cy={44} r={41} fill={`url(#b${id})`} stroke="#8E2A20" strokeWidth={5} />
+        </Svg>
+        <Text style={{ fontFamily: fonts.displaySC, fontSize: 10, letterSpacing: 1, color: WAX.text }} numberOfLines={1}>
+          {top}
+        </Text>
+        <Text style={{ fontFamily: fonts.display, fontSize: 20, lineHeight: 22, color: WAX.text }}>{kmLabel}</Text>
+        <Text style={{ fontFamily: fonts.displaySC, fontSize: 9, color: WAX.text }}>{dateLabel}</Text>
+      </View>
+    </DropIn>
   );
 }
 

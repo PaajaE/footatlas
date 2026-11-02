@@ -64,7 +64,8 @@ export function isWithinLastDays(day: string, todayKey: string, days: number): b
   return day >= shiftDay(todayKey, -(days - 1)) && day <= todayKey;
 }
 
-function parseDay(day: string): Date {
+/** Den YYYY-MM-DD jako místní datum. */
+export function dayFromKey(day: string): Date {
   return new Date(Number(day.slice(0, 4)), Number(day.slice(5, 7)) - 1, Number(day.slice(8, 10)));
 }
 
@@ -74,7 +75,7 @@ function pad(n: number): string {
 
 /** Posun dne o `delta` dnů (YYYY-MM-DD, místní čas). */
 export function shiftDay(day: string, delta: number): string {
-  const d = parseDay(day);
+  const d = dayFromKey(day);
   d.setDate(d.getDate() + delta);
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
@@ -86,7 +87,7 @@ export function formatWhen(day: string, todayKey: string): string {
   if (day === todayKey) return "dnes";
   if (day === shiftDay(todayKey, -1)) return "včera";
   for (let back = 2; back <= 6; back++) {
-    if (day === shiftDay(todayKey, -back)) return WEEKDAYS[parseDay(day).getDay()]!;
+    if (day === shiftDay(todayKey, -back)) return WEEKDAYS[dayFromKey(day).getDay()]!;
   }
   return formatDayNumeric(day);
 }
@@ -111,4 +112,18 @@ export function reachQuip(choice: ReachChoice, placeNames: readonly string[]): s
 export function zOf(done: number, total: number): string {
   const ze = [2, 3, 4, 6, 7, 12, 13, 14, 16, 17].includes(total);
   return `${done} ${ze ? "ze" : "z"} ${total}`;
+}
+
+/** Místo před a za místem `id` v pořadí po trase. */
+export function neighbours<P extends { id: string }>(places: readonly P[], id: string): { prev?: P; next?: P } {
+  const i = places.findIndex((p) => p.id === id);
+  if (i < 0) return {};
+  return { prev: places[i - 1], next: places[i + 1] };
+}
+
+/** Podíl cesty od předchozího místa k tomuto, 0 až 1. Bez předchozího místa se počítá od startu. */
+export function approachFraction(walkedM: number, prevAtM: number | undefined, atM: number): number {
+  const from = prevAtM ?? 0;
+  if (atM <= from) return 1;
+  return Math.max(0, Math.min(1, (walkedM - from) / (atM - from)));
 }
