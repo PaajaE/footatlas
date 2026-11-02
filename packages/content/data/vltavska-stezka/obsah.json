@@ -56,7 +56,7 @@
     {
       "id": "karluv-most",
       "hook": "Pět set let se mu říkalo prostě Kamenný most.",
-      "teaser": "Jméno, které dnes zná každý, dostal teprve nedávno.",
+      "teaser": "Jméno, které dnes zná každý, dostal až po pěti stoletích.",
       "riddle": {
         "question": "Jak se Karlovu mostu říkalo, než se kolem roku 1870 vžilo jeho dnešní jméno?",
         "options": ["Zlatý most", "Přemyslovský most", "Kamenný most"],
@@ -74,7 +74,7 @@
       "teaser": "Jméno ostrova prozrazuje, co se tu dělo se zvěří.",
       "riddle": {
         "question": "Podle čeho má ostrov Štvanice jméno?",
-        "options": ["Podle pana Štvance, správce ostrova", "Podle štvanic, zápasů psů se zvířaty", "Podle rybářů, kteří tu štvali pstruhy"],
+        "options": ["Podle pana Štvance, správce ostrova", "Podle štvanic, krutých zábav se zvířaty", "Podle rybářů, kteří tu štvali pstruhy"],
         "answer": 1
       },
       "context": "Na ostrově se kdysi pořádaly štvanice, zápasy psů se zvířaty. Dnes se tu místo zvěře honí tenisové míčky a hokejové puky.",
@@ -123,7 +123,7 @@
         "answer": 1
       },
       "context": "Kanál podél Císařského ostrova dlouhý asi tři kilometry se ve své době jmenoval Vltavský průplav. Přejít se dá jediným veřejným mostem, takže si ho zapamatujte.",
-      "visitTip": "Přejděte kanál po jediném veřejném mostě.",
+      "visitTip": "Přes kanál vede jen jeden veřejný most. Kdo ho mine, jde dlouhou oklikou.",
       "chapterId": "vorari",
       "sources": [{ "title": "Zdymadlo Troja-Podbaba (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Zdymadlo_Troja-Podbaba" }],
       "verified": false
@@ -160,7 +160,7 @@
     },
     {
       "id": "troja",
-      "hook": "Celá čtvrť se jmenuje podle antických výjevů na zámku. Dřív to byl Zadní Ovenec.",
+      "hook": "Celá čtvrť se nejspíš jmenuje podle antických výjevů na zámku. Dřív to byl Zadní Ovenec.",
       "teaser": "Název čtvrti má původ ve výzdobě jednoho domu.",
       "riddle": {
         "question": "Proč se celá čtvrť jmenuje podle Tróje?",
@@ -205,7 +205,7 @@
     {
       "id": "roztoky",
       "hook": "Zámek, kterému po roce 1948 hrozila demolice, dnes ukrývá muzeum.",
-      "teaser": "Konec etapy ve zámku, který málem zmizel.",
+      "teaser": "Konec etapy v zámku, který málem zmizel.",
       "riddle": {
         "question": "Co hrozilo zámku v Roztokách po roce 1948?",
         "options": ["Přestavba na hotel", "Demoliční výměr", "Přesun do Prahy"],

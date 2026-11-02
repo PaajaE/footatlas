@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { Button, Card, Screen, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
-import { formatDay, formatKm } from "../../format";
+import { formatDay, formatDistance } from "../../format";
 import { useExpedition } from "../../state/ExpeditionProvider";
 import { useTheme } from "../../theme/ThemeProvider";
 
@@ -10,7 +10,7 @@ export default function PlaceDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { colors, fonts } = useTheme();
-  const { walkedM, active, events } = useExpedition();
+  const { walkedM, active, events, stepLength } = useExpedition();
   const place = id ? vltavska.placesById.get(id) : undefined;
 
   if (!place) {
@@ -28,6 +28,8 @@ export default function PlaceDetail() {
   const chapter = place.chapterId ? vltavska.chapters.find((c) => c.id === place.chapterId) : undefined;
   const members = chapter ? chapter.placeIds.map((pid) => vltavska.placesById.get(pid)!).filter(Boolean) : [];
   const reachedCount = members.filter((m) => active && m.atM <= walkedM).length;
+  const remaining = formatDistance(place.atM - walkedM, { stepLengthM: stepLength.meters });
+  const unlockText = remaining === "Jste tady" ? "Jste na místě, odemkne se každým krokem." : `Odemkne se za ${remaining}.`;
   const hasStory = place.hook !== undefined;
 
   return (
@@ -97,7 +99,7 @@ export default function PlaceDetail() {
           )}
           <Card style={{ gap: 6 }}>
             <T variant="muted">
-              {active ? `Odemkne se za ${formatKm(Math.max(0, place.atM - walkedM))}.` : "Odemkne se po ušlé vzdálenosti od startu."}
+              {active ? unlockText : "Odemkne se po ušlé vzdálenosti od startu."}
             </T>
           </Card>
         </>
@@ -110,7 +112,7 @@ export default function PlaceDetail() {
             {reached
               ? "Toto místo jste už minuli."
               : active
-                ? `Odemkne se za ${formatKm(Math.max(0, place.atM - walkedM))}.`
+                ? unlockText
                 : "Odemkne se po ušlé vzdálenosti od startu."}
           </T>
         </Card>
