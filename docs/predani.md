@@ -47,6 +47,9 @@ Cesty v tabulce jsou relativně k `apps/mobile/` u aplikace.
 
 **NEOVĚŘENO na zařízení:** vše z 0014–0016 (živá obnova, Nastavení, nový detail místa). Trasa 0017 neověřena v terénu.
 
+### Balík A (větev `claude/balik-a-zaklad`, rozhodnutí 0019)
+Hotovo: tokeny (světlé i noční), sdílené komponenty (pečeť, medailon, záhlaví, dlaždice, čip, karta s popiskem), nové Domů a detail zastávky včetně zamčeného místa. Chybí haptika dopadu pečeti (není `expo-haptics`), „Poslat jako pohlednici“ (balík D). Na zařízení neověřeno.
+
 ## 4. Úkoly
 
 Priorita: **P0** hned, **P1** jádro prožitku, **P2** potom. Číslování fází odpovídá `docs/navrh-prozitek.md`, kapitola 7.

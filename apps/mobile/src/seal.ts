@@ -60,8 +60,9 @@ export function waxRingText(name: string, kmLabel: string, dateLabel: string): s
   return `${name} · ${kmLabel} · ${dateLabel} ·`;
 }
 
-/** Kilometr na pečeti: „km 0,2“. */
+/** Kilometr na pečeti: „km 0,2“; start výpravy se nepíše jako „km 0,0“. */
 export function sealKm(meters: number): string {
+  if (meters < 50) return "start";
   return `km ${(meters / 1000).toFixed(1).replace(".", ",")}`;
 }
 

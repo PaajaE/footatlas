@@ -30,6 +30,7 @@ describe("seal", () => {
   });
   it("texty", () => {
     expect(sealKm(200)).toBe("km 0,2");
+    expect(sealKm(0)).toBe("start");
     expect(waxRingText("Vyšehrad", "km 0,2", "24. 10. 2026")).toBe("Vyšehrad · km 0,2 · 24. 10. 2026 ·");
     expect(ringPath(66, 66, 49)).toBe("M66 66 m-49 0 a49 49 0 1 1 98 0 a49 49 0 1 1 -98 0");
   });

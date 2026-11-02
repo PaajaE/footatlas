@@ -2,6 +2,7 @@ import { localDateKey } from "@footatlas/core";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LabeledCard, SectionLabel } from "../../components/LabeledCard";
 import { BackPill, PlaceHero } from "../../components/PlaceHero";
@@ -144,7 +145,7 @@ export default function PlaceDetail() {
             <T variant="small" style={{ fontSize: 13, color: colors.mutedStrong }}>
               {nextInChapter
                 ? `${zOf(reachedCount, members.length)} · další ${nextInChapter.name} za ${formatDistance(nextInChapter.atM - walkedM)}`
-                : `${zOf(reachedCount, members.length)} · kapitola je u konce`}
+                : zOf(reachedCount, members.length)}
             </T>
           </LabeledCard>
         )}
@@ -156,7 +157,7 @@ export default function PlaceDetail() {
         <View style={{ gap: 8 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
             <T variant="body" style={{ flex: 1, color: colors.mutedStrong }} numberOfLines={1}>
-              {prev ? `Od ${prev.name}` : "Od startu"}
+              {prev ? `Předtím: ${prev.name}` : "Od startu"}
             </T>
             <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, color: colors.accent }}>
               {remaining === "Jste tady" ? remaining : `ještě ${remaining}`}
@@ -233,9 +234,17 @@ export default function PlaceDetail() {
             paddingHorizontal: 20,
             paddingTop: 12,
             paddingBottom: Math.max(insets.bottom, 20),
-            backgroundColor: colors.bg + "F2",
           }}
         >
+          <Svg width="100%" height="100%" preserveAspectRatio="none" style={{ position: "absolute", left: 0, top: 0 }} pointerEvents="none">
+            <Defs>
+              <LinearGradient id="bar-fade" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor={colors.bg} stopOpacity={0} />
+                <Stop offset="0.3" stopColor={colors.bg} stopOpacity={1} />
+              </LinearGradient>
+            </Defs>
+            <Rect x={0} y={0} width="100%" height="100%" fill="url(#bar-fade)" />
+          </Svg>
           {/* „Poslat jako pohlednici“ přijde v balíku D; do té doby jen pokračování na další místo. */}
           <Button label={next.kind === "stop" ? "Další zastávka" : "Další místo"} onPress={() => open(next)} />
         </View>

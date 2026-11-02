@@ -156,3 +156,12 @@ Datum: 2. 11. 2026 · Stav: přijato; ověřeno testy a na emulátoru Android 16
 - **Domů.** Přibyly: hádanka další zastávky s tlačítkem „Tipnout“, „Kam dnes dojdu?“ (1, 2, 4 km, konec etapy; jen ukáže, co by se odemklo, nic nenastavuje), „Nedávno objeveno“, Kapitoly s postupem.
 - **Objevovat** ukazuje rozjetou výpravu a kartu „Připravujeme“ s poznámkou „Chci vědět, až bude“ (jen lokálně, nic se neodesílá; název další výpravy se nevymýšlí). **Kronika** má deník po dnech místo seznamu míst.
 - Nezahrnuto: návrat „Inkoust“ s letem kamery (M1), příchod naživo (M4), styl mapy skica/inkoust, zeměkoule v Kronice, Karta života, pohlednice.
+
+## 0019 Balík A: základ vzhledu „Inkoust“, Domů a detail zastávky
+Datum: 2. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chromiu (světlý i noční vzhled), na zařízení NEOVĚŘENO
+
+- **Tokeny.** Noční vzhled podle nočních snímků a `mockupy/noc.css` (papír `#221C16`, karta `#2E261E`, akcent `#E0704A`, popisky zlatě). Přibyly `surfaceAlt`, `chip`, `chipActive(Fg)`, `inkCard(Fg)`, `fgSoft`, `mutedStrong`; stávající klíče zůstaly.
+- **Komponenty** (`src/components/`): `ScreenHeader`, `StatTile`, `Chip`, `Medallion`, `Seal` (pečeť, razítko, zamčený kroužek, kapitola, etapa) a `SealBadge`, `LabeledCard`, `PlaceHero`. Nepravidelný okraj vosku a razítka je vykreslený tvarem (`src/seal.ts`), ne filtrem SVG, protože react-native-svg na telefonu `feTurbulence` nezná. Dopad 600 ms s přestřelem, kruh 700 ms; při „Omezit pohyb“ jen prolnutí 400 ms. **Haptika chybí**: `expo-haptics` v projektu není a nový nativní modul vyžaduje nový build.
+- **Domů** podle `08-domu.jpg`. Dlaždice berou data výpravy (`daily` v `ExpeditionProvider`); nemají-li data, vynechají se. „Pohlednice“ ukazuje zbývající vzdálenost do konce etapy. Odhad času počítá s 5 km/h (shodné s prototypem). Hlášky pod „Kam dnes dojdu?“ jsou z prototypu; bez shody žádná. Název etapy „Praha“ je z prototypu, ostatní etapy se jmenují podle cíle.
+- **Detail zastávky** podle `06-zastavka.jpg` a `03-hadanka.jpg`. Fotky 9 míst jsou v `assets/places/` (licence v `credits.ts`, přibyl Karlův most; neznámý autor se v UI nevypisuje). Místa bez fotky mají nižší šrafovaný pruh. „Poslat jako pohlednici“ je skryté do balíku D. Vazby tvaru „Od Trojské lávky“ vyžadují skloňování, proto „Předtím: …“ a „Cestou sem“.
+- Zbývá: skutečné příběhy a fotky pro etapy 2–4 (balík E), počty míst v kapitolách jsou zatím jen z míst, která příběh mají.
