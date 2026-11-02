@@ -108,10 +108,9 @@ export function postcardTitle(stageIndex: number): string {
   return stageIndex === 0 ? "Pozdrav z Prahy" : `Pozdrav z etapy ${toRoman(stageIndex + 1)}`;
 }
 
-/** Fotka líce: foto poslední zastávky etapy, která ho má, jinak kterékoli místo etapy s fotkou. */
+/** Fotka líce: foto prvního místa etapy, které ho má (u první etapy Karlův most, ladí s nadpisem „Pozdrav z Prahy“). */
 export function pickPhotoKey(places: readonly PcPlace[]): string | undefined {
-  const withPhoto = places.filter((p) => p.photo);
-  return (withPhoto.filter((p) => p.kind === "stop").at(-1) ?? withPhoto.at(-1))?.photo;
+  return places.find((p) => p.photo)?.photo;
 }
 
 function joinNames(names: readonly string[]): string {

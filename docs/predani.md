@@ -49,6 +49,9 @@ Cesty v tabulce jsou relativně k `apps/mobile/` u aplikace.
 
 **NEOVĚŘENO na zařízení:** vše z 0014–0016 (živá obnova, Nastavení, nový detail místa). Trasa 0017 neověřena v terénu.
 
+### Balík D (větev `claude/balik-d-navrat`, rozhodnutí 0022)
+Hotovo: návrat „Inkoust“ (`/navrat`, `src/navrat.ts`, `FlightMap`), příchod naživo (`ArrivalHost`, `src/prichod.ts`), pohlednice z etapy (`/pohlednice`, `src/pohlednice.ts`) a scéna přívozu (`/privoz`, `src/privoz.ts`); čistá logika má testy. Domů ukazuje `ReturnCard`, detail místa „Poslat jako pohlednici“, Sbírky v Kronice vedou na pohlednici. Úkoly 5, 8, 16 a 17 níže jsou tím splněny. **Na zařízení NEOVĚŘENO**: let kamery MapLibre, výkon masky po krocích, nativní vykreslení. Chybí haptika (`expo-haptics`) a „Sdílet obrázek“ (potřebuje nativní modul `react-native-view-shot`); oboje vyžaduje nový build.
+
 ### Balík A (větev `claude/balik-a-zaklad`, rozhodnutí 0019)
 Hotovo: tokeny (světlé i noční), sdílené komponenty (pečeť, medailon, záhlaví, dlaždice, čip, karta s popiskem), nové Domů a detail zastávky včetně zamčeného místa. Chybí haptika dopadu pečeti (není `expo-haptics`), „Poslat jako pohlednici“ (balík D). Na zařízení neověřeno.
 
@@ -64,10 +67,10 @@ Priorita: **P0** hned, **P1** jádro prožitku, **P2** potom. Číslování fáz
 
 ### P1: okamžiky z prototypu do aplikace (fáze 2–3)
 Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádanka s tipem), část č. 10 (Domů bez výřezu atlasu) a č. 11 (jen deník po dnech). Balík C (rozhodnutí 0021) dodal č. 11, 12 a 20 níže; zbývá zbytek těchto bodů.
-5. **Návrat „Inkoust“ (M1):** po otevření, když přibylo ≥ 300 m nebo místo: kamera MapLibre letí po ušlém úseku, razítka dopadají, počítadlo; přeskočitelné; respektovat „Omezit pohyb“. Vzor `docs/mockupy/Main.dc.html`. Data: `state.newlyReached`, `session.lastSeenWalkedM`, `markSeen`.
+~~5. **Návrat „Inkoust“ (M1):** po otevření, když přibylo ≥ 300 m nebo místo: kamera MapLibre letí po ušlém úseku, razítka dopadají, počítadlo; přeskočitelné; respektovat „Omezit pohyb“. Vzor `docs/mockupy/Main.dc.html`. Data: `state.newlyReached`, `session.lastSeenWalkedM`, `markSeen`.~~ **Hotovo v balíku D (0022), na zařízení NEOVĚŘENO.**
 6. **Příběhy objevů (M2):** celoobrazovkové listování nově odemčenými místy (háček, kontext, den dosažení, „co přibylo na mapě“). Vzor: příběhová část v `Main.dc.html`.
 7. **Hádanka s tipem (M3):** u zamčeného místa tři možnosti, tip se uloží (SQLite nebo AsyncStorage) a vyhodnotí po odemčení. Data už jsou v `obsah.json` (`riddle.options`, `riddle.answer`). Vzor `Hadanka.dc.html`.
-8. **Příchod naživo (M4):** když živá obnova odemkne místo při otevřené aplikaci, ukázat dopad pečeti a hlášku „Právě jste došli k …“ (+ haptika). Navázat na `refreshFor` v `ExpeditionProvider` (porovnat `reached` před a po).
+~~8. **Příchod naživo (M4):** když živá obnova odemkne místo při otevřené aplikaci, ukázat dopad pečeti a hlášku „Právě jste došli k …“ (+ haptika). Navázat na `refreshFor` v `ExpeditionProvider` (porovnat `reached` před a po).~~ **Hotovo v balíku D (0022), na zařízení NEOVĚŘENO.**
 9. ~~Styl mapy skica / inkoust~~ **Hotovo v balíku B (rozhodnutí 0020), na zařízení NEOVĚŘENO.** Zbývá ověřit na emulátoru / telefonu: vzory (`fill-pattern`), maska (`beforeId` vrstev u zdrojů přidaných komponentami), štítek metrů (`icon-text-fit`), výkon `revealMask` a hustotu popisků; porovnat se snímky v `docs/mapa-atlas/` a `docs/prototyp-snimky/09-vyprava.jpg`. Dále: tažení spodního panelu na Výpravě, kresby dalších památek, ruční dolaďování noční palety, vzory se neotáčejí.
 10. **Domů podle mockupu:** výřez atlasu nahoře, „Kam dnes dojdu?“ (1 / 2 / 4 km / konec etapy), nedávno objeveno, kapitoly. Vzor `Domu.dc.html`.
 11. ~~**Kronika podle mockupu:** zeměkoule s ušlou částí obvodu, střídavé postřehy, Deník jako časová osa, Životní cesta, Rok den po dni, Sbírky. Vzor `Kronika.dc.html`. Data: `ChronicleProvider`, `expedition_event`.~~ Hotovo (0021), na zařízení neověřeno; zbývá pečeť ze sdílené komponenty a animace (otáčení zeměkoule, kreslení oblouku).
@@ -79,8 +82,8 @@ Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádank
 15. **Licence fotek:** u Trojského zámku chybí autor (`docs/mockupy/assets/ZDROJE.md`, `apps/mobile/src/data/credits.ts`).
 
 ### P2: později
-16. **Pohlednice z etapy** (otočná, sdílení obrázkem) a list atlasu za výpravu. Vzor `Pohlednice.dc.html`.
-17. **Přívoz jako scéna** na trase (vzor `Privoz.dc.html`); trasa má přívozy v Podbabě, Libčicích a Lužci (jezdí sezónně).
+~~16. **Pohlednice z etapy** (otočná, sdílení obrázkem) a list atlasu za výpravu. Vzor `Pohlednice.dc.html`.~~ **Pohlednice hotová v balíku D (0022), na zařízení NEOVĚŘENO;** zbývá sdílení obrázkem a list atlasu za celou výpravu.
+~~17. **Přívoz jako scéna** na trase (vzor `Privoz.dc.html`); trasa má přívozy v Podbabě, Libčicích a Lužci (jezdí sezónně).~~ **Hotovo v balíku D (0022), na zařízení NEOVĚŘENO.**
 18. **Tmavý vzhled v novém stylu:** noční pergamen podle `*-noc.dc.html`, ale přes tokeny tématu, ne přes `noc.css`.
 19. **Pozadí, widget, upozornění** (až po vyladění aplikace, viz návrh příloha A): Health Connect `READ_HEALTH_DATA_IN_BACKGROUND` + periodická úloha, HealthKit background delivery, widget, lokální upozornění na události (výchozí vypnuto).
 20. ~~**Objevovat:** knihovna výprav~~ Hotovo (0021) s koncepty `verified: false` v `src/kronika/upcoming.ts`; **ověřit délky a popisy** Po Labi do Děčína, Krkonošská hřebenovka, Pěšky na Měsíc před vydáním.

@@ -70,7 +70,8 @@ describe("texty", () => {
     expect(backText([])).toEqual([]);
   });
   it("fotka líce a konce etapy", () => {
-    expect(pickPhotoKey(places.filter((p) => p.atM <= 1000))).toBe("z");
+    expect(pickPhotoKey(places.filter((p) => p.atM > 0 && p.atM <= 1000))).toBe("z");
+    expect(pickPhotoKey(places)).toBe("s");
     expect(pickPhotoKey([{ id: "a", kind: "discovery", name: "A", atM: 1 }])).toBeUndefined();
     expect(stageEndpoints(stage0, places)).toMatchObject({ start: { id: "s" }, end: { id: "t" } });
   });

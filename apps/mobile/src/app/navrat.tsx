@@ -69,7 +69,8 @@ export default function Return() {
   // Zapamatovat si, že úsek byl vidět (Domů to udělalo při odchodu; tady pro případ otevření odjinud).
   useEffect(() => () => ex.markSeen(), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const next = vltavska.places.find((p) => p.kind === "stop" && p.atM > toM);
+  const nowM = Math.max(toM, ex.walkedM);
+  const next = vltavska.places.find((p) => p.kind === "stop" && p.atM > nowM);
   const storyIds = places.filter((p) => p.hook !== undefined).map((p) => p.id);
   const ferry = places.find(isFerry);
 
@@ -223,7 +224,7 @@ export default function Return() {
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
                   <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.fg }}>{next.name}</T>
                   <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>
-                    {formatDistance(Math.max(0, next.atM - Math.max(toM, ex.walkedM)), { stepLengthM: ex.stepLength.meters })}
+                    {formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}
                   </T>
                 </View>
                 {(next.riddle?.question ?? next.teaser) && (
