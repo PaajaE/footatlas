@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { Pressable, View } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
 import { changeSentence, summarizeChange } from "@footatlas/core";
+import { Chapters, NextRiddle, RecentlyDiscovered, WhereToday } from "../../components/HomeSections";
 import { LastUpdated } from "../../components/LastUpdated";
 import { Button, Card, Screen, StageBar, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
@@ -59,6 +60,9 @@ export default function Home() {
     (id) => vltavska.placesById.get(id)?.name ?? id,
   );
 
+  // Příběhy nově odemčených míst k listování; jen místa, která příběh mají.
+  const storyIds = state.newlyReached.filter((p) => vltavska.placesById.get(p.id)?.hook !== undefined).map((p) => p.id);
+
   return (
     <Screen onRefresh={ex.demo.enabled ? undefined : ex.refresh} refreshing={ex.refreshing}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
@@ -96,10 +100,18 @@ export default function Home() {
             ✓
           </T>
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, gap: 10 }}>
           <T variant="body">{changeSentence(summary)}</T>
+          {storyIds.length > 0 && (
+            <Button
+              kind="secondary"
+              label={storyIds.length === 1 ? "Projít objev" : `Projít je (${storyIds.length})`}
+              onPress={() => router.push({ pathname: "/objevy", params: { ids: storyIds.join(",") } })}
+            />
+          )}
         </View>
       </Card>
+      {!state.completed && <NextRiddle />}
 
       {!state.completed && (
         <View style={{ gap: 4 }}>
@@ -134,6 +146,10 @@ export default function Home() {
           })}
         </View>
       )}
+
+      <WhereToday />
+      <RecentlyDiscovered />
+      <Chapters />
 
       {paused && (
         <Card style={{ gap: 10 }}>

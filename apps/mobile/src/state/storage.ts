@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { parseSession, parseStepProfile, type ExpeditionSession, type StepProfile } from "@footatlas/core";
+import { parseTips, type Tip } from "../riddle";
 
 const SESSION_KEY = "footatlas.session.v1";
 const DEMO_KEY = "footatlas.demo.v1";
@@ -89,4 +90,34 @@ export async function saveThemeChoice(c: StoredSchemeChoice): Promise<void> {
 export async function saveCalibrationStart(iso: string | null): Promise<void> {
   if (iso === null) await AsyncStorage.removeItem(CALIBRATION_KEY);
   else await AsyncStorage.setItem(CALIBRATION_KEY, JSON.stringify(iso));
+}
+
+const TIPS_KEY = "footatlas.tips.v1";
+
+/** Tipy k hádankám (id místa → zvolená možnost); zůstávají jen v telefonu. */
+export async function loadTips(): Promise<Record<string, Tip>> {
+  return parseTips(await readJson(TIPS_KEY));
+}
+
+export async function saveTips(t: Record<string, Tip>): Promise<void> {
+  try {
+    await AsyncStorage.setItem(TIPS_KEY, JSON.stringify(t));
+  } catch {
+    // tip se nepodařilo uložit, platí jen do zavření aplikace
+  }
+}
+
+const WISH_KEY = "footatlas.wish.v1";
+
+/** „Chci vědět, až bude“ u připravované výpravy; jen poznámka v telefonu, nic se neodesílá. */
+export async function loadWish(): Promise<boolean> {
+  return (await readJson(WISH_KEY)) === true;
+}
+
+export async function saveWish(v: boolean): Promise<void> {
+  try {
+    await AsyncStorage.setItem(WISH_KEY, JSON.stringify(v));
+  } catch {
+    // poznámka se nepodařila uložit, platí jen do zavření aplikace
+  }
 }

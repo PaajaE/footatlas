@@ -37,6 +37,7 @@ Po testu APK 1.4.0 na telefonu majitel produktu chtěl výrazně lepší prožit
 | 0014 | Světlý vzhled výchozí, volba se ukládá; `formatDistance` („40 m · asi 55 kroků“, „Jste tady“); obrazovka Nastavení; ozubené kolo na Domů | `src/format.ts` (+test), `src/theme/ThemeProvider.tsx`, `src/state/storage.ts`, `src/app/nastaveni.tsx`, `src/app/(tabs)/index.tsx`, `vyprava.tsx` |
 | 0015 | Živá obnova: návrat do popředí (min. 15 s odstup), každou minutu v popředí, stažení prstem; na pozadí nic; „Aktualizováno před N min“ | `src/state/ExpeditionProvider.tsx`, `src/state/refreshPolicy.ts` (+test), `src/components/LastUpdated.tsx`, `src/components/ui.tsx` |
 | 0016 | Příběhy míst odděleně od geometrie: háček, upoutávka, hádanka (3 možnosti), kontext, tip „Až tam půjdete“, kapitola, zdroje. 14 míst 1. etapy, 5 kapitol. Nový detail místa | `packages/content/src/story.ts` (+test), `packages/content/data/vltavska-stezka/obsah.json`, `apps/mobile/src/data/vltavska.ts`, `apps/mobile/src/app/zastavka/[id].tsx` |
+| 0018 | Tipy k hádankám, „Projít je“ (příběhy objevů), Domů (hádanka, Kam dnes dojdu?, Nedávno objeveno, Kapitoly), Objevovat, deník v Kronice | `src/riddle.ts` (+test), `src/components/Riddle.tsx`, `src/components/HomeSections.tsx`, `src/app/objevy.tsx`, `src/state/useTips.ts` |
 | 0017 | Pěší trasa po souši (OSRM nad OSM), 62,25 km, 4 etapy (Roztoky, Kralupy, Vraňany, Mělník) | `tools/route/build-walking-route.mjs` (+README), `packages/content/data/vltavska-stezka/route.json`, `expedition.json`, `pilot.test.ts` |
 
 Cesty v tabulce jsou relativně k `apps/mobile/` u aplikace.
@@ -56,6 +57,7 @@ Priorita: **P0** hned, **P1** jádro prožitku, **P2** potom. Číslování fáz
 4. **Mapa po změně trasy:** zkontrolovat, že ušlý úsek a poloha na mapě v aplikaci odpovídají nové `route.json`. Trasa je do 1,5 km od staré, koridor 5 km stačí, ale ověřit vizuálně.
 
 ### P1: okamžiky z prototypu do aplikace (fáze 2–3)
+Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádanka s tipem), část č. 10 (Domů bez výřezu atlasu) a č. 11 (jen deník po dnech). Zbývá zbytek těchto bodů.
 5. **Návrat „Inkoust“ (M1):** po otevření, když přibylo ≥ 300 m nebo místo: kamera MapLibre letí po ušlém úseku, razítka dopadají, počítadlo; přeskočitelné; respektovat „Omezit pohyb“. Vzor `docs/mockupy/Main.dc.html`. Data: `state.newlyReached`, `session.lastSeenWalkedM`, `markSeen`.
 6. **Příběhy objevů (M2):** celoobrazovkové listování nově odemčenými místy (háček, kontext, den dosažení, „co přibylo na mapě“). Vzor: příběhová část v `Main.dc.html`.
 7. **Hádanka s tipem (M3):** u zamčeného místa tři možnosti, tip se uloží (SQLite nebo AsyncStorage) a vyhodnotí po odemčení. Data už jsou v `obsah.json` (`riddle.options`, `riddle.answer`). Vzor `Hadanka.dc.html`.

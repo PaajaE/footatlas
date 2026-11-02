@@ -1,9 +1,11 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
+import { RiddleCard, TipResult } from "../../components/Riddle";
 import { Button, Card, Screen, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
 import { formatDay, formatDistance } from "../../format";
 import { useExpedition } from "../../state/ExpeditionProvider";
+import { useTips } from "../../state/useTips";
 import { useTheme } from "../../theme/ThemeProvider";
 
 export default function PlaceDetail() {
@@ -11,6 +13,7 @@ export default function PlaceDetail() {
   const router = useRouter();
   const { colors, fonts } = useTheme();
   const { walkedM, active, events, stepLength } = useExpedition();
+  const { tips, setTip } = useTips();
   const place = id ? vltavska.placesById.get(id) : undefined;
 
   if (!place) {
@@ -51,6 +54,7 @@ export default function PlaceDetail() {
 
       {hasStory && reached && (
         <>
+          {place.riddle && <TipResult riddle={place.riddle} tip={tips[place.id]} />}
           <T style={{ fontFamily: fonts.displayItalic, fontSize: 22, lineHeight: 30 }}>{`„${place.hook}“`}</T>
           {place.context && <T variant="body">{place.context}</T>}
           {place.visitTip && (
@@ -91,12 +95,7 @@ export default function PlaceDetail() {
         <>
           <T variant="label">Zatím zamčeno</T>
           {place.teaser && <T style={{ fontFamily: fonts.displayItalic, fontSize: 20, lineHeight: 28 }}>{place.teaser}</T>}
-          {place.riddle && (
-            <Card style={{ gap: 6 }}>
-              <T variant="label">Hádanka</T>
-              <T variant="title">{place.riddle.question}</T>
-            </Card>
-          )}
+          {place.riddle && <RiddleCard riddle={place.riddle} tip={tips[place.id]} onTip={(t) => setTip(place.id, t)} />}
           <Card style={{ gap: 6 }}>
             <T variant="muted">
               {active ? unlockText : "Odemkne se po ušlé vzdálenosti od startu."}

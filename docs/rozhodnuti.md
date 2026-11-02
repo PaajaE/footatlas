@@ -125,7 +125,7 @@ Datum: 2. 11. 2026 · Stav: přijato, ověřeno testy a typecheckem; na telefonu
 - Výchozí vzhled je světlý pergamen pro všechny (`app.json` `userInterfaceStyle: "light"`); volba Světlý / Tmavý / Podle systému se ukládá v AsyncStorage (`ThemeProvider`, `storage.ts`).
 - Zbývající vzdálenost k místu: `formatDistance` (`apps/mobile/src/format.ts`): pod 15 m „Jste tady“, pod 1 km metry po 10 m a „asi N kroků“ z osobní délky kroku, do 10 km na desetiny, dál celé km. „0,0 km“ se už nezobrazí.
 - Nová obrazovka `/nastaveni` (vzhled, délka kroku, zdroje a licence, vývoj jen v `__DEV__`), na Domů ji otevírá ozubené kolo.
-- Známé: zvolený tmavý vzhled se po spuštění na okamžik ukáže světlý, než se volba načte.
+- Splash screen se skryje až po načtení uložené volby vzhledu, takže tmavá volba už nebliká světlým (ověřeno testy a na emulátoru ve světlém; tmavý vzhled na emulátoru neviděn).
 
 ## 0015 Živá obnova v popředí
 Datum: 2. 11. 2026 · Stav: přijato, ověřeno testy; chování na zařízení NEOVĚŘENO
@@ -147,3 +147,12 @@ Datum: 2. 11. 2026 · Stav: přijato; v terénu NEOVĚŘENO
 - Místa na druhém břehu se nenavštěvují, jen promítají („výhled přes řeku“); 9 míst je dál než 500 m od trasy (nejvíc Klecany 3 km).
 - Trasa se od staré čáry vzdálí nejvýš 1,5 km, mapový koridor stačí.
 - Rizika: přívozy (Podbaba, Libčice, Lužec) jezdí sezónně; úsek Červený mlýn → Vraňany je nejvíc zakřivený (1,8× vzdušné vzdálenosti), projít na mapě. Hustota: jediná mezera nad 4 km (Výhled na Říp → Vepřek, 4,4 km), doplnit objev.
+
+## 0018 Hádanky s tipem, příběhy objevů a Domů podle mockupu
+Datum: 2. 11. 2026 · Stav: přijato; ověřeno testy a na emulátoru Android 16 (release APK, ukázkový postup), na telefonu NEOVĚŘENO
+
+- **Tipy k hádankám (M3).** U zamčeného místa tři možnosti; tip je dobrovolný, bez bodů, lze ho měnit do odemčení a ukládá se jen v telefonu (`footatlas.tips.v1`). Po odemčení detail řekne „Tipovali jste správně“ nebo „Tohle překvapí“ a ukáže správnou odpověď. Logika v `src/riddle.ts` (+test).
+- **Příběhy objevů (M2).** Karta „Od posledně“ má tlačítko „Projít je (N)“ s listováním nově odemčenými místy (háček, kontext, den dosažení, kapitola), na konci hádanka dalšího místa. Místa se předávají parametrem `ids`, protože „od posledně“ se po odchodu z Domů maže. Bez fotografie (fotky míst v aplikaci zatím nejsou).
+- **Domů.** Přibyly: hádanka další zastávky s tlačítkem „Tipnout“, „Kam dnes dojdu?“ (1, 2, 4 km, konec etapy; jen ukáže, co by se odemklo, nic nenastavuje), „Nedávno objeveno“, Kapitoly s postupem.
+- **Objevovat** ukazuje rozjetou výpravu a kartu „Připravujeme“ s poznámkou „Chci vědět, až bude“ (jen lokálně, nic se neodesílá; název další výpravy se nevymýšlí). **Kronika** má deník po dnech místo seznamu míst.
+- Nezahrnuto: návrat „Inkoust“ s letem kamery (M1), příchod naživo (M4), styl mapy skica/inkoust, zeměkoule v Kronice, Karta života, pohlednice.

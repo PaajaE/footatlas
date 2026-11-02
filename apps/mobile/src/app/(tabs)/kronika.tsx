@@ -3,7 +3,8 @@ import { View } from "react-native";
 import { Button, Card, Screen, T } from "../../components/ui";
 import { useChronicle } from "../../db/ChronicleProvider";
 import { vltavska } from "../../data/vltavska";
-import { formatDay, formatDayLong, formatKm } from "../../format";
+import { formatDayLong, formatKm } from "../../format";
+import { joinNames } from "../../riddle";
 import { useExpedition } from "../../state/ExpeditionProvider";
 import { fromHealthSource } from "../../health/names";
 
@@ -18,7 +19,18 @@ export default function Chronicle() {
   const reached = events.filter((e) => e.kind === "place" || e.kind === "finish").sort((a, b) => b.atM - a.atM);
   const stagesDone = events.filter((e) => e.kind === "stage").length;
   const [showAll, setShowAll] = useState(false);
-  const shown = showAll ? reached : reached.slice(0, 5);
+  // Deník po dnech: místa seskupená podle dne dosažení, nejnovější den nahoře.
+  const diary = [...new Set(reached.map((e) => e.reachedDay))]
+    .sort()
+    .reverse()
+    .map((day) => ({
+      day,
+      names: reached
+        .filter((e) => e.reachedDay === day)
+        .reverse()
+        .map((e) => (e.kind === "finish" ? "Cíl výpravy" : (vltavska.placesById.get(e.ref)?.name ?? e.ref))),
+    }));
+  const shown = showAll ? diary : diary.slice(0, 3);
   const empty = stats.daysWithRecord === 0;
   const busy = sync.kind === "syncing";
 
@@ -36,22 +48,15 @@ export default function Chronicle() {
           {reached.length === 0 ? (
             <T variant="small">Zatím žádné místo; první se odemkne po prvních ušlých metrech.</T>
           ) : (
-            shown.map((e) => {
-              const place = e.kind === "place" ? vltavska.placesById.get(e.ref) : null;
-              return (
-                <View key={`${e.kind}-${e.ref}`} style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
-                  <T variant="body" style={{ flex: 1 }} numberOfLines={1}>
-                    {e.kind === "finish" ? "Cíl výpravy" : (place?.name ?? e.ref)}
-                  </T>
-                  <T variant="small" style={{ flexShrink: 0 }}>
-                    {formatDay(e.reachedDay)}
-                  </T>
-                </View>
-              );
-            })
+            shown.map((d) => (
+              <View key={d.day} style={{ gap: 2 }}>
+                <T variant="strong">{longDay(d.day)}</T>
+                <T variant="muted">{joinNames(d.names)}</T>
+              </View>
+            ))
           )}
-          {reached.length > 5 && (
-            <Button kind="secondary" label={showAll ? "Zobrazit méně" : `Zobrazit všechna (${reached.length})`} onPress={() => setShowAll(!showAll)} />
+          {diary.length > 3 && (
+            <Button kind="secondary" label={showAll ? "Zobrazit méně" : `Zobrazit všechny dny (${diary.length})`} onPress={() => setShowAll(!showAll)} />
           )}
         </Card>
       )}
