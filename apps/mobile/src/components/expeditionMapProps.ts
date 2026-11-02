@@ -9,4 +9,13 @@ export interface ExpeditionMapProps {
   walkedM: number;
   height: number;
   onPlacePress?: (id: string) => void;
+  /**
+   * Plochy, které přes mapu překrývají jiné prvky obrazovky (karta nahoře, panel dole). Kamera na ně bere ohled
+   * při „Celá trasa“ a tlačítka s atribucí se posunou nad panel.
+   */
+  insets?: { top: number; bottom: number };
+  /** Rámeček listu atlasu s titulkem (např. „List I · Praha“) a měřítkem; bez hodnoty se nekreslí. */
+  frame?: string;
+  /** Tlačítka „Moje poloha“ a „Celá trasa“ na mapě (výchozí ano); obrazovka je může mít vlastní. */
+  controls?: boolean;
 }
