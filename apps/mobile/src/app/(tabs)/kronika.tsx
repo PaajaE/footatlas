@@ -1,65 +1,82 @@
-import { useState } from "react";
+import { useRouter } from "expo-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
+import { CollectionsView } from "../../components/kronika/CollectionsView";
+import { DiaryView } from "../../components/kronika/DiaryView";
+import { LifeHero } from "../../components/kronika/LifeHero";
+import { LifePathView } from "../../components/kronika/LifePathView";
+import { Segmented } from "../../components/kronika/Segmented";
+import { YearView } from "../../components/kronika/YearView";
 import { Button, Card, Screen, T } from "../../components/ui";
 import { useChronicle } from "../../db/ChronicleProvider";
 import { vltavska } from "../../data/vltavska";
-import { formatDayLong, formatKm } from "../../format";
-import { joinNames } from "../../riddle";
-import { useExpedition } from "../../state/ExpeditionProvider";
 import { fromHealthSource } from "../../health/names";
+import { diaryCards, buildDiary } from "../../kronika/diary";
+import { distanceSentence, estimateSteps, lifeRoute, longestDaySentence } from "../../kronika/earth";
+import { useExpedition } from "../../state/ExpeditionProvider";
+import { loadLifeCardSeen, saveLifeCardSeen } from "../../state/storage";
+import { localDateKey } from "@footatlas/core";
 
-const dayDate = (day: string) => new Date(Number(day.slice(0, 4)), Number(day.slice(5, 7)) - 1, Number(day.slice(8, 10)));
-const longDay = (day: string) => `${formatDayLong(dayDate(day)).toLowerCase()} ${day.slice(0, 4)}`;
-const pct = (part: number, total: number) => (total > 0 ? Math.round((part / total) * 100) : 0);
+type Tab = "denik" | "cesta" | "rok" | "sbirky";
+const TABS = [
+  { key: "denik", label: "Deník" },
+  { key: "cesta", label: "Cesta" },
+  { key: "rok", label: "Rok" },
+  { key: "sbirky", label: "Sbírky" },
+] as const;
 
-/** Statistiky kroniky z uložených dnů (docs/kronika-sqlite.md). Životní cesta a výpravy přijdou později. */
+const MONTHS_GEN = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
+/** „března 2019“ pro větu „píše se od …“. */
+function sinceLabel(day: string): string {
+  return `${MONTHS_GEN[Number(day.slice(5, 7)) - 1]} ${day.slice(0, 4)}`;
+}
+
+/** Kronika: zeměkoule s ušlou vzdáleností a přepínač Deník / Cesta / Rok / Sbírky (docs/design-prototyp.md). */
 export default function Chronicle() {
-  const { ready, stats, lastReadAt, sync, syncNow } = useChronicle();
-  const { events, active } = useExpedition();
-  const reached = events.filter((e) => e.kind === "place" || e.kind === "finish").sort((a, b) => b.atM - a.atM);
-  const stagesDone = events.filter((e) => e.kind === "stage").length;
-  const [showAll, setShowAll] = useState(false);
-  // Deník po dnech: místa seskupená podle dne dosažení, nejnovější den nahoře.
-  const diary = [...new Set(reached.map((e) => e.reachedDay))]
-    .sort()
-    .reverse()
-    .map((day) => ({
-      day,
-      names: reached
-        .filter((e) => e.reachedDay === day)
-        .reverse()
-        .map((e) => (e.kind === "finish" ? "Cíl výpravy" : (vltavska.placesById.get(e.ref)?.name ?? e.ref))),
-    }));
-  const shown = showAll ? diary : diary.slice(0, 3);
+  const router = useRouter();
+  const { ready, stats, days, lastReadAt, sync, syncNow } = useChronicle();
+  const { active, walkedM, state, events, daySlices, stepLength } = useExpedition();
+  const [tab, setTab] = useState<Tab>("denik");
   const empty = stats.daysWithRecord === 0;
   const busy = sync.kind === "syncing";
 
+  // Karta života se ukáže jednou po prvním načtení historie (když ji uživatel právě vyvolal).
+  const wantCard = useRef(false);
+  useEffect(() => {
+    if (!wantCard.current || empty) return;
+    wantCard.current = false;
+    void loadLifeCardSeen().then((seen) => {
+      if (seen) return;
+      void saveLifeCardSeen();
+      router.push("/karta-zivota");
+    });
+  }, [empty, router]);
+
+  const today = localDateKey(new Date());
+  const cards = useMemo(() => {
+    const nameOf = (id: string) => vltavska.placesById.get(id)?.name ?? id;
+    const diary = buildDiary(daySlices, events, nameOf, stepLength.meters);
+    const next = state.next;
+    return diaryCards(diary, today, next && state.toNextM !== null ? { name: nameOf(next.id), remainingM: state.toNextM } : null);
+  }, [daySlices, events, stepLength.meters, state.next, state.toNextM, today]);
+
+  const total = stats.totalM;
+  const facts = [
+    distanceSentence(total),
+    stats.longestDay ? longestDaySentence(stats.longestDay.distanceM, { name: vltavska.name, totalM: vltavska.totalM }) : null,
+  ].filter((f): f is string => f !== null);
+  const route = useMemo(() => lifeRoute(days), [days]);
+
   return (
     <Screen>
-      <T variant="display">Kronika</T>
-
-      {active && (
-        <Card style={{ gap: 6 }}>
-          <T variant="label">Výprava</T>
-          <T variant="title">{vltavska.name}</T>
-          <T variant="muted">
-            {stagesDone} z {vltavska.plan.stages.length} etap dokončeno · {reached.filter((e) => e.kind === "place").length} míst odemčeno
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 12 }}>
+        <T variant="display">Kronika</T>
+        {stats.firstDay && (
+          <T variant="small" style={{ fontSize: 13, paddingBottom: 6 }}>
+            píše se od {sinceLabel(stats.firstDay)}
           </T>
-          {reached.length === 0 ? (
-            <T variant="small">Zatím žádné místo; první se odemkne po prvních ušlých metrech.</T>
-          ) : (
-            shown.map((d) => (
-              <View key={d.day} style={{ gap: 2 }}>
-                <T variant="strong">{longDay(d.day)}</T>
-                <T variant="muted">{joinNames(d.names)}</T>
-              </View>
-            ))
-          )}
-          {diary.length > 3 && (
-            <Button kind="secondary" label={showAll ? "Zobrazit méně" : `Zobrazit všechny dny (${diary.length})`} onPress={() => setShowAll(!showAll)} />
-          )}
-        </Card>
-      )}
+        )}
+      </View>
 
       {!ready ? (
         <T variant="muted">Načítám…</T>
@@ -68,53 +85,52 @@ export default function Chronicle() {
           <T variant="muted">
             Kronika se plní z kroků a vzdálenosti {fromHealthSource()}. Po povolení se přečte celá dostupná historie a uloží se jen v tomto telefonu.
           </T>
-          <Button label={busy ? "Načítám…" : "Načíst historii"} disabled={busy} onPress={() => syncNow(true)} />
+          <Button
+            label={busy ? "Načítám…" : "Načíst historii"}
+            disabled={busy}
+            onPress={() => {
+              wantCard.current = true;
+              void syncNow(true);
+            }}
+          />
         </Card>
       ) : (
+        <LifeHero totalM={total} steps={estimateSteps(total, stepLength.meters)} facts={facts} onPress={() => router.push("/karta-zivota")} />
+      )}
+
+      <Segmented items={TABS} value={tab} onChange={setTab} />
+
+      {tab === "denik" && (
         <>
-          <Card style={{ gap: 4 }}>
-            <T variant="label">Celkem</T>
-            <T variant="display">{formatKm(stats.totalM, 0)}</T>
-            <T variant="muted">
-              od {longDay(stats.firstDay!)} · {stats.daysWithRecord} dní se záznamem
-            </T>
-            {stats.longestDay && (
-              <T variant="muted">
-                Nejdelší den {formatKm(stats.longestDay.distanceM)} ({longDay(stats.longestDay.day)})
-              </T>
-            )}
-          </Card>
+          {active ? (
+            <DiaryView cards={cards} scaleM={walkedM} />
+          ) : (
+            <Card style={{ gap: 4 }}>
+              <T variant="strong">Deník se začne psát s první výpravou</T>
+              <T variant="muted">Každý den na výpravě tu dostane svou kartu: ujetou trasu, místa, která jste odemkli, a krátký postřeh.</T>
+            </Card>
+          )}
+        </>
+      )}
+      {tab === "cesta" && <LifePathView route={route} firstDay={stats.firstDay} />}
+      {tab === "rok" && <YearView days={days} by={stats.byConfidence} stepLengthM={stepLength.meters} />}
+      {tab === "sbirky" && (
+        <CollectionsView
+          active={active}
+          walkedM={walkedM}
+          nextStop={state.toNextM !== null ? { remainingM: state.toNextM } : null}
+        />
+      )}
 
-          <Card style={{ gap: 6 }}>
-            <T variant="strong">Podle roků</T>
-            {stats.byYear.map((y) => (
-              <View key={y.year} style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <T variant="body">{y.year}</T>
-                <T variant="body">
-                  {formatKm(y.distanceM, 0)} · {y.days} dní
-                </T>
-              </View>
-            ))}
-          </Card>
-
-          <Card style={{ gap: 6 }}>
-            <T variant="strong">Z čeho se kronika skládá</T>
-            <T variant="muted">
-              Ověřeno přímo ze zdravotních dat: {formatKm(stats.byConfidence.verified, 0)} ({pct(stats.byConfidence.verified, stats.totalM)} %)
-            </T>
-            <T variant="muted">
-              Odhad z kroků podle vaší délky kroku: {formatKm(stats.byConfidence.estimated, 0)} ({pct(stats.byConfidence.estimated, stats.totalM)} %)
-            </T>
-            {stats.byConfidence.manual > 0 && <T variant="muted">Ručně zadáno: {formatKm(stats.byConfidence.manual, 0)}</T>}
-          </Card>
-
+      {!empty && ready && (
+        <View style={{ gap: 6 }}>
           <Button kind="secondary" label={busy ? "Aktualizuji…" : "Aktualizovat"} disabled={busy} onPress={() => syncNow(false)} />
           {lastReadAt && <T variant="small">Naposledy přečteno {new Date(lastReadAt).toLocaleString("cs-CZ")}.</T>}
-        </>
+        </View>
       )}
 
       {sync.kind === "error" && <T variant="small">Čtení se nepovedlo: {sync.message}</T>}
-      {sync.kind === "unavailable" && (
+      {sync.kind === "unavailable" && sync.reason !== "unsupported" && (
         <T variant="small">
           {sync.reason === "denied" ? `Čtení ${fromHealthSource()} nebylo povoleno.` : `${fromHealthSource()} na tomto zařízení není dostupné.`}
         </T>

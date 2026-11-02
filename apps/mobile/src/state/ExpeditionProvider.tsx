@@ -16,6 +16,7 @@ import {
   type ExpeditionSession,
   type ExpeditionState,
   type JourneyEvent,
+  type SliceDistance,
   type StepLength,
   type StepProfile,
 } from "@footatlas/core";
@@ -41,6 +42,8 @@ interface ExpeditionContextValue {
   status: DataStatus;
   /** Dosažená místa, etapy a cíl rozjeté výpravy s dnem dosažení (uložené v databázi). */
   events: JourneyEvent[];
+  /** Vzdálenost výpravy po úsecích a dnech (pro deník v Kronice); nejstarší první. */
+  daySlices: SliceDistance[];
   /** Kdy se naposledy úspěšně přečetla zdravotní data. */
   lastReadAt: Date | null;
   /** Běží čtení vyvolané stažením prstem (jen pro kolečko obnovy). */
@@ -71,6 +74,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   const [measuredM, setMeasuredM] = useState(0);
   const [status, setStatus] = useState<DataStatus>({ kind: "loading" });
   const [storedEvents, setEvents] = useState<JourneyEvent[]>([]);
+  const [measuredSlices, setMeasuredSlices] = useState<SliceDistance[]>([]);
   const [lastReadAt, setLastReadAt] = useState<Date | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const inFlightRef = useRef(false);
@@ -92,6 +96,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   const readHealth = useCallback(async (s: ExpeditionSession | null) => {
     if (!s) {
       setMeasuredM(0);
+      setMeasuredSlices([]);
       setEvents([]);
       setStatus({ kind: "ok" });
       return;
@@ -101,6 +106,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
       const availability = await healthSource.availability();
       if (availability !== "available") {
         setMeasuredM(0);
+        setMeasuredSlices([]);
         setStatus({ kind: "unavailable", reason: availability });
         return;
       }
@@ -115,6 +121,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
       ]);
       const perSlice = walkedBySlice(slices, daily, intervalM);
       setMeasuredM(perSlice.reduce((sum, x) => sum + x.distanceM, 0));
+      setMeasuredSlices(perSlice);
       setStatus({ kind: "ok" });
       lastReadRef.current = now.getTime();
       setLastReadAt(now);
@@ -250,6 +257,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     await persistSession(null);
     setEvents([]);
     setMeasuredM(0);
+    setMeasuredSlices([]);
     setDemoState(DEFAULT_DEMO);
     await saveDemo(DEFAULT_DEMO);
     setStatus({ kind: "ok" });
@@ -268,6 +276,10 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   const events = useMemo(
     () => (demo.enabled ? journeyEvents(vltavska.plan, [{ day: localDateKey(new Date()), distanceM: demo.walkedM }]) : storedEvents),
     [demo.enabled, demo.walkedM, storedEvents],
+  );
+  const daySlices = useMemo<SliceDistance[]>(
+    () => (demo.enabled ? [{ day: localDateKey(new Date()), distanceM: demo.walkedM }] : measuredSlices),
+    [demo.enabled, demo.walkedM, measuredSlices],
   );
   const previousM = demo.enabled ? demo.seenM : (session?.lastSeenWalkedM ?? 0);
   const active = demo.enabled || session !== null;
@@ -297,6 +309,7 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     paused,
     status,
     events,
+    daySlices,
     lastReadAt,
     refreshing,
     stepProfile,

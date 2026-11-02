@@ -38,6 +38,14 @@ export function formatKmBig(totalM: number): string {
   return `${groupThousands(km)}${NBSP}km`;
 }
 
+/** Velké číslo a jednotka pro kartu zeměkoule: „14 200“ + „km“; pod 100 km s desetinou, pod 1 km v metrech. */
+export function bigDistance(totalM: number): { value: string; unit: string } {
+  const m = Math.max(0, totalM);
+  if (m < 1000) return { value: String(Math.round(m / 10) * 10), unit: "m" };
+  const km = m / 1000;
+  return { value: km < 100 ? km.toFixed(1).replace(".", ",") : groupThousands(km), unit: "km" };
+}
+
 /** Počet kroků pro lidi: „18,9 mil.“, „123 000“, „4 130“. */
 export function formatStepCount(steps: number): string {
   const n = Math.max(0, Math.round(steps));

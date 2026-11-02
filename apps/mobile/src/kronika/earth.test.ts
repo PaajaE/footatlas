@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  bigDistance,
   CITY_STOPS,
   confidenceShares,
   dayReaching,
@@ -19,6 +20,7 @@ import {
   PRAGUE,
 } from "./earth";
 
+const NB = " ";
 const nb = (s: string | null) => s?.replace(/ /g, " ");
 
 describe("obvod Země", () => {
@@ -41,6 +43,11 @@ describe("formátování", () => {
     expect(nb(formatKmBig(14_200_000))).toBe("14 200 km");
     expect(nb(formatKmBig(35_600))).toBe("35,6 km");
     expect(nb(formatKmBig(420))).toBe("420 m");
+  });
+  it("velké číslo karty", () => {
+    expect(bigDistance(14_200_000)).toEqual({ value: `14${NB}200`, unit: "km" });
+    expect(bigDistance(35_640)).toEqual({ value: "35,6", unit: "km" });
+    expect(bigDistance(420)).toEqual({ value: "420", unit: "m" });
   });
   it("kroky", () => {
     expect(nb(formatStepCount(18_900_000))).toBe("18,9 mil.");

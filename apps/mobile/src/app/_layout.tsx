@@ -34,6 +34,7 @@ function Shell() {
         <Stack.Screen name="zdroje" />
         <Stack.Screen name="nastaveni" />
         <Stack.Screen name="objevy" />
+        <Stack.Screen name="karta-zivota" />
         <Stack.Screen name="dev" options={{ presentation: "modal" }} />
       </Stack>
     </>
