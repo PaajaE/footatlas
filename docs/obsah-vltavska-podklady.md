@@ -33,13 +33,13 @@ Legenda: ✅ silný háček · 🟡 použitelné · ⚠️ pozor, sporné nebo n
 | Rodný dům A. Dvořáka | Narodil se 8. 9. 1841 jako první z devíti dětí. Rozšířená domněnka, že se vyučil řezníkem, byla vyvrácena. | ✅ | [Antonín Dvořák](https://cs.wikipedia.org/wiki/Anton%C3%ADn_Dvo%C5%99%C3%A1k) | |
 | Zámek Veltrusy | 1754 tu proběhl první vzorkový veletrh na světě (Velký trh tovarů Království českého) za účasti Marie Terezie. Půdorys zámku tvoří ondřejský kříž. Chotek chtěl původně zahradu jako ve Versailles. | ✅ | [Veltrusy (zámek)](https://cs.wikipedia.org/wiki/Veltrusy_(z%C3%A1mek)) | „první na světě“ ověřit u NPÚ |
 | Červený mlýn | — | ❌ | | dohledat (NPÚ, zámek Veltrusy) |
-| Lužní les | Obecný článek, nic místního. | ❌ | | nahradit konkrétním místem |
+| Lužní les | Obecný článek, nic místního. | ❌ | | nahrazeno místem Mlčechvosty (balík E) |
 | Výhled na Říp | Jméno Říp je podle některých výkladů předkeltské indoevropské a znamená prostě „hora“. | 🟡 ⚠️ | [Říp](https://cs.wikipedia.org/wiki/%C5%98%C3%ADp) | výklady se liší, tak to napsat |
 | Vepřek | Fotovoltaická elektrárna u Vepřku byla při spuštění největší v Česku. | 🟡 | [Vepřek](https://cs.wikipedia.org/wiki/Vep%C5%99ek) | |
 | Slepé rameno | — | ❌ | | |
 | Plavební kanál Vraňany | Na kanálu je unikátní zdvižný kamenný mostní oblouk v Hoříně a první železniční zdvihací most v ČR u Lužce. | ✅ | [Laterální plavební kanál Mělník–Vraňany](https://cs.wikipedia.org/wiki/Later%C3%A1ln%C3%AD_plavebn%C3%AD_kan%C3%A1l_M%C4%9Bln%C3%ADk%E2%80%93Vra%C5%88any) | |
 | Lužec nad Vltavou | Od roku 1907 (stavba kanálu) jediná obec v ČR celá na ostrově; jediná ostrovní škola, stadion a kulturní dům v zemi; jediný zdvihací železniční most v Česku. | ✅ | [Lužec nad Vltavou](https://cs.wikipedia.org/wiki/Lu%C5%BEec_nad_Vltavou) | |
-| Polabská rovina, Říční tůně | — | ❌ | | nahradit konkrétními místy |
+| Polabská rovina, Říční tůně | — | ❌ | | Polabská rovina nahrazena Lávkou do Bukolu; Říční tůně zůstávají bez příběhu (balík E) |
 | První pohled na Mělník | Sgrafita na severním křídle zámku z roku 1553 patří k nejstarším v Čechách. | ✅ | [Mělník (zámek)](https://cs.wikipedia.org/wiki/M%C4%9Bln%C3%ADk_(z%C3%A1mek)) | |
 | Zámek Hořín | — | ❌ | | kandidát: zdvižný kamenný oblouk (viz kanál) |
 | Soutok v Mělníku | Podle legendy okopával vinice svatý Václav při návštěvách babičky Ludmily. První parník pod městem 1845. | 🟡 ⚠️ | [Mělník](https://cs.wikipedia.org/wiki/M%C4%9Bln%C3%ADk) | často uváděné „Vltava má u soutoku víc vody než Labe“ v článku není, ověřit v datech ČHMÚ |
@@ -79,3 +79,54 @@ Prototyp na plátně „FootAtlas prototyp Inkoust“ používá tyto texty bez 
 - [ ] Životní cesta (Kronika): vzdálenosti po Hedvábné stezce (Praha–Vídeň 250 km … Tokio 13 300 km, Sapporo 14 400 km) jsou hrubý odhad; spočítat z jedné definované trasy.
 - [ ] Objevovat: Po Labi do Děčína (asi 100 km), Krkonošská hřebenovka (asi 70 km) ověřit délky a vybrat trasy; licence fotek Krkonoše, Měsíc, Mělník.
 - [ ] Vyšehrad: skála 42 m z ordovických břidlic, nejhlubší místo Vltavy v Praze, rotunda sv. Martina nejstarší v Praze, hrob Dvořáka a Smetany na Vyšehradském hřbitově.
+
+## Úkoly k ověření: příběhy 2.–4. etapy (balík E, 2. 11. 2026)
+
+Všech 23 nových příběhů v `obsah.json` má `verified: false`. Texty jsou přeformulované vlastními slovy; jednotlivá čísla, data a jména vycházejí ze zdrojů ve sloupci „Zdroje“. Sloupec „Druhý nezávislý zdroj“ říká, kde ho hledat; kde je zdroj jediný, je to uvedeno. Hotovo = obě fakta potvrzena a zapsáno datum (v `obsah.json` pak `verified: true`).
+
+| Místo | Nejslabší tvrzení | Zdroje (dnes) | Druhý nezávislý zdroj / co ověřit |
+|---|---|---|---|
+| Levý Hradec | Kostel sv. Klimenta „podle tradice první křesťanský v Čechách“ (80. léta 9. st.); základy rotundy v kryptě | Wikipedie, prague.eu | Památkový katalog NPÚ (kostel č. 13489484 podle odkazu na Turistika.cz); web levyhradec.cz; zda je krypta přístupná |
+| Řež | Kolonie 15. 3. 1909, 21 lidí, 54 ha, zadlužení, prodej 1911 | Wikipedie (jediný) | odborná literatura o českém anarchismu (Národní archiv); web obce Husinec |
+| Klecany | Pověst o zvonech (varianty se liší); pohřebiště Pravý Hradec 2000 | Wikipedie (jediný) | web města Klecany; Profantová, *Klecany: raně středověká pohřebiště* (2015); provoz přívozu Klecánky–Roztoky |
+| Husinec | Jméno od chovu hus; zmínka „kolem 1227“ je z falza | Wikipedie (jediný) | web obce Husinec; Profous, *Místní jména v Čechách* |
+| Libčice | Zmínka 993 (břevnovská listina); Liběhrad, Bílkovy plastiky | Wikipedie (jediný) | web města Libčice; Památkový katalog; přívoz Dol–Libčice (provoz) |
+| Přívoz do Letek | Jméno „patrně“ od hmyzu; zmínka 1052; sloučení 1924. Poloha a název místa neodpovídají jisté přívozní lince | Wikipedie (Letky, Libčice) | Profous; web města; zda přívoz do Letek existuje, jinak místo přejmenovat |
+| Dolany | Zaplavení obce v roce 2002 | Wikipedie (jediný) | web obce Dolany nad Vltavou; zpráva ČHMÚ o povodni 2002 (Kralupy–Dolany) |
+| Kralupy | Výklady jména; povodeň 2002 „největší v historii dolního Povltaví“; nálet 22. 3. 1945 | Wikipedie, Česká televize | Muzeum Kralupy; Povodí Vltavy/ČHMÚ pro povodeň; počty obětí a bomb se **nepoužily** (zdroje se liší) |
+| Lobeček | 27 domů v roce 1869, 765 v 2021, 7 510 obyv. v 1980; Kaučuk 1958/1963 | Wikipedie (Lobeček, Kralupy) | ČSÚ, Historický lexikon obcí; který podnik leží přímo v Lobečku |
+| Zámek Nelahozeves | „Spolu s Kaceřovem první ohlas Palladia“ (O. Frejková 1941); 65 000 svazků; 1950–1993 mimo rodinu | Wikipedie, lobkowicz.cz | Památkový katalog NPÚ; odborná literatura (Frejková); sgrafita z podkladů zůstávají nedohledána |
+| Rodný dům A. Dvořáka | Dům čp. 12 naproti kostelu; požár školy 1885; **znovuotevření v říjnu 2025** | antonin-dvorak.cz, Wikipedie, The World | web Lobkowicz Collections / Dvořákův Nelahozeves; Dvořákova doba ve Zlonicích (1853–1856); mýtus o vyučení řezníkem se nepoužil |
+| Zámek Veltrusy | Veletrh 1754 „první vzorkový“ – **sporné** (kudyznudy uvádí jako oficiální první londýnskou výstavu 1756); Povodeň 2002 zaplavila většinu parku | Wikipedie, NPÚ (historie) | NPÚ/odborná literatura o veletrhu; hook je podán „bývá označován“. Zdroj k veletrhu: stránka kudyznudy.cz (7 věcí, které nevíte o Expu) |
+| Červený mlýn | Rok vzniku 1792, penzion a výletní restaurace, požár 1929 | Wikipedie, Waymarking (uživatelský web, slabý) | NPÚ Veltrusy; závěrečná práce o zaniklých stavbách parku (theses.cz/id/wlmkbr) |
+| Výhled na Říp | Výklad jména: předkeltské / indoevropské / germánské – výklady se liší; stáří lávového jezera (>26 mil. let) | Wikipedie, Novinky | Profous (1951); publikace Univerzity Karlovy z 2025/2026 (rok studie se v pramenech liší) |
+| Vepřek | Spuštění 8. 9. 2010 jako největší FVE v ČR; **oprava polohy** | Wikipedie (jediný) | web obce Nová Ves/Vepřek; ČTK/ERÚ pro „největší“; velikost elektrárny |
+| Mlčechvosty | Obrozenci u Kratochvílů, Dvořák „často“ | Wikipedie (jediný) | web obce Vraňany; Dvořákovy životopisy (Šourek) |
+| Plavební kanál Vraňany | Jednosměrný provoz se semafory a výhybnou v Lužci; 10,1 km; 8 mostů | Wikipedie, ŘVC (jen délka a rok) | ŘVC ČR (provoz, signalizace); délka se v pramenech liší (10–11 km) |
+| Lávka do Bukolu | 130 m, pylon 40 m, „po 100 letech“ nahradila přívoz, 2020 | E15, České stavby, Wikipedie | web obce Lužec; rok otevření a cena se liší (50 vs 60 mil. Kč) |
+| Lužec nad Vltavou | Jediná obec celá na ostrově; jediná ostrovní škola; první zdvihací železniční most | Wikipedie, Deník | web obce Lužec / plán rozvoje obce; ŘVC (most); první zmínka 1223 vs 1305 |
+| První pohled na Mělník | Sgrafita 1553 „mezi nejstaršími datovanými v Čechách“ (starší jsou známa) | Wikipedie, UK (diplomová práce) | Památkový katalog NPÚ; web zámku; hook je podán opatrně |
+| Zdymadlo Hořín | Spád: **8,5 m (Wikipedie) vs 8,8 m (ŘVC)**; texty říkají „víc než osm metrů“; „nejvyšší stupeň mezi Prahou a Mělníkem“ | Wikipedie, Turistika.cz, ŘVC | Povodí Vltavy/ŘVC: přesný spád a čísla komor |
+| Zámek Hořín | „Nejvyzrálejší rokoko v Čechách“ (kamenné pokoje 1760–1763); prodej 2024 | Wikipedie (jediný) | Památkový katalog NPÚ; aktuální vlastník a přístupnost (zámek byl dříve zavřený) |
+| Soutok v Mělníku | Studna: průměr 4,54 m, hloubka 54 (56) m, „nejširší v ČR“; přístupná z podzemí | Wikipedie, Deník | web Mělníka / Mělnické podzemí; legenda o Ludmile a Václavovi je podána jako legenda |
+
+Změny poloh a seznamu míst, které musí potvrdit člověk (v terénu nebo z mapy):
+- **Vepřek**: prototypové souřadnice (50,298; 14,352) byly asi 3 km vedle. Nové (50,3108; 14,3231) pocházejí z Wikipedie; místo je 172 m od trasy, `unlockAtM` 47 396 m (dřív 50 033). Mezeru 4,4 km tím vyplnilo skutečné místo; nový objev nebyl potřeba.
+- **Mlčechvosty** (50,3189; 14,3392) nahradily „Lužní les“, **Lávka do Bukolu** (poloha obce Bukol 50,3147; 14,3925, od trasy asi 1 km, přes řeku) nahradila „Polabskou rovinu“, **Zdymadlo Hořín** (50,3409; 14,4686) je nové. Souřadnice všech z Wikipedie.
+- Další souřadnice prototypu nejsou přesné a nebyly opravovány: **Dolany** (prototyp 50,229; 14,335 × Wikipedie 50,222; 14,350), **Lobeček** (50,252; 14,306 × 50,249; 14,315), **Letky** (50,213; 14,353 × 50,185; 14,368), **Zámek Hořín** (50,3396; 14,4783 × 50,3448; 14,4643). Před vydáním zkontrolovat všechna místa proti mapě.
+- **Bez příběhu zůstávají** „Slepé rameno“ a „Říční tůně“ (konkrétní místo se na trase nepodařilo doložit); jsou potřeba kvůli hustotě míst. Nahradit, až se najde příběh.
+- Kapitola „Řeka a povodně 2002“ se **nezaložila**: povodeň 2002 je doložena u Dolan, Kralup a Veltrus jen jedním zdrojem (Wikipedie), a každé místo má svůj silnější příběh.
+
+### Kandidáti na fotky (Wikimedia Commons, nic nestaženo)
+
+Před použitím zkontrolovat licenci a podmínky uvedení autora na stránce souboru; CC BY-SA vyžaduje uvedení autora a stejnou licenci.
+
+| Místo | Soubor | Autor | Licence |
+|---|---|---|---|
+| Levý Hradec | [Kostel sv. Klimenta, Levý Hradec.jpg](https://commons.wikimedia.org/wiki/File:Kostel_sv._Klimenta,_Lev%C3%BD_Hradec.jpg) | Ondřej Žváček | CC BY-SA 4.0 |
+| Levý Hradec | [Základy rotundy, kostel sv. Klimenta.jpg](https://commons.wikimedia.org/wiki/File:Z%C3%A1klady_rotundy,_kostel_sv._Klimenta,_Lev%C3%BD_Hradec.jpg) | Ondřej Žváček | CC BY-SA 4.0 |
+| Zámek Veltrusy | [Veltrusy (zámek), pohled z jihu.jpg](https://commons.wikimedia.org/wiki/File:Veltrusy_(z%C3%A1mek),_pohled_z_jihu.jpg) | Skot | CC BY-SA 4.0 |
+| Zámek Nelahozeves | [Nelahozeves CZ zamek 499.jpg](https://commons.wikimedia.org/wiki/File:Nelahozeves_CZ_zamek_499.jpg) | User:Miaow Miaow | public domain (zkontrolovat) |
+| Zámek Nelahozeves | [Nelahozeves, zámek Nelahozeves 2.JPG](https://commons.wikimedia.org/wiki/File:Nelahozeves,_z%C3%A1mek_Nelahozeves_2.JPG) | Horakvlado | CC BY-SA 3.0 |
+| Lávka do Bukolu | [Lávka v Lužci nad Vltavou 2024-04-27 04.jpg](https://commons.wikimedia.org/wiki/File:L%C3%A1vka_v_Lu%C5%BEci_nad_Vltavou_2024-04-27_04.jpg) | Hubert Kororo | CC BY-SA 4.0 |
+| Výhled na Říp | [Říp, rotunda sv. Jiří.jpg](https://commons.wikimedia.org/wiki/File:%C5%98%C3%ADp,_rotunda_sv._Ji%C5%99%C3%AD.jpg) | PatrikPaprika | CC BY-SA 4.0 |

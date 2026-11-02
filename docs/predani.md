@@ -59,7 +59,7 @@ Priorita: **P0** hned, **P1** jádro prožitku, **P2** potom. Číslování fáz
 ### P0: ověřit a dorovnat
 1. **Build APK z `main` a test na telefonu** (Android): Domů (ozubené kolo, „Aktualizováno…“, stažení prstem), Nastavení (přepnutí vzhledu), detail místa (zamčené / odemčené), mapa s novou trasou (nevede vodou, medailony sedí). Výsledky zapsat k rozhodnutím 0014–0017.
 2. **Záblesk světlého vzhledu** při zvoleném tmavém: volba se načítá asynchronně. Řešení: načíst volbu před skrytím splash screenu (`src/app/_layout.tsx`, `SplashScreen.hideAsync`).
-3. **Hustota míst:** mezera 4,4 km bez místa (Výhled na Říp → Vepřek). Doplnit jeden malý objev (`expedition.json` + příběh v `obsah.json`), upravit `pilot.test.ts` (tam je mezera výslovně uvedená).
+3. ~~**Hustota míst:** mezera 4,4 km (Výhled na Říp → Vepřek)~~ Hotovo v balíku E (0023): Vepřek měl špatnou polohu, po opravě mezera zmizela, `pilot.test.ts` hlídá prázdné `issues`.
 4. **Mapa po změně trasy:** zkontrolovat, že ušlý úsek a poloha na mapě v aplikaci odpovídají nové `route.json`. Trasa je do 1,5 km od staré, koridor 5 km stačí, ale ověřit vizuálně.
 
 ### P1: okamžiky z prototypu do aplikace (fáze 2–3)
@@ -74,8 +74,8 @@ Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádank
 12. ~~**Karta života** po prvním načtení historie (onboarding).~~ Hotovo (0021); chybí „Sdílet kartu jako obrázek“ (skryto) a ověření na zařízení.
 
 ### P1: obsah
-13. **Ověřit fakta** podle seznamu v `docs/obsah-vltavska-podklady.md` (dva nezávislé zdroje, datum), pak nastavit `verified: true`. Dělá člověk; agent může připravit druhé zdroje.
-14. **Příběhy pro etapy 2–4** (24 míst) ve stejné šabloně a tónu jako 1. etapa. Fakta jen z podkladů nebo nově dohledaná se zdrojem. Slabá místa bez příběhu (Polabská rovina, Říční tůně, Slepé rameno, Lužní les) nahradit konkrétními místy.
+13. **Ověřit fakta** (včetně nových příběhů 2.–4. etapy) podle seznamu v `docs/obsah-vltavska-podklady.md` (dva nezávislé zdroje, datum), pak nastavit `verified: true`. Dělá člověk; agent může připravit druhé zdroje.
+14. ~~**Příběhy pro etapy 2–4**~~ Hotovo v balíku E (rozhodnutí 0023): 23 příběhů, všechny `verified: false`. Zbývá najít příběh pro Slepé rameno a Říční tůně (zatím bez příběhu) a zkontrolovat nepřesné souřadnice Dolan, Lobečku, Letek a Zámku Hořín. Seznam tvrzení a druhých zdrojů: `docs/obsah-vltavska-podklady.md`.
 15. **Licence fotek:** u Trojského zámku chybí autor (`docs/mockupy/assets/ZDROJE.md`, `apps/mobile/src/data/credits.ts`).
 
 ### P2: později
