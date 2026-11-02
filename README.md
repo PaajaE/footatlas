@@ -6,4 +6,5 @@ Mobilní aplikace, která proměňuje skutečný pohyb (kroky, vzdálenost) ve v
 - [Technologie: srovnání a doporučení](docs/technologie.md)
 - [Rozhodnutí](docs/rozhodnuti.md)
 - [Návrh: kronika v SQLite](docs/kronika-sqlite.md)
+- [Návrh: z počítadla kilometrů živá výprava](docs/navrh-prozitek.md)
 - [Mockupy obrazovek](docs/mockupy/README.md)
