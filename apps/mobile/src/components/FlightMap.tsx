@@ -19,7 +19,7 @@ import {
   youLayers,
 } from "@footatlas/map-style";
 import { positionAt } from "@footatlas/core";
-import { flightKeyframes, sectionBounds } from "../navrat";
+import { sectionBounds } from "../navrat";
 import { placeProps } from "../map/atlasPlaces";
 import { MEDALLIONS } from "../map/medallionFiles";
 import { PATTERNS } from "../map/patternFiles";
@@ -41,6 +41,8 @@ const EMPTY = { type: "FeatureCollection" as const, features: [] };
 const MASK_STEPS = 6;
 /** Přiblížení kamery za letu (zhruba čtvrť; prototyp letí na ~1,9× měřítko listu). */
 const FLIGHT_ZOOM = 14;
+/** Dojezd kamery na další polohu; o málo delší než krok hodin (50 ms), aby se pohyb nezastavoval mezi kroky. */
+const FOLLOW_MS = 70;
 
 /**
  * Mapa návratu: stejný atlasový styl jako Výprava, ale kamera MapLibre letí po ušlém úseku (klíčové body z
@@ -80,11 +82,15 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
   const bounds = useMemo(() => sectionBounds(route, cumulative, fromM, toM), [route, cumulative, fromM, toM]);
   const [view, setView] = useState<{ zoom: number; lat: number }>({ zoom: FLIGHT_ZOOM, lat: start.lat });
 
-  // Poloha letu zaokrouhlená na 1/40 úseku: jinak by se zdroje GeoJSON přepisovaly každých 50 ms.
+  // Poloha značky a kamery: jemný krok (1/600 úseku), aby se plynule hýbaly se stejnými hodinami (krok ≈ 50 ms).
+  // Místa a maska se přepočítávají zřídka (drahé): místa po 1/40 úseku, maska po šestinách.
   const span = Math.max(1, toM - fromM);
-  const q = Math.round(((walkedM - fromM) / span) * 40) / 40;
+  const frac = Math.min(1, Math.max(0, (walkedM - fromM) / span));
+  const qFine = Math.round(frac * 600) / 600;
+  const q = Math.round(frac * 40) / 40;
   const here = fromM + q * span;
-  const you = useMemo(() => positionAt(route, cumulative, here), [route, cumulative, here]);
+  const youM = fromM + qFine * span;
+  const you = useMemo(() => positionAt(route, cumulative, youM), [route, cumulative, youM]);
   const done = useMemo(() => [...coords.slice(0, Math.max(1, you.segment + 1)), [you.lon, you.lat] as [number, number]], [coords, you]);
   const maskStep = Math.round(q * MASK_STEPS);
   const maskDone = useMemo(() => {
@@ -131,7 +137,7 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
     return out;
   }, [places, mode, mapTheme]);
 
-  // Let: kamera na začátek úseku, pak řetěz klíčových bodů (rovnoměrně v čase, poloha podle ease-in-out).
+  // Let: kamera skočí na začátek úseku a pak v každém kroku hodin plynule dojede (lineárně) na polohu značky.
   useEffect(() => {
     const cam = camera.current;
     if (!cam) return;
@@ -139,16 +145,13 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
       cam.fitBounds(bounds, { padding: { top: 40, right: 28, bottom: 40, left: 28 }, duration: 0 });
       return;
     }
-    const kf = flightKeyframes(route, cumulative, fromM, toM, durationMs, 12);
-    cam.jumpTo({ center: [kf[0]!.lon, kf[0]!.lat], zoom: FLIGHT_ZOOM });
-    const stops = kf.slice(1).map((k, i) => ({
-      center: [k.lon, k.lat] as [number, number],
-      zoom: FLIGHT_ZOOM,
-      duration: k.atMs - kf[i]!.atMs,
-      easing: "linear" as const,
-    }));
-    void cam.setStop({ stops } as never);
-  }, [runKey, route, cumulative, fromM, toM, durationMs, bounds, reduceMotion]);
+    cam.jumpTo({ center: [start.lon, start.lat], zoom: FLIGHT_ZOOM });
+  }, [runKey, start, bounds, reduceMotion]);
+
+  useEffect(() => {
+    if (finished || reduceMotion) return;
+    camera.current?.easeTo({ center: [you.lon, you.lat], zoom: FLIGHT_ZOOM, duration: FOLLOW_MS, easing: "linear" });
+  }, [you, finished, reduceMotion]);
 
   // Konec letu (doběhl, nebo se přeskočil): ukázat celý úsek.
   useEffect(() => {
