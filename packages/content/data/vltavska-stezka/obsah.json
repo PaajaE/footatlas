@@ -77,7 +77,7 @@
         "options": ["Podle pana Štvance, správce ostrova", "Podle štvanic, krutých zábav se zvířaty", "Podle rybářů, kteří tu štvali pstruhy"],
         "answer": 1
       },
-      "context": "Na ostrově se kdysi pořádaly štvanice, zápasy psů se zvířaty. Dnes se tu místo zvěře honí tenisové míčky a hokejové puky.",
+      "context": "Na ostrově se kdysi pořádaly štvanice, kruté zábavy se zvířaty. Dnes se tu místo zvěře honí tenisové míčky a hokejové puky.",
       "visitTip": "Stačí se rozhlédnout: kdo tu dnes honí míčky a puky?",
       "chapterId": "ostrovy",
       "sources": [{ "title": "Štvanice (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/%C5%A0tvanice" }],
