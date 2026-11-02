@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { parseSession, parseStepProfile, type ExpeditionSession, type StepProfile } from "@footatlas/core";
+import { parseWishes } from "../kronika/upcoming";
 import { parseTips, type Tip } from "../riddle";
 
 const SESSION_KEY = "footatlas.session.v1";
@@ -107,17 +108,32 @@ export async function saveTips(t: Record<string, Tip>): Promise<void> {
   }
 }
 
-const WISH_KEY = "footatlas.wish.v1";
+const WISHES_KEY = "footatlas.wishes.v1";
 
-/** „Chci vědět, až bude“ u připravované výpravy; jen poznámka v telefonu, nic se neodesílá. */
-export async function loadWish(): Promise<boolean> {
-  return (await readJson(WISH_KEY)) === true;
+/** „Chci ji“ u připravovaných výprav (id → true); jen poznámka v telefonu, nic se neodesílá. */
+export async function loadWishes(): Promise<Record<string, true>> {
+  return parseWishes(await readJson(WISHES_KEY));
 }
 
-export async function saveWish(v: boolean): Promise<void> {
+export async function saveWishes(w: Record<string, true>): Promise<void> {
   try {
-    await AsyncStorage.setItem(WISH_KEY, JSON.stringify(v));
+    await AsyncStorage.setItem(WISHES_KEY, JSON.stringify(w));
   } catch {
     // poznámka se nepodařila uložit, platí jen do zavření aplikace
+  }
+}
+
+const LIFE_CARD_KEY = "footatlas.lifecard.v1";
+
+/** Karta života se ukáže jednou po prvním načtení historie; tady je poznačeno, že už byla. */
+export async function loadLifeCardSeen(): Promise<boolean> {
+  return (await readJson(LIFE_CARD_KEY)) === true;
+}
+
+export async function saveLifeCardSeen(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(LIFE_CARD_KEY, JSON.stringify(true));
+  } catch {
+    // příště se karta může ukázat znovu
   }
 }
