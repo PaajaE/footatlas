@@ -34,6 +34,25 @@ export function flightDurationMs(deltaM: number): number {
   return Math.round(FLIGHT_MIN_MS + f * (FLIGHT_MAX_MS - FLIGHT_MIN_MS));
 }
 
+/** Nejvyšší rychlost letu v šířkách obrazovky za sekundu (špička ease-in-out je 2× průměr); víc už je rozmazané a dlaždice mapy nestačí. */
+const FLIGHT_PEAK_SCREENS_PER_S = 0.6;
+/** Šířka obrazovky v bodech a metrů na bod při přiblížení 0 (512px dlaždice, šířka 50° s. š.). */
+const SCREEN_DP = 411;
+const M_PER_DP_Z0 = 50_300;
+
+/**
+ * Přiblížení mapy za letu: pro krátký úsek blízko (14), pro dlouhý dál, aby kamera neletěla rychleji než
+ * `FLIGHT_PEAK_SCREENS_PER_S` šířek obrazovky za sekundu. Rozsah 11,5 až 14,5.
+ */
+export function flightZoom(deltaM: number, durationMs: number): number {
+  const d = Number.isFinite(deltaM) ? Math.max(0, deltaM) : 0;
+  const avgMps = durationMs > 0 ? d / (durationMs / 1000) : 0;
+  const widthM = (2 * avgMps) / FLIGHT_PEAK_SCREENS_PER_S;
+  if (widthM <= 0) return 14.5;
+  const z = Math.log2((SCREEN_DP * M_PER_DP_Z0) / widthM);
+  return Math.round(Math.min(14.5, Math.max(11.5, z)) * 10) / 10;
+}
+
 /** Zrychlení a zpomalení (ease-in-out, kvadraticky). */
 export function easeInOut(t: number): number {
   const x = Math.min(1, Math.max(0, t));

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { cumulativeM } from "@footatlas/core";
 import {
+  flightZoom,
   FLIGHT_MAX_MS,
   FLIGHT_MIN_MS,
   counterM,
@@ -155,5 +156,20 @@ describe("nadpis a úsek", () => {
     const total = cum.at(-1)!;
     const b = sectionBounds(route, cum, 0, total);
     expect(b).toEqual([14, 50, 14.1, 50.2]);
+  });
+});
+
+describe("flightZoom", () => {
+  it("krátký úsek letí blízko", () => {
+    expect(flightZoom(1400, 4000)).toBeGreaterThanOrEqual(13.5);
+  });
+  it("dlouhý úsek letí dál, aby kamera nebyla příliš rychlá", () => {
+    const z = flightZoom(12_000, 7_900);
+    expect(z).toBeLessThanOrEqual(12.5);
+    expect(z).toBeGreaterThanOrEqual(11.5);
+  });
+  it("je vždy v rozsahu 11,5 až 14,5", () => {
+    expect(flightZoom(0, 4000)).toBe(14.5);
+    expect(flightZoom(500_000, 9000)).toBe(11.5);
   });
 });
