@@ -10,3 +10,4 @@ Mobilní aplikace, která proměňuje skutečný pohyb (kroky, vzdálenost) ve v
 - [Podklady k obsahu Vltavské stezky (neověřeno)](docs/obsah-vltavska-podklady.md)
 - [Předání práce: stav a úkoly](docs/predani.md)
 - [Mockupy obrazovek](docs/mockupy/README.md)
+- [Cílový vzhled: rozbor prototypu Inkoust](docs/design-prototyp.md) (snímky v `docs/prototyp-snimky/`)

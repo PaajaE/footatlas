@@ -20,6 +20,7 @@ Po testu APK 1.4.0 na telefonu majitel produktu chtěl výrazně lepší prožit
 
 | Co | Kde |
 |---|---|
+| **Cílový vzhled (závazný), rozbor a plán balíků A–E** | `docs/design-prototyp.md`, snímky `docs/prototyp-snimky/` |
 | Návrh prožitku, plán po fázích | `docs/navrh-prozitek.md` |
 | Podklady k obsahu a **seznam faktů k ověření** | `docs/obsah-vltavska-podklady.md` (sekce „Úkoly k ověření“) |
 | Interaktivní mockupy (vzor pro implementaci) | `docs/mockupy/` (README tam), plátno Claude Design „FootAtlas prototyp Inkoust“: https://claude.ai/artifact/QEXiSvreAHWUFWqQ4kBKny |
