@@ -3,7 +3,7 @@ import type { MapTheme } from "./tokens";
 /** Minimální popis stylu MapLibre; záměrně bez závislosti na knihovně. */
 export interface StyleLayer {
   id: string;
-  type: "background" | "fill" | "line" | "symbol";
+  type: "background" | "fill" | "line" | "symbol" | "circle";
   source?: string;
   "source-layer"?: string;
   filter?: unknown;

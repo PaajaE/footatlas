@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { parseSession, parseStepProfile, type ExpeditionSession, type StepProfile } from "@footatlas/core";
+import { parseWishes } from "../kronika/upcoming";
+import { parseTips, type Tip } from "../riddle";
 
 const SESSION_KEY = "footatlas.session.v1";
 const DEMO_KEY = "footatlas.demo.v1";
@@ -89,4 +91,65 @@ export async function saveThemeChoice(c: StoredSchemeChoice): Promise<void> {
 export async function saveCalibrationStart(iso: string | null): Promise<void> {
   if (iso === null) await AsyncStorage.removeItem(CALIBRATION_KEY);
   else await AsyncStorage.setItem(CALIBRATION_KEY, JSON.stringify(iso));
+}
+
+const TIPS_KEY = "footatlas.tips.v1";
+
+/** Tipy k hádankám (id místa → zvolená možnost); zůstávají jen v telefonu. */
+export async function loadTips(): Promise<Record<string, Tip>> {
+  return parseTips(await readJson(TIPS_KEY));
+}
+
+export async function saveTips(t: Record<string, Tip>): Promise<void> {
+  try {
+    await AsyncStorage.setItem(TIPS_KEY, JSON.stringify(t));
+  } catch {
+    // tip se nepodařilo uložit, platí jen do zavření aplikace
+  }
+}
+
+const WISHES_KEY = "footatlas.wishes.v1";
+
+/** „Chci ji“ u připravovaných výprav (id → true); jen poznámka v telefonu, nic se neodesílá. */
+export async function loadWishes(): Promise<Record<string, true>> {
+  return parseWishes(await readJson(WISHES_KEY));
+}
+
+export async function saveWishes(w: Record<string, true>): Promise<void> {
+  try {
+    await AsyncStorage.setItem(WISHES_KEY, JSON.stringify(w));
+  } catch {
+    // poznámka se nepodařila uložit, platí jen do zavření aplikace
+  }
+}
+
+const LIFE_CARD_KEY = "footatlas.lifecard.v1";
+
+/** Karta života se ukáže jednou po prvním načtení historie; tady je poznačeno, že už byla. */
+export async function loadLifeCardSeen(): Promise<boolean> {
+  return (await readJson(LIFE_CARD_KEY)) === true;
+}
+
+export async function saveLifeCardSeen(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(LIFE_CARD_KEY, JSON.stringify(true));
+  } catch {
+    // příště se karta může ukázat znovu
+  }
+}
+
+const POSTCARDS_KEY = "footatlas.postcards.v1";
+
+/** Pohlednice uložené do Kroniky: pole indexů etap (od 0). Jen v telefonu. */
+export async function loadPostcards(): Promise<number[]> {
+  const v = await readJson(POSTCARDS_KEY);
+  return Array.isArray(v) ? v.filter((n): n is number => Number.isInteger(n) && n >= 0) : [];
+}
+
+export async function savePostcards(stages: number[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(POSTCARDS_KEY, JSON.stringify(stages));
+  } catch {
+    // uložení se nepovedlo, platí jen do zavření aplikace
+  }
 }

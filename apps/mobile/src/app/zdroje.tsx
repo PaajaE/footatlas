@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { Linking, Pressable, View } from "react-native";
 import { Button, Card, Screen, T } from "../components/ui";
-import { DATA_CREDITS, PHOTO_CREDITS } from "../data/credits";
+import { creditAuthor, DATA_CREDITS, PHOTO_CREDITS } from "../data/credits";
 
 /** Zdroje a licence (atribuce obrázků a mapových dat). */
 export default function Credits() {
@@ -24,7 +24,7 @@ export default function Credits() {
             <View>
               <T variant="body">{c.subject}</T>
               <T variant="small">
-                {c.author} · {c.license}
+                {creditAuthor(c)}{c.license}
               </T>
             </View>
           </Pressable>

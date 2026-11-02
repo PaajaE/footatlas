@@ -24,8 +24,8 @@ const OSRM = "https://routing.openstreetmap.de/routed-foot/route/v1/foot/";
 // Body trasy v pořadí. Řetězec je id místa z expedition.json, trojice [lon, lat, popisek] je pomocný bod.
 // Jako body trasy jsou jen místa, která leží na straně, kudy se jde. Ostatní místa se jen promítnou
 // (jsou to „výhledy přes řeku“ nebo leží dál od cesty): karluv-most, libensky-most, komora-troja,
-// cisarsky-ostrov, sedlec, podmorani, klecany, husinec, dolany, lobecek, dvorak, lesik, rip, veprek,
-// stara-vltava, lounky, nivy, tune, vyhled-melnik, horin.
+// cisarsky-ostrov, sedlec, podmorani, klecany, husinec, dolany, lobecek, dvorak, rip, veprek, mlcechvosty,
+// stara-vltava, bukol, lounky, tune, vyhled-melnik, zdymadlo-horin, horin.
 // Zkoušené a zamítnuté: Libeňský most a Sedlec/Podbaba jako body (router se vrací po stejné cestě,
 // +5 km zpětných úseků), Dvořákův dům (smyčka v jedné obci), Lužec před Vraňany (dvojitý průchod Lužcem).
 const WAYPOINTS_RAW = [

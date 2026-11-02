@@ -6,17 +6,28 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ArrivalHost } from "../components/ArrivalHost";
 import { ChronicleProvider } from "../db/ChronicleProvider";
 import { ExpeditionProvider } from "../state/ExpeditionProvider";
-import { ThemeProvider, useTheme } from "../theme/ThemeProvider";
+import { ThemeProvider, useTheme, useThemeReady } from "../theme/ThemeProvider";
 
 SplashScreen.preventAutoHideAsync();
+
+/** Skryje splash screen, až jsou písma i uložená volba vzhledu; jinak by při tmavé volbě blikl světlý. */
+function SplashGate({ fontsDone }: { fontsDone: boolean }) {
+  const themeReady = useThemeReady();
+  useEffect(() => {
+    if (fontsDone && themeReady) SplashScreen.hideAsync();
+  }, [fontsDone, themeReady]);
+  return null;
+}
 
 function Shell() {
   const theme = useTheme();
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <StatusBar style={theme.name === "dark" ? "light" : "dark"} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.bg } }}>
         <Stack.Screen name="(tabs)" />
@@ -24,9 +35,15 @@ function Shell() {
         <Stack.Screen name="delka-kroku" />
         <Stack.Screen name="zdroje" />
         <Stack.Screen name="nastaveni" />
+        <Stack.Screen name="objevy" />
+        <Stack.Screen name="karta-zivota" />
+        <Stack.Screen name="navrat" options={{ animation: "fade" }} />
+        <Stack.Screen name="pohlednice" />
+        <Stack.Screen name="privoz" />
         <Stack.Screen name="dev" options={{ presentation: "modal" }} />
       </Stack>
-    </>
+      <ArrivalHost />
+    </View>
   );
 }
 
@@ -40,16 +57,13 @@ export default function RootLayout() {
     WorkSans_600SemiBold,
   });
 
-  useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
-
   // Při chybě načtení písem aplikace běží se systémovým písmem, ne s prázdnou obrazovkou.
   if (!loaded && !error) return null;
 
   return (
     <SafeAreaProvider>
       <ThemeProvider>
+        <SplashGate fontsDone={loaded || !!error} />
         <ExpeditionProvider>
           <ChronicleProvider>
             <Shell />
