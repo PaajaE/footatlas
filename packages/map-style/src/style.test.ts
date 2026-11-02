@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { ATTRIBUTION, buildStyle, parchmentDay, parchmentNight, routeLayers, themes, type MapTheme } from "./index";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import {
+  ATLAS_LABEL_FONT,
+  ATLAS_PATTERNS,
+  ATLAS_SKETCH_START,
+  ATTRIBUTION,
+  REVEAL_INNER,
+  REVEAL_OUTER,
+  buildAtlasStyle,
+  buildStyle,
+  placeLayers,
+  youLayers,
+  parchmentDay,
+  parchmentNight,
+  patternName,
+  revealLayers,
+  revealMask,
+  routeLayers,
+  themes,
+  type LonLat,
+  type MapTheme,
+} from "./index";
 
 const opts = (theme: MapTheme) => ({
   theme,
@@ -30,6 +52,7 @@ describe.each(Object.values(themes))("styl $id", (theme) => {
     const allowed = new Set([
       ...Object.values(theme.palette),
       ...Object.values(theme.route).filter((x): x is string => typeof x === "string"),
+      ...Object.values(theme.atlas),
     ].map((x) => x.toLowerCase()));
     const used = (JSON.stringify(style) + JSON.stringify(routeLayers(theme))).match(HEX) ?? [];
     expect(used.length).toBeGreaterThan(10);
@@ -61,5 +84,152 @@ describe("motivy", () => {
     const r = routeLayers(parchmentNight);
     expect(r.map((l) => l.id)).toEqual(["route-rest-halo", "route-rest", "route-done-halo", "route-done"]);
     expect(r.at(-1)!.paint["line-color"]).toBe(parchmentNight.route.done);
+  });
+});
+
+describe.each(Object.values(themes))("atlas $id", (theme) => {
+  const style = buildAtlasStyle(opts(theme));
+  const ids = style.layers.map((l) => l.id);
+  const cut = ids.indexOf(ATLAS_SKETCH_START);
+  const colored = style.layers.slice(0, cut).filter((l) => l.id !== "background");
+  const sketch = style.layers.slice(cut + 1);
+
+  it("má unikátní id vrstev, zdroj a značku začátku skici", () => {
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(cut).toBeGreaterThan(0);
+    for (const l of style.layers) if (l.source) expect(style.sources[l.source]).toBeDefined();
+    expect(style.sources.osm!.attribution).toBe(ATTRIBUTION);
+  });
+
+  it("kolorovaná vrstva je pod skicou: ink-* před značkou, sk-* a popisky za ní", () => {
+    expect(colored.length).toBeGreaterThan(8);
+    for (const l of colored) expect(l.id.startsWith("ink-")).toBe(true);
+    expect(sketch.some((l) => l.id.startsWith("sk-"))).toBe(true);
+    expect(sketch.some((l) => l.type === "symbol")).toBe(true);
+  });
+
+  it("skica nemá plné výplně, jen vzory a linky", () => {
+    for (const l of sketch.filter((l) => l.type === "fill")) {
+      expect(l.paint["fill-color"], l.id).toBeUndefined();
+      expect(l.paint["fill-pattern"], l.id).toBeDefined();
+    }
+  });
+
+  it("kolorovaná vrstva má bloky, lesy, vinice a akvarelovou řeku", () => {
+    const byId = Object.fromEntries(style.layers.map((l) => [l.id, l]));
+    expect(byId["ink-urban"]!.paint["fill-pattern"]).toBe(patternName(theme, "blk-ink"));
+    expect(byId["ink-wood"]!.paint["fill-pattern"]).toBe(patternName(theme, "tree-ink"));
+    expect(byId["ink-vine"]!.paint["fill-pattern"]).toBe(patternName(theme, "vine-ink"));
+    expect(byId["sk-urban"]!.paint["fill-pattern"]).toBe(patternName(theme, "blk-sketch"));
+    expect(byId["ink-river"]!.paint["line-color"]).toBe(theme.atlas.river);
+    expect(byId["ink-river-wash"]!.paint["line-blur"]).toBeDefined();
+  });
+
+  it("vzory ve stylu existují jako obrázky v aplikaci", () => {
+    const used = new Set<string>();
+    for (const l of style.layers) if (typeof l.paint["fill-pattern"] === "string") used.add(l.paint["fill-pattern"]);
+    expect(used.size).toBeGreaterThan(4);
+    const base = fileURLToPath(new URL("../../../apps/mobile/assets/map/patterns/", import.meta.url));
+    for (const name of ATLAS_PATTERNS) expect(existsSync(`${base}${patternName(theme, name)}@3x.png`), name).toBe(true);
+    for (const u of used) expect(ATLAS_PATTERNS.map((p) => patternName(theme, p))).toContain(u);
+  });
+
+  it("popisky jsou kurzívou IM Fell a preferují český název; řeka se píše podél toku", () => {
+    const labels = style.layers.filter((l) => l.type === "symbol");
+    expect(labels.length).toBeGreaterThan(5);
+    for (const l of labels) {
+      expect(l.layout!["text-font"]).toEqual(ATLAS_LABEL_FONT);
+      expect(JSON.stringify(l.layout!["text-field"])).toContain("name:cs");
+    }
+    expect(ATLAS_LABEL_FONT).toEqual(["IM Fell English Italic"]); // jedno písmo: glyfy se v aplikaci hledají po písmech
+    expect(style.layers.find((l) => l.id === "water-label")!.layout!["symbol-placement"]).toBe("line");
+  });
+
+  it("všechny barvy atlasu (styl, místa, poloha, krytí) pocházejí z tokenů motivu", () => {
+    const allowed = new Set(
+      [...Object.values(theme.atlas), ...Object.values(theme.route).filter((x): x is string => typeof x === "string")].map((x) => x.toLowerCase()),
+    );
+    const used = (JSON.stringify(style) + JSON.stringify([...placeLayers(theme), ...youLayers(theme), ...revealLayers(theme)])).match(HEX) ?? [];
+    expect(used.length).toBeGreaterThan(20);
+    for (const color of used) expect(allowed.has(color.toLowerCase()), color).toBe(true);
+  });
+
+  it("vrstvy míst: kresby, razítka objevů, pečeti zastávek a štítek metrů, popisky IM Fell", () => {
+    const layers = placeLayers(theme);
+    expect(layers.map((l) => l.id)).toEqual(["places-drawing", "places-discovery", "places-stop", "places-next-label"]);
+    for (const l of layers) {
+      expect(l.source).toBe("places");
+      expect(l.layout!["icon-image"]).toBeDefined();
+    }
+    for (const l of layers.filter((l) => l.layout!["text-field"])) expect(l.layout!["text-font"]).toEqual(ATLAS_LABEL_FONT);
+    expect(JSON.stringify(layers.find((l) => l.id === "places-stop")!.layout!["icon-size"])).toContain("zoom");
+    expect(youLayers(theme).map((l) => l.source)).toEqual(["you", "you"]);
+  });
+
+  it("krycí vrstvy mají papírovou barvu a vlastní zdroje", () => {
+    const [inner, outer] = revealLayers(theme);
+    expect(inner!.source).toBe(REVEAL_INNER);
+    expect(outer!.source).toBe(REVEAL_OUTER);
+    expect(outer!.paint["fill-color"]).toBe(theme.atlas.paper);
+    expect(outer!.paint["fill-opacity"]).toBe(1);
+    expect(inner!.paint["fill-opacity"] as number).toBeLessThan(1);
+  });
+});
+
+describe("atlas den a noc", () => {
+  it("dávají stejné vrstvy a stejnou sadu tokenů", () => {
+    expect(buildAtlasStyle(opts(parchmentDay)).layers.map((l) => l.id)).toEqual(buildAtlasStyle(opts(parchmentNight)).layers.map((l) => l.id));
+    expect(Object.keys(parchmentNight.atlas).sort()).toEqual(Object.keys(parchmentDay.atlas).sort());
+  });
+});
+
+describe("revealMask", () => {
+  // Trasa na sever od 50° s.š.: 0,01° šířky ≈ 1,11 km.
+  const route: LonLat[] = [
+    [14.4, 50.0],
+    [14.4, 50.01],
+    [14.41, 50.02],
+    [14.42, 50.02],
+  ];
+  const inside = (ring: number[][], [x, y]: number[]) => {
+    let c = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i]!;
+      const [xj, yj] = ring[j]!;
+      if (yi! > y! !== yj! > y! && x! < ((xj! - xi!) * (y! - yi!)) / (yj! - yi!) + xi!) c = !c;
+    }
+    return c;
+  };
+
+  it("bez trasy je celý svět kryt", () => {
+    const m = revealMask([], 500);
+    expect(m.geometry.coordinates).toHaveLength(1);
+    expect(m.geometry.coordinates[0]).toHaveLength(1);
+  });
+
+  it("díra obsahuje body trasy a okolí do poloměru, vzdálené body ne", () => {
+    const m = revealMask(route, 500);
+    const [world, ...holes] = m.geometry.coordinates[0]!;
+    expect(world).toBeDefined();
+    expect(holes).toHaveLength(1);
+    const hole = holes[0]!;
+    for (const p of route) expect(inside(hole, p)).toBe(true);
+    expect(inside(hole, [14.4 + 0.004, 50.005])).toBe(true); // ≈ 290 m od trasy
+    expect(inside(hole, [14.4 + 0.02, 50.005])).toBe(false); // ≈ 1,4 km od trasy
+    expect(inside(hole, [14.45, 50.05])).toBe(false);
+  });
+
+  it("jeden bod dává kruh", () => {
+    const hole = revealMask([[14.4, 50]], 300).geometry.coordinates[0]![1]!;
+    expect(inside(hole, [14.4, 50])).toBe(true);
+    expect(inside(hole, [14.41, 50])).toBe(false);
+  });
+
+  it("zvládne dlouhou trasu rychle", () => {
+    const long: LonLat[] = Array.from({ length: 4000 }, (_, i) => [14.4 + i * 0.0001 + Math.sin(i / 40) * 0.01, 50 + i * 0.0001]);
+    const t = Date.now();
+    const m = revealMask(long, 600);
+    expect(Date.now() - t).toBeLessThan(3000);
+    expect(m.geometry.coordinates[0]!.length).toBeGreaterThanOrEqual(2);
   });
 });

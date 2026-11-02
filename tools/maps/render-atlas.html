@@ -1,0 +1,43 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="/vendor/maplibre-gl.css" rel="stylesheet">
+<script src="/vendor/maplibre-gl.js"></script>
+<script src="/vendor/pmtiles.js"></script>
+<style>html,body{margin:0}#map{width:var(--w);height:var(--h)}.maplibregl-ctrl-attrib{display:none}</style>
+</head><body><div id="map"></div>
+<script>
+const protocol = new pmtiles.Protocol();
+maplibregl.addProtocol('pmtiles', protocol.tile);
+window.__errors = [];
+window.addEventListener('error', (e) => window.__errors.push(String(e.message)));
+
+// opts: { style, images:{název:url}, reveal:{outer,inner}, revealLayers, routeLayers, routeDone, routeRest,
+//         places, placeLayers, you, youLayers, beforeId, center, zoom, bounds, w, h, pad }
+window.setup = async (o) => {
+  document.documentElement.style.setProperty('--w', o.w + 'px');
+  document.documentElement.style.setProperty('--h', o.h + 'px');
+  const bitmaps = {};
+  for (const [name, url] of Object.entries(o.images)) bitmaps[name] = await createImageBitmap(await (await fetch(url)).blob());
+  const map = (window.map = new maplibregl.Map({
+    container: 'map', style: o.style, center: o.center ?? [14.4, 50.2], zoom: o.zoom ?? 10, pixelRatio: 2, fadeDuration: 0,
+    preserveDrawingBuffer: true, attributionControl: false, bearing: 0, pitch: 0,
+  }));
+  map.on('error', (e) => window.__errors.push(String(e.error?.message ?? e.message ?? e)));
+  // Obrázky (vzory, pečeti) se přidají, jakmile je styl nebo vrstva potřebuje (v aplikaci to dělá komponenta Images).
+  map.on('styleimagemissing', (e) => { if (bitmaps[e.id] && !map.hasImage(e.id)) map.addImage(e.id, bitmaps[e.id], { pixelRatio: 3 }); });
+  await new Promise((r) => map.once('load', r));
+  for (const [name, bmp] of Object.entries(bitmaps)) if (!map.hasImage(name)) map.addImage(name, bmp, { pixelRatio: 3 });
+  const geo = (data) => ({ type: 'geojson', data });
+  map.addSource('reveal-inner', geo(o.reveal.inner));
+  map.addSource('reveal-outer', geo(o.reveal.outer));
+  map.addSource('route-done', geo(o.routeDone));
+  map.addSource('route-rest', geo(o.routeRest));
+  map.addSource('places', geo(o.places));
+  map.addSource('you', geo(o.you));
+  for (const l of o.revealLayers) map.addLayer(l, o.beforeId);
+  for (const l of [...o.routeLayers, ...o.placeLayers, ...o.youLayers]) map.addLayer(l);
+  if (o.bounds) map.fitBounds(o.bounds, { padding: o.pad ?? 20, duration: 0 });
+  await new Promise((r) => (map.loaded() && map.areTilesLoaded() ? setTimeout(r, 400) : map.once('idle', () => setTimeout(r, 400))));
+  return { errors: window.__errors };
+};
+</script></body></html>

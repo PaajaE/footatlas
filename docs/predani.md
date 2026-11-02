@@ -1,6 +1,6 @@
 # Předání práce: stav k 2. 11. 2026
 
-Pro dalšího agenta nebo vývojáře. Popisuje, co je hotové, kde to je a co zbývá. Stav odpovídá `main` po [PaajaE/footatlas#14](https://github.com/PaajaE/footatlas/pull/14) (merge commit `192362b`).
+Pro dalšího agenta nebo vývojáře. Popisuje, co je hotové, kde to je a co zbývá. Stav odpovídá `main` po [PaajaE/footatlas#14](https://github.com/PaajaE/footatlas/pull/14) (merge commit `192362b`) a větvi `claude/prozitek-faze2` s balíkem B (mapa jako atlas, rozhodnutí 0020, viz níže).
 
 ## 1. Kontext v kostce
 
@@ -40,6 +40,7 @@ Po testu APK 1.4.0 na telefonu majitel produktu chtěl výrazně lepší prožit
 | 0016 | Příběhy míst odděleně od geometrie: háček, upoutávka, hádanka (3 možnosti), kontext, tip „Až tam půjdete“, kapitola, zdroje. 14 míst 1. etapy, 5 kapitol. Nový detail místa | `packages/content/src/story.ts` (+test), `packages/content/data/vltavska-stezka/obsah.json`, `apps/mobile/src/data/vltavska.ts`, `apps/mobile/src/app/zastavka/[id].tsx` |
 | 0018 | Tipy k hádankám, „Projít je“ (příběhy objevů), Domů (hádanka, Kam dnes dojdu?, Nedávno objeveno, Kapitoly), Objevovat, deník v Kronice | `src/riddle.ts` (+test), `src/components/Riddle.tsx`, `src/components/HomeSections.tsx`, `src/app/objevy.tsx`, `src/state/useTips.ts` |
 | 0017 | Pěší trasa po souši (OSRM nad OSM), 62,25 km, 4 etapy (Roztoky, Kralupy, Vraňany, Mělník) | `tools/route/build-walking-route.mjs` (+README), `packages/content/data/vltavska-stezka/route.json`, `expedition.json`, `pilot.test.ts` |
+| 0020 | **Balík B: mapa jako ilustrovaný atlas** a nová Výprava: styl skica + kolorovaná vrstva v masce kolem ušlé trasy, vzory, glyfy IM Fell, pečeti a razítka míst, kresby (loď, zámek, most), rámeček s měřítkem, plovoucí karta a spodní panel | `packages/map-style/src/atlas.ts`, `reveal.ts`, `src/components/ExpeditionMap.tsx`, `AtlasFrame.tsx`, `src/app/(tabs)/vyprava.tsx`, `src/map/atlasPlaces.ts`, `vypravaInfo.ts`, `tools/maps/make-{medallions,patterns,glyphs}.py`, `render-atlas.mjs` |
 
 Cesty v tabulce jsou relativně k `apps/mobile/` u aplikace.
 
@@ -66,7 +67,7 @@ Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádank
 6. **Příběhy objevů (M2):** celoobrazovkové listování nově odemčenými místy (háček, kontext, den dosažení, „co přibylo na mapě“). Vzor: příběhová část v `Main.dc.html`.
 7. **Hádanka s tipem (M3):** u zamčeného místa tři možnosti, tip se uloží (SQLite nebo AsyncStorage) a vyhodnotí po odemčení. Data už jsou v `obsah.json` (`riddle.options`, `riddle.answer`). Vzor `Hadanka.dc.html`.
 8. **Příchod naživo (M4):** když živá obnova odemkne místo při otevřené aplikaci, ukázat dopad pečeti a hlášku „Právě jste došli k …“ (+ haptika). Navázat na `refreshFor` v `ExpeditionProvider` (porovnat `reached` před a po).
-9. **Styl mapy skica / inkoust (fáze 3):** v `packages/map-style` dvě vrstvy: tužková skica všude, kolorovaný styl jen v masce kolem ušlé části trasy. Pečeti a razítka podle `Pecete.dc.html` (medailony dnes v `apps/mobile/assets/map/medallions`, generuje `tools/maps/make-medallions.py`).
+9. ~~Styl mapy skica / inkoust~~ **Hotovo v balíku B (rozhodnutí 0020), na zařízení NEOVĚŘENO.** Zbývá ověřit na emulátoru / telefonu: vzory (`fill-pattern`), maska (`beforeId` vrstev u zdrojů přidaných komponentami), štítek metrů (`icon-text-fit`), výkon `revealMask` a hustotu popisků; porovnat se snímky v `docs/mapa-atlas/` a `docs/prototyp-snimky/09-vyprava.jpg`. Dále: tažení spodního panelu na Výpravě, kresby dalších památek, ruční dolaďování noční palety, vzory se neotáčejí.
 10. **Domů podle mockupu:** výřez atlasu nahoře, „Kam dnes dojdu?“ (1 / 2 / 4 km / konec etapy), nedávno objeveno, kapitoly. Vzor `Domu.dc.html`.
 11. **Kronika podle mockupu:** zeměkoule s ušlou částí obvodu, střídavé postřehy, Deník jako časová osa, Životní cesta, Rok den po dni, Sbírky. Vzor `Kronika.dc.html`. Data: `ChronicleProvider`, `expedition_event`.
 12. **Karta života** po prvním načtení historie (onboarding). Vzor `KartaZivota.dc.html`.
