@@ -75,3 +75,6 @@ Prototyp na plátně „FootAtlas prototyp Inkoust“ používá tyto texty bez 
 - [ ] Licence fotek (u Trojského zámku chybí autor).
 - [ ] Kresba atlasu: polohy čtvrtí, lesů a dominant podle skutečných dat.
 - [ ] Statistiky v Kronice jsou ukázkové; napojit na data.
+- [ ] Rašínovo nábřeží: „největší otáčivá okna svého druhu na světě“.
+- [ ] Životní cesta (Kronika): vzdálenosti po Hedvábné stezce (Praha–Vídeň 250 km … Tokio 13 300 km, Sapporo 14 400 km) jsou hrubý odhad; spočítat z jedné definované trasy.
+- [ ] Objevovat: Po Labi do Děčína (asi 100 km), Krkonošská hřebenovka (asi 70 km) ověřit délky a vybrat trasy; licence fotek Krkonoše, Měsíc, Mělník.
