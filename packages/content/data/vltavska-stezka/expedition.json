@@ -207,7 +207,7 @@
       "lat": 50.199,
       "lon": 14.36,
       "unlockAtM": 26521,
-      "text": "Bývalá voroplavecká obec v úzkém údolí. Odtud se otevírá výhled na skalnaté svahy nad řekou.",
+      "text": "Obec v údolí Vltavy, poprvé zmíněná roku 993. Odtud se otevírá výhled na skalnaté svahy nad řekou.",
       "draft": true,
       "photo": "libcice"
     },
@@ -248,7 +248,7 @@
       "lat": 50.252,
       "lon": 14.306,
       "unlockAtM": 35408,
-      "text": "Čtvrť na levém břehu s výhledem na zámek.",
+      "text": "Čtvrť Kralup nad Vltavou na pravém břehu řeky.",
       "draft": true
     },
     {
@@ -295,16 +295,6 @@
     },
     {
       "kind": "discovery",
-      "id": "lesik",
-      "name": "Lužní les",
-      "lat": 50.293,
-      "lon": 14.342,
-      "unlockAtM": 42065,
-      "text": "Les, který řeka pravidelně zaplavuje.",
-      "draft": true
-    },
-    {
-      "kind": "discovery",
       "id": "rip",
       "name": "Výhled na Říp",
       "lat": 50.297,
@@ -317,10 +307,20 @@
       "kind": "discovery",
       "id": "veprek",
       "name": "Vepřek",
-      "lat": 50.298,
-      "lon": 14.352,
-      "unlockAtM": 50033,
+      "lat": 50.3108,
+      "lon": 14.3231,
+      "unlockAtM": 47396,
       "text": "Vesnička na okraji říční nivy.",
+      "draft": true
+    },
+    {
+      "kind": "discovery",
+      "id": "mlcechvosty",
+      "name": "Mlčechvosty",
+      "lat": 50.3189,
+      "lon": 14.3392,
+      "unlockAtM": 48955,
+      "text": "Ves na levém břehu, kam kdysi jezdili obrozenci.",
       "draft": true
     },
     {
@@ -345,22 +345,22 @@
     },
     {
       "kind": "discovery",
+      "id": "bukol",
+      "name": "Lávka do Bukolu",
+      "lat": 50.3147,
+      "lon": 14.3925,
+      "unlockAtM": 54713,
+      "text": "Zavěšená lávka na místě bývalého přívozu.",
+      "draft": true
+    },
+    {
+      "kind": "discovery",
       "id": "lounky",
       "name": "Lužec nad Vltavou",
       "lat": 50.32,
       "lon": 14.399,
       "unlockAtM": 54898,
       "text": "Obec s kostelem na terase nad nivou.",
-      "draft": true
-    },
-    {
-      "kind": "discovery",
-      "id": "nivy",
-      "name": "Polabská rovina",
-      "lat": 50.33,
-      "lon": 14.42,
-      "unlockAtM": 56714,
-      "text": "Krajina se otevírá, na obzoru Říp.",
       "draft": true
     },
     {
@@ -381,6 +381,16 @@
       "lon": 14.4737,
       "unlockAtM": 59417,
       "text": "Na ostrohu se objeví zámek a kostel.",
+      "draft": true
+    },
+    {
+      "kind": "discovery",
+      "id": "zdymadlo-horin",
+      "name": "Zdymadlo Hořín",
+      "lat": 50.3409,
+      "lon": 14.4686,
+      "unlockAtM": 60550,
+      "text": "Historické dvoukomorové zdymadlo z roku 1905.",
       "draft": true
     },
     {

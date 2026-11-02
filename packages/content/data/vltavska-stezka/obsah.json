@@ -216,6 +216,331 @@
       "chapterId": "sidla",
       "sources": [{ "title": "Roztoky (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Roztoky_(z%C3%A1mek)" }],
       "verified": false
+    },
+    {
+      "id": "levy-hradec",
+      "hook": "Tady byl 19. února 982 zvolen druhým pražským biskupem Vojtěch, v místě, kde podle tradice stál první křesťanský kostel v Čechách.",
+      "teaser": "Návrší, na kterém se rozhodovalo o biskupovi.",
+      "riddle": {
+        "question": "Co se na Levém Hradci stalo 19. února 982?",
+        "options": ["Byl zvolen druhý pražský biskup", "Byl korunován první český král", "Byla sepsána první česká listina"],
+        "answer": 0
+      },
+      "context": "Hradiště o rozloze zhruba 6,4 hektaru sloužilo Přemyslovcům. Podle tradice tu Bořivoj v 80. letech 9. století postavil kostel svatého Klimenta. Počátkem 10. století ho Přemyslovci opustili a koncem 11. století patrně zanikl. Dnes je to národní kulturní památka.",
+      "visitTip": "Podle turistických průvodců jsou v kryptě kostela vidět základy rotundy z 9. století; otevírací dobu zjistěte předem.",
+      "chapterId": "pocatky",
+      "sources": [{ "title": "Levý Hradec (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Lev%C3%BD_Hradec" }, { "title": "Kostel sv. Klimenta v Levém Hradci (prague.eu)", "url": "https://prague.eu/cs/objevujte/kostel-sv-klimenta-v-levem-hradci/" }],
+      "verified": false
+    },
+    {
+      "id": "rez",
+      "hook": "V březnu 1909 tu 21 lidí založilo první českou anarchistickou kolonii. Do roka byla zadlužená.",
+      "teaser": "Tady se jednou zkoušelo žít bez šéfů.",
+      "riddle": {
+        "question": "Co v březnu 1909 vzniklo v Řeži?",
+        "options": ["První česká anarchistická kolonie", "První česká jaderná laboratoř", "První česká družstevní sklárna"],
+        "answer": 0
+      },
+      "context": "Kolonie hospodařila na usedlosti o výměře asi 54 hektarů, měla koně, krávy a zemědělské stroje a žila ze společné pokladny. Místo mzdy dostávali členové podíl ze zisku. Od roku 1910 o ní anarchistický tisk přestal psát a roku 1911 byla usedlost prodána. V severní části obce dnes stojí areál jaderného výzkumu.",
+      "sources": [{ "title": "Řež (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/%C5%98e%C5%BE" }],
+      "verified": false
+    },
+    {
+      "id": "klecany",
+      "hook": "Podle pověsti leží v klecanské tůni zvony, které se vracely domů. Při úplňku se z ní prý ozývají.",
+      "teaser": "Na dně tůně prý něco zvoní.",
+      "riddle": {
+        "question": "Kam se podle pověsti potopily zvony vracející se do Klecan?",
+        "options": ["Do tůně pod jezem", "Do studny na návsi", "Do rybníka u zámku"],
+        "answer": 0
+      },
+      "context": "Zvony si prý Klecany zapůjčily do Brandýsa nad Labem, ale v noci se vracely domů. Hmatatelnější je hradiště Pravý Hradec z doby kolem roku 900. V roce 2000 tu odkryli slovanské pohřebiště z první poloviny 10. století, jehož význam se srovnává s Levým Hradcem a Pražským hradem.",
+      "visitTip": "Z Klecánek do Roztok jezdí přívoz pro pěší a cyklisty.",
+      "chapterId": "pocatky",
+      "sources": [{ "title": "Klecany (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Klecany" }],
+      "verified": false
+    },
+    {
+      "id": "husinec",
+      "hook": "Jméno vzniklo z místa, kde se chovaly husy. Roku 1227 se psalo Guscinec.",
+      "teaser": "Jméno prozrazuje, kdo tu býval doma.",
+      "riddle": {
+        "question": "Podle čeho se Husinec jmenuje?",
+        "options": ["Podle místa chovu hus", "Podle Jana Husa", "Podle husté mlhy v údolí"],
+        "answer": 0
+      },
+      "context": "Nejstarší doklad jména je v listině, která se dnes považuje za falzum datované zhruba k roku 1227. Přemysl Otakar I. v ní svěřil poddané v Husinci a v Řeži klášteru svatého Jiří v Praze. Východní část obce zabírá kamenolom Klecany.",
+      "sources": [{ "title": "Husinec (okres Praha-východ) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Husinec_(okres_Praha-v%C3%BDchod)" }],
+      "verified": false
+    },
+    {
+      "id": "libcice",
+      "hook": "Libčice jsou v písemných pramenech od roku 993, tedy déle než tisíc let.",
+      "teaser": "Obec, která se do listin zapsala před tisíciletím.",
+      "riddle": {
+        "question": "Ke kterému roku sahá první písemná zmínka o Libčicích?",
+        "options": ["993", "1293", "1593"],
+        "answer": 0
+      },
+      "context": "Zmiňuje je zakládací listina břevnovského kláštera. V roce 1159 je král Vladislav II. daroval maltézskému klášteru v Praze. Mezi pamětihodnostmi je zřícenina hradu Liběhrad, skalnatý vrch Kameníček a funerální plastiky Františka Bílka.",
+      "visitTip": "Přes Vltavu tu jezdí přívoz Dol – Libčice nad Vltavou.",
+      "sources": [{ "title": "Libčice nad Vltavou (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Lib%C4%8Dice_nad_Vltavou" }],
+      "verified": false
+    },
+    {
+      "id": "privoz-letky",
+      "hook": "Jméno Letek se patrně odvozuje od hmyzu, který se v nivě Vltavy hojně vyskytoval. První zmínka je z roku 1052.",
+      "teaser": "Jméno, které prý přiletělo s hmyzem.",
+      "riddle": {
+        "question": "Podle čeho se patrně jmenují Letky?",
+        "options": ["Podle hmyzu v říční nivě", "Podle letců z blízkého letiště", "Podle letní slavnosti"],
+        "answer": 0
+      },
+      "context": "Nejstarší zmínka je v zakládací listině kapituly ve Staré Boleslavi, kterou vydal kníže Břetislav I. Místní tvrz byla roku 1638 označena za zpustlou a nad zemí po ní nezůstalo nic. Od roku 1924 jsou Letky součástí Libčic.",
+      "sources": [{ "title": "Letky (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Letky" }, { "title": "Libčice nad Vltavou (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Lib%C4%8Dice_nad_Vltavou" }],
+      "verified": false
+    },
+    {
+      "id": "dolany",
+      "hook": "Zdymadlo s elektrárnou u Dolan krotí Vltavu, a přesto obec v roce 2002 zalila velká voda.",
+      "teaser": "Řeka tu jednou přetekla i přes zdymadlo.",
+      "riddle": {
+        "question": "Co postihlo Dolany nad Vltavou v roce 2002?",
+        "options": ["Velká voda", "Požár návsi", "Dlouhé sucho"],
+        "answer": 0
+      },
+      "context": "Před vsí stojí zdymadlo Dolany s elektrárnou a na protějším břehu plavební komora Dolánky, která leží většinou také v katastru Dolan. Obec je doložena od roku 1318 a leží na levém břehu zhruba tři kilometry jihovýchodně od Kralup.",
+      "sources": [{ "title": "Dolany nad Vltavou (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Dolany_nad_Vltavou" }],
+      "verified": false
+    },
+    {
+      "id": "kralupy",
+      "hook": "Odkud je jméno Kralupy, nikdo neví jistě: vykládá se od loupačů kůry i jako posměšek na zloděje slepic.",
+      "teaser": "Město se jménem, které má víc výkladů.",
+      "riddle": {
+        "question": "Co se podle jednoho z výkladů skrývá ve jménu Kralupy?",
+        "options": ["Ves loupačů kůry", "Králova pokladnice", "Ves králových lovců"],
+        "answer": 0
+      },
+      "context": "Město leží tam, kde Vltava vytéká z pražské plošiny do Polabí. Po příchodu železnice roku 1851 tu vznikla první chemická továrna. Povodeň 2002 zasáhla střed města a byla největší v historii dolního Povltaví. Nálet z 22. března 1945 na rafinerii patří k největším tragédiím v dějinách města.",
+      "visitTip": "Přes řeku vás převede most T. G. Masaryka z let 1926 až 1928 a vedle něj pěší lávka z prosince 1996.",
+      "sources": [{ "title": "Kralupy nad Vltavou (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Kralupy_nad_Vltavou" }, { "title": "Tragické bombardování na konci války zasáhlo Kralupy (Česká televize)", "url": "https://ct24.ceskatelevize.cz/clanek/domaci/nemohli-jsme-poznat-sve-mesto-tragicke-bombardovani-na-konci-valky-zasahlo-kralupy-51917" }],
+      "verified": false
+    },
+    {
+      "id": "lobecek",
+      "hook": "V roce 1869 tu stálo 27 domů. Dnes jich je 765 a ve čtvrti bydlí přes pět tisíc lidí.",
+      "teaser": "Ves, která se rozrostla v celou čtvrt.",
+      "riddle": {
+        "question": "Kolik domů stálo v Lobečku v roce 1869?",
+        "options": ["27", "270", "2 700"],
+        "answer": 0
+      },
+      "context": "Lobeček je dnes část Kralup nad Vltavou. Nejvíc obyvatel, 7 510, tu napočítali při sčítání 1980. Ves patřila svatovítské kapitule a od roku 1623 až do roku 1848 Lobkowiczům. V Kralupech začala koncem léta 1958 stavba závodu Kaučuk a výroba se rozběhla roku 1963.",
+      "visitTip": "Pěší lávka spojuje centrum Kralup s Lobečkem.",
+      "sources": [{ "title": "Lobeček (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Lobe%C4%8Dek" }, { "title": "Kralupy nad Vltavou (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Kralupy_nad_Vltavou" }],
+      "verified": false
+    },
+    {
+      "id": "nelahozeves",
+      "hook": "Zámek bývá spolu s Kaceřovem označován za první ohlas italského architekta Palladia v Čechách.",
+      "teaser": "Kousek Itálie na břehu Vltavy.",
+      "riddle": {
+        "question": "Který italský architekt prý inspiroval zámek v Nelahozevsi?",
+        "options": ["Andrea Palladio", "Michelangelo", "Filippo Brunelleschi"],
+        "answer": 0
+      },
+      "context": "Stavbu začal roku 1553 Florián Gryspek z Gryspachu, poradce Ferdinanda I. Měl tu knihovnu, klenotnici a galerii převážně vlámských mistrů. Roku 1623 koupila panství Polyxena z Lobkovic a zámek patří Lobkowiczům, s výjimkou let 1950 až 1993. Renesanční podobu si zachoval i díky malé péči a nezájmu o přestavby.",
+      "visitTip": "Uvnitř je dvanáct pokojů v duchu 19. století a knihovna o 65 000 svazcích.",
+      "chapterId": "sidla",
+      "sources": [{ "title": "Nelahozeves (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Nelahozeves_(z%C3%A1mek)" }, { "title": "Historie zámku Nelahozeves (Lobkowicz)", "url": "https://www.lobkowicz.cz/en/nelahozeves-castle/history" }],
+      "verified": false
+    },
+    {
+      "id": "dvorak",
+      "hook": "Nejhranější český skladatel na světě se narodil v domě s hospodou a řeznictvím naproti kostelu.",
+      "teaser": "Dům, ve kterém to všechno začalo notou.",
+      "riddle": {
+        "question": "V jaké rodině se narodil Antonín Dvořák?",
+        "options": ["Hostinského a řezníka", "Mlynáře", "Kantora a varhaníka"],
+        "answer": 0
+      },
+      "context": "Antonín Dvořák se tu narodil 8. září 1841 jako první z devíti dětí. Školní dokumenty se nedochovaly, protože je zničil požár nelahozevské školy roku 1885. Po škole ho otec poslal ke strýci do Zlonic, kde se učil hudbě.",
+      "visitTip": "Dům stojí naproti kostelu; podle zpráv z října 2025 se po rekonstrukci znovu otevřel jako expozice.",
+      "sources": [{ "title": "Nelahozeves (antonin-dvorak.cz)", "url": "https://www.antonin-dvorak.cz/en/life/places/nelahozeves/" }, { "title": "Antonín Dvořák (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Anton%C3%ADn_Dvo%C5%99%C3%A1k" }, { "title": "Dvořák house reopens after years of renovation (The World)", "url": "https://theworld.org/stories/2025/10/09/dvorak-house-reopens-after-years-of-renovation" }],
+      "verified": false
+    },
+    {
+      "id": "veltrusy",
+      "hook": "V Chotkově zámku se roku 1754 konal veletrh, který bývá označován za první vzorkový veletrh na světě.",
+      "teaser": "Park, kde se sešly výrobky celého království.",
+      "riddle": {
+        "question": "Co se roku 1754 konalo v zámeckém areálu ve Veltrusích?",
+        "options": ["Veletrh výrobků Království českého", "Korunovace", "Turnaj šermířů"],
+        "answer": 0
+      },
+      "context": "Velký trh tovarů Království českého se konal za účasti Marie Terezie. Půdorys zámku tvoří oválné jádro a křídla v podobě ondřejského kříže. Chotek původně plánoval francouzskou zahradu, ale časté povodně a móda anglického parku vedly k jiné podobě. Povodeň 2002 zaplavila většinu parku.",
+      "visitTip": "Park je součástí přírodní památky a táhne se až k Červenému mlýnu na konci Osové aleje.",
+      "chapterId": "sidla",
+      "sources": [{ "title": "Veltrusy (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Veltrusy_(z%C3%A1mek)" }, { "title": "Zámek Veltrusy: historie (NPÚ)", "url": "https://zamek-veltrusy.cz/en/about/history" }],
+      "verified": false
+    },
+    {
+      "id": "cerveny-mlyn",
+      "hook": "Pseudogotický Červený mlýn na konci Osové aleje sloužil i jako penzion a výletní restaurace a dvakrát vyhořel.",
+      "teaser": "Mlýn v gotickém kabátě.",
+      "riddle": {
+        "question": "Čím byl Červený mlýn kromě mlýna?",
+        "options": ["Penzionem a výletní restaurací", "Celnicí", "Pivovarem"],
+        "answer": 0
+      },
+      "context": "Stojí v severní části veltruského parku poblíž soutoku Vltavy a Mlýnského potoka. Podle jednoho zdroje vznikl roku 1792, po zrušení mlýnského zařízení koncem 19. století v něm byl penzion a výletní restaurace a podruhé vyhořel roku 1929.",
+      "visitTip": "Dojděte k němu po Osové aleji, na jejímž konci stojí.",
+      "chapterId": "sidla",
+      "sources": [{ "title": "Veltrusy (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Veltrusy_(z%C3%A1mek)" }, { "title": "Červený mlýn, Všestudy (Waymarking)", "url": "https://www.waymarking.com/waymarks/WMZ421_Cerven_mln_Red_Mill_Vsestudy_Central_Bohemia_Czechia" }],
+      "verified": false
+    },
+    {
+      "id": "rip",
+      "hook": "Jméno Říp je podle některých výkladů předkeltské a znamená prostě „hora“.",
+      "teaser": "Hora s jménem, které je možná starší než Češi.",
+      "riddle": {
+        "question": "Co podle jednoho z výkladů znamená jméno Říp?",
+        "options": ["Prostě „hora“", "Zlatý vrch", "Kámen praotce"],
+        "answer": 0
+      },
+      "context": "Vrch vysoký 460,8 metru stojí asi 4 km jižně od Roudnice. Podle pověsti z Kosmovy kroniky odtud praotec Čech přehlédl krajinu a rozhodl se zde usadit. Na vrcholu stojí rotunda svatého Jiří zmíněná roku 1126. Podle nového výzkumu je hora pozůstatkem lávového jezera starého více než 26 milionů let.",
+      "chapterId": "pocatky",
+      "sources": [{ "title": "Říp (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/%C5%98%C3%ADp" }, { "title": "Věděl praotec Čech, na čem stojí hora Říp? (Novinky)", "url": "https://www.novinky.cz/clanek/veda-skoly-vedel-praotec-cech-na-cem-stoji-hora-rip-je-pozustatkem-lavoveho-jezera-40521774" }],
+      "verified": false
+    },
+    {
+      "id": "veprek",
+      "hook": "Fotovoltaická elektrárna u Vepřku byla při spuštění 8. září 2010 největší v České republice.",
+      "teaser": "Vesnička, která roku 2010 sbírala slunce na rekord.",
+      "riddle": {
+        "question": "Čím se Vepřek roku 2010 zapsal mezi rekordy?",
+        "options": ["Největší fotovoltaickou elektrárnou v Česku", "Největším sudem na víno", "Nejdelší lávkou přes Vltavu"],
+        "answer": 0
+      },
+      "context": "Vesnice na levém břehu Vltavy je doložena od roku 1346 a leží asi 1,5 km východně od Nové Vsi. Stojí tu kostel Narození Panny Marie, dřevěná zvonice a vodní mlýn čp. 19. Narodil se tu Josef Walter (1873–1950), inženýr, továrník a průkopník automobilů.",
+      "sources": [{ "title": "Vepřek (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Vep%C5%99ek" }],
+      "verified": false
+    },
+    {
+      "id": "mlcechvosty",
+      "hook": "Do Mlčechvost jezdili Havlíček Borovský, Sladkovský i Antonín Dvořák. Scházeli se tu obrozenci.",
+      "teaser": "Ves, kde se schůzovalo u Kratochvílů.",
+      "riddle": {
+        "question": "Který skladatel do Mlčechvost často jezdil?",
+        "options": ["Antonín Dvořák", "Bedřich Smetana", "Leoš Janáček"],
+        "answer": 0
+      },
+      "context": "Ves leží na levém břehu Vltavy asi dva kilometry jihozápadně od Vraňan a poprvé se zmiňuje roku 1436. Po zrušení roboty a v duchu revoluce 1848 se tu u Kratochvílů scházeli přední stoupenci obrozeneckého hnutí. V květnu 1818 vyhořela téměř celá ves.",
+      "sources": [{ "title": "Mlčechvosty (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Ml%C4%8Dechvosty" }],
+      "verified": false
+    },
+    {
+      "id": "vranany",
+      "hook": "Na Vraňanském kanálu je jednosměrný provoz, který řídí světla. Lodě se míjejí jen u výhybny v Lužci.",
+      "teaser": "Kanál se semafory pro lodě.",
+      "riddle": {
+        "question": "Jak se řídí provoz lodí na Vraňansko-hořínském kanálu?",
+        "options": ["Světelnou signalizací", "Zvoněním zvonu", "Vlajkami na břehu"],
+        "answer": 0
+      },
+      "context": "Kanál dlouhý asi deset kilometrů vznikl v letech 1902 až 1905. Lodím umožňuje obejít poslední peřeje Vltavy před soutokem s Labem. Na počátku 20. století přes něj postavili osm mostů. V letech 2019 až 2021 se mosty přestavěly, aby pod nimi proplula plavidla s nástavbami až sedm metrů vysokými.",
+      "chapterId": "vorari",
+      "sources": [{ "title": "Laterální plavební kanál Mělník–Vraňany (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Later%C3%A1ln%C3%AD_plavebn%C3%AD_kan%C3%A1l_M%C4%9Bln%C3%ADk%E2%80%93Vra%C5%88any" }, { "title": "Vodní cesty (ŘVC ČR), 4/2021", "url": "https://www.rvc.gov.cz/admin-data/storage/get/199-vcap_4_2021.pdf" }],
+      "verified": false
+    },
+    {
+      "id": "bukol",
+      "hook": "Lávka dlouhá 130 metrů visí na jediném čtyřicetimetrovém pylonu a nahradila přívoz, který tu jezdil asi sto let.",
+      "teaser": "Jeden pylon a lana místo převozníka.",
+      "riddle": {
+        "question": "Co nahradila zavěšená lávka mezi Lužcem a Bukolem?",
+        "options": ["Přívoz", "Brod", "Most z lodí"],
+        "answer": 0
+      },
+      "context": "Lávka z roku 2020 spojuje ostrovní Lužec s Bukolem. Její mostovka je z ultra vysokohodnotného betonu s rozptýlenou ocelovou výztuží a nese ji 17 párů ocelových lan. Autory jsou Petr Tej, Marek Blank a Jan Mourek. Vede po ní trasa EuroVelo 7 a přes lávku mohou projet i záchranáři, což zkracuje cestu mezi břehy o téměř 17 km.",
+      "visitTip": "Na bukolské straně vysadili dubovou alej, jejíž stromy mají dorůst do výšky pylonu.",
+      "chapterId": "mosty",
+      "sources": [{ "title": "Největší vltavský ostrov architekti propojili s pevninou (E15)", "url": "https://www.e15.cz/galerie/magazin/223877/nejvetsi-vltavsky-ostrov-architekti-propojili-s-pevninou-lavka-po-100-letech-nahrazuje-privoz" }, { "title": "Lávka přes Vltavu tenká jako stužka (České stavby)", "url": "https://www.ceskestavby.cz/clanky/lavka-pres-vltavu-tenka-jako-stuzka-diky-specialnimu-betonu-uhpc-to-slo-35182.html" }, { "title": "Lužec nad Vltavou (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Lu%C5%BEec_nad_Vltavou" }],
+      "verified": false
+    },
+    {
+      "id": "lounky",
+      "hook": "Lužec je od roku 1907 jedinou českou obcí, která leží celá na ostrově. Oddělil ho od pevniny kanál.",
+      "teaser": "Obec, kterou kanál udělal ostrovem.",
+      "riddle": {
+        "question": "Čím je Lužec nad Vltavou v Česku jedinečný?",
+        "options": ["Celá obec leží na ostrově", "Je to nejmenší obec v zemi", "Nevede do ní žádná silnice"],
+        "answer": 0
+      },
+      "context": "Ostrov vznikl s plavebním kanálem Vraňany – Hořín a je největším ostrovem na Vltavě. Je tu jediná ostrovní škola v zemi a železniční most přes kanál je zdvihací, první takový v Česku. Přívoz do Bukolu nahradila roku 2020 zavěšená lávka.",
+      "visitTip": "Podívejte se na zdvihací most u kanálu: umožňuje proplout lodím vysokým až sedm metrů.",
+      "chapterId": "ostrovy",
+      "sources": [{ "title": "Lužec nad Vltavou (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Lu%C5%BEec_nad_Vltavou" }, { "title": "Obec na ostrově Lužec (Deník)", "url": "https://www.denik.cz/cestujeme-doma/obec-na-ostrove-luzec.html" }],
+      "verified": false
+    },
+    {
+      "id": "vyhled-melnik",
+      "hook": "Sgrafita na severním křídle mělnického zámku z roku 1553 bývají řazena mezi nejstarší datovaná v Čechách.",
+      "teaser": "Zámek, který má na fasádě rytý vzor staletí.",
+      "riddle": {
+        "question": "Čím je severní křídlo mělnického zámku z roku 1553 výjimečné?",
+        "options": ["Sgrafity řazenými mezi nejstarší v Čechách", "Nejstarší zámeckou věží", "Nejdelší chodbou v zemi"],
+        "answer": 0
+      },
+      "context": "Křídlo s dvoupatrovou lodžií je renesanční. Dnešní barokní podobu zámku daly úpravy z let 1685 až 1686. Roku 1753 přešel sňatkem Marie Ludmily Černínové s Augustem Antonínem z Lobkovic na Lobkowicze, kterým byl v roce 1992 vrácen v restituci.",
+      "visitTip": "Lze navštívit i vinné sklepy Jiřího Lobkowicze.",
+      "chapterId": "sidla",
+      "sources": [{ "title": "Mělník (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/M%C4%9Bln%C3%ADk_(z%C3%A1mek)" }, { "title": "Renesanční podoba mělnického zámku (UK, závěrečná práce)", "url": "https://dspace.cuni.cz/handle/20.500.11956/29222" }],
+      "verified": false
+    },
+    {
+      "id": "zdymadlo-horin",
+      "hook": "Zdymadlo z roku 1905 zvedá lodě o víc než osm metrů, nejvíc ze všech plavebních stupňů mezi Prahou a Mělníkem.",
+      "teaser": "Výtah pro lodě z roku 1905.",
+      "riddle": {
+        "question": "Čím je zdymadlo Hořín výjimečné?",
+        "options": ["Nejvyšší plavební stupeň mezi Prahou a Mělníkem", "Je celé dřevěné", "Lodě po něm sjíždějí po kolejích"],
+        "answer": 0
+      },
+      "context": "Dvě komory vedle sebe měří 137 × 20 a 73 × 11 metru. Zdymadlo projektoval František Sander a je technickou památkou. V letech 2019 až 2021 přibyl do kamenného portálu zdvihací mechanismus pro lodě vysoké až sedm metrů.",
+      "chapterId": "vorari",
+      "sources": [{ "title": "Zdymadlo Hořín (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Zdymadlo_Ho%C5%99%C3%ADn" }, { "title": "Historické zdymadlo v Hoříně (Turistika.cz)", "url": "https://www.turistika.cz/mista/melnik-historicke-zdymadlo-na-vranansko-horinskem-kanalu-vltavy-v-horine" }, { "title": "Vodní cesty (ŘVC ČR), 4/2021", "url": "https://www.rvc.gov.cz/admin-data/storage/get/199-vcap_4_2021.pdf" }],
+      "verified": false
+    },
+    {
+      "id": "horin",
+      "hook": "Lovecký zámeček z roku 1696 ukrývá kamenné pokoje, které bývají označovány za nejvyzrálejší rokoko v Čechách.",
+      "teaser": "Zámek, který začínal jako lovecká chata.",
+      "riddle": {
+        "question": "K čemu zámek v Hoříně původně sloužil?",
+        "options": ["Jako lovecký zámeček", "Jako celnice", "Jako vinný sklep"],
+        "answer": 0
+      },
+      "context": "Postavit ho nechal Heřman Jakub Černín z Chudenic podle návrhu Giovanniho Battisty Alliprandiho. Později patřil Lobkowiczům, po roce 1948 sloužil jako internát zemědělského učiliště a chátral. Natáčely se tu filmy Svatba upírů (1993) a Na západní frontě klid (2022).",
+      "chapterId": "sidla",
+      "sources": [{ "title": "Hořín (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Ho%C5%99%C3%ADn_(z%C3%A1mek)" }],
+      "verified": false
+    },
+    {
+      "id": "melnik",
+      "hook": "Pod mělnickým náměstím je nejširší studna v Česku: průměr asi 4,5 metru a hloubka kolem 54.",
+      "teaser": "Pod městem se skrývá rekord.",
+      "riddle": {
+        "question": "Jaký rekord drží studna pod Mělníkem?",
+        "options": ["Je nejširší v Česku", "Je nejstarší v Evropě", "Má nejchladnější vodu"],
+        "answer": 0
+      },
+      "context": "Mělník stojí na pravém břehu Labe u soutoku s Vltavou. Podle legendy tu svatý Václav při návštěvách babičky Ludmily okopával vinice, révu pak podle tradice zvelebil Karel IV. Mělnický kopec je protkán podzemními prostory. První parník pod městem se objevil roku 1845.",
+      "visitTip": "Do studny je vidět z veřejně přístupné části mělnického podzemí.",
+      "chapterId": "pocatky",
+      "sources": [{ "title": "Mělník (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/M%C4%9Bln%C3%ADk" }, { "title": "Podzemí nabízí pohled do studny (Deník)", "url": "https://www.denik.cz/cestovani/podzemi-nabizi-pohled-do-studny/" }],
+      "verified": false
     }
   ]
 }
