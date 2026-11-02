@@ -22,6 +22,9 @@ export function Medallion({
 }) {
   const { colors, fonts } = useTheme();
   const k = size / 132;
+  // Čárkovaný kroužek vyplňuje celý čtverec; fotka je od něj o 3 px dál (jako v prototypu).
+  const ringR = 66 - 1.5 / 2 / k;
+  const photoD = size - 9;
   const showPhoto = photo !== undefined && !locked;
   return (
     <View style={{ width: size, height: size }} accessibilityLabel={label ? `Místo, ${label}` : "Místo"}>
@@ -31,9 +34,9 @@ export function Medallion({
             <Line x1={0} y1={0} x2={0} y2={6} stroke={colors.muted} strokeWidth={0.8} opacity={0.6} />
           </Pattern>
         </Defs>
-        <Circle cx={66} cy={66} r={48} fill={showPhoto ? colors.bg : "url(#med-hatch)"} stroke={colors.muted} strokeWidth={1.4} strokeDasharray="3 3" />
+        <Circle cx={66} cy={66} r={ringR} fill={showPhoto ? colors.bg : "url(#med-hatch)"} stroke={colors.muted} strokeWidth={1.5 / k} strokeDasharray={`${2 / k} ${2 / k}`} />
         {!showPhoto && (
-          <SvgText x={66} y={80} textAnchor="middle" fontFamily={fonts.display} fontSize={44} fill={colors.muted}>
+          <SvgText x={66} y={83} textAnchor="middle" fontFamily={fonts.display} fontSize={50} fill={colors.muted}>
             ?
           </SvgText>
         )}
@@ -43,14 +46,14 @@ export function Medallion({
           pointerEvents="none"
           style={{
             position: "absolute",
-            left: 26 * k,
-            top: 26 * k,
-            width: 80 * k,
-            height: 80 * k,
-            borderRadius: 40 * k,
+            left: 4.5,
+            top: 4.5,
+            width: photoD,
+            height: photoD,
+            borderRadius: photoD / 2,
             overflow: "hidden",
-            opacity: 0.85,
-            filter: "grayscale(1) sepia(0.35)",
+            opacity: 0.8,
+            filter: "grayscale(1) sepia(0.25)",
           }}
         >
           <Image source={photo} resizeMode="cover" style={{ width: "100%", height: "100%" }} />
@@ -62,12 +65,12 @@ export function Medallion({
             position: "absolute",
             left: 0,
             right: 0,
-            bottom: 14 * k,
+            bottom: 8,
             alignItems: "center",
           }}
         >
-          <View style={{ backgroundColor: colors.chipActive, borderRadius: 999, paddingHorizontal: 8, minWidth: 52 * k, height: 20 * k + 2, alignItems: "center", justifyContent: "center" }}>
-            <T variant="small" style={{ fontFamily: fonts.bodySemi, fontSize: Math.max(9, 11 * k * 1.1), lineHeight: 14, color: colors.chipActiveFg }}>
+          <View style={{ backgroundColor: colors.chipActive, borderRadius: 999, paddingHorizontal: 8, height: 20, alignItems: "center", justifyContent: "center" }}>
+            <T variant="small" style={{ fontFamily: fonts.bodySemi, fontSize: 11, lineHeight: 14, color: colors.chipActiveFg }}>
               {label}
             </T>
           </View>

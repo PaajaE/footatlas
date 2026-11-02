@@ -53,13 +53,13 @@ export function ScreenHeader({
           <T variant="small" style={{ fontSize: 13, color: colors.muted }}>
             {date}
           </T>
-          <T style={{ fontFamily: fonts.display, fontSize: 34, lineHeight: 40, color: colors.fg }} numberOfLines={1}>
+          <T style={{ fontFamily: fonts.display, fontSize: 30, lineHeight: 34, color: colors.fg }} numberOfLines={1}>
             {title}
           </T>
         </View>
         {onSettings && <SettingsButton onPress={onSettings} />}
       </View>
-      {divider && <View style={{ height: 2, backgroundColor: colors.line, borderRadius: 1 }} />}
+      {divider && <View style={{ height: 1, backgroundColor: colors.line }} />}
     </View>
   );
 }

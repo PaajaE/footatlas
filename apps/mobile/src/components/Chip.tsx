@@ -4,7 +4,7 @@ import { T } from "./ui";
 
 /** Čip (1 km, 2 km, Konec etapy; přepínače): vybraný je tmavý, ve tmě krémový. */
 export function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
-  const { colors } = useTheme();
+  const { colors, fonts } = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
@@ -21,7 +21,7 @@ export function Chip({ label, selected, onPress }: { label: string; selected: bo
         backgroundColor: selected ? colors.chipActive : colors.chip,
       }}
     >
-      <T variant="strong" style={{ fontSize: 14, color: selected ? colors.chipActiveFg : colors.fg }}>
+      <T style={{ fontFamily: selected ? fonts.bodySemi : fonts.body, fontSize: 14, color: selected ? colors.chipActiveFg : colors.fg }}>
         {label}
       </T>
     </Pressable>

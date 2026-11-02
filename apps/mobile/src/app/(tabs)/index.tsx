@@ -1,7 +1,7 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { changeSentence, summarizeChange } from "@footatlas/core";
-import { Chapters, NextStopCard, RecentlyDiscovered, SinceLastCard, StageProgress, StatTiles, WhereToday } from "../../components/HomeSections";
+import { Chapters, NextStopCard, RecentlyDiscovered, StageProgress, StatTiles, WhereToday } from "../../components/HomeSections";
 import { ReturnCard } from "../../components/ReturnCard";
 import { LastUpdated } from "../../components/LastUpdated";
 import { ScreenHeader } from "../../components/ScreenHeader";
@@ -57,23 +57,17 @@ export default function Home() {
     newStageCount: state.newlyCompletedStages.length,
   });
 
-  // Příběhy nově odemčených míst k listování; jen místa, která příběh mají.
-  const storyIds = state.newlyReached.filter((p) => vltavska.placesById.get(p.id)?.hook !== undefined).map((p) => p.id);
   const dateLine = ex.demo.enabled ? `${today} · ukázkový postup` : paused ? `${today} · výprava je pozastavena` : today;
 
   return (
-    <Screen onRefresh={ex.demo.enabled ? undefined : ex.refresh} refreshing={ex.refreshing}>
+    <Screen top={16} gap={16} onRefresh={ex.demo.enabled ? undefined : ex.refresh} refreshing={ex.refreshing}>
       <ScreenHeader date={dateLine} title={vltavska.name} onSettings={settings} />
       {state.completed ? <T variant="label">Výprava dokončena</T> : null}
       <StageProgress />
       <LastUpdated />
       <StatTiles />
-      {showReturn ? (
-        <ReturnCard fromM={previousM} toM={state.walkedM} sentence={changeSentence(summary)} />
-      ) : (
-        <SinceLastCard sentence={changeSentence(summary)} storyIds={storyIds} />
-      )}
       {!state.completed && <NextStopCard />}
+      {showReturn && <ReturnCard fromM={previousM} toM={state.walkedM} sentence={changeSentence(summary)} />}
       <WhereToday />
       <RecentlyDiscovered />
       <Chapters />
