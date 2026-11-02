@@ -132,7 +132,7 @@ export function buildStyle({ theme, tilesUrl, glyphs }: BuildStyleOptions): MapS
 
   road("roads-minor", ["all", kindIn("minor_road", "other"), ["!", detailIn("service", "alley", "parking_aisle")]], c.roadMinor, zoomWidth(12, 0.4, 14, 1.2, 18, 6), { minzoom: 12 });
   road("roads-service", ["all", kindIn("minor_road"), detailIn("service", "alley", "parking_aisle")], c.roadMinor, zoomWidth(14, 0.5, 18, 3), { minzoom: 14 });
-  road("roads-major", kindIn("major_road"), c.road, zoomWidth(7, 0.5, 11, 1.4, 14, 2.6, 18, 10), { minzoom: 7 });
+  road("roads-major", kindIn("major_road"), c.road, zoomWidth(9, 0.4, 11, 1.4, 14, 2.6, 18, 10), { minzoom: 9.5 });
   road("roads-highway", kindIn("highway"), c.road, zoomWidth(5, 0.8, 11, 2.2, 14, 3.6, 18, 12));
   road("roads-path", kindIn("path"), c.path, zoomWidth(14, 0.6, 18, 2.4), {
     minzoom: 14,

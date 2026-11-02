@@ -4,80 +4,300 @@
 <meta charset="utf-8">
 <title>Domů</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=Work+Sans:wght@400;500;600&amp;display=swap">
 <style>
-body{margin:0;font-family:'Work Sans',system-ui,sans-serif}
-.fa{--bg:#EFE4CB;--surface:#F8F1E1;--ink:#2B2118;--muted:#75644E;--line:#D8C9A9;--accent:#9B2C22;--accent-fg:#FBF5E8;--ochre:#8E6320;--nav:#F6EEDC;--panel:rgba(248,241,225,.95);--track:#DCCDAE;--lock:#B7A88E;--seal:#9B2C22;--seal-fg:#F6E7C8;--free:#3E7D52;--shadow:rgba(60,40,15,.22)}
-.fa{width:390px;height:844px;box-sizing:border-box;background:var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='390' height='844'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='4' seed='9'/><feColorMatrix values='0 0 0 0 .62  0 0 0 0 .48  0 0 0 0 .26  0 0 0 .9 -.25'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.55'/></svg>");background-blend-mode:multiply;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:'Work Sans',system-ui,sans-serif}
-.fa *{box-sizing:border-box}
-.fell{font-family:'IM Fell English',Georgia,serif;font-weight:400}
-.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;letter-spacing:.05em;color:var(--ochre)}
-.muted{color:var(--muted)}
-.num{font-variant-numeric:tabular-nums}
-.melt{position:absolute;left:0;right:0;top:0;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%)}
-.edges{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.soft{-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%)}
-.top{position:relative;padding:54px 20px 0;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
-.top a{color:inherit;text-decoration:none}
-.eyebrow{display:flex;align-items:center;gap:8px;font-family:'IM Fell English SC',Georgia,serif;font-size:15px;letter-spacing:.06em;color:var(--ochre)}
-.eyebrow::before,.eyebrow::after{content:"";height:1px;width:20px;background:var(--ochre);opacity:.7}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.med{border-radius:50%;flex:none;background-size:cover;background-position:center;border:1.5px solid var(--ochre);outline:1px solid var(--line);outline-offset:3px;position:relative}
-.badge{position:absolute;right:-6px;bottom:-5px;width:20px;height:20px;background:var(--seal);color:var(--seal-fg);font-size:11px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
-.dot{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--lock);color:var(--muted)}
-.seal{width:36px;height:36px;flex:none;background:var(--seal);color:var(--seal-fg);display:flex;align-items:center;justify-content:center;font-size:14px;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
-.rule{height:1px;background:var(--line)}
-.btn{display:block;text-align:center;text-decoration:none;font-weight:600;font-size:16px;padding:15px;border-radius:14px}
-.btn.pri{background:var(--accent);color:var(--accent-fg)}
-.btn.sec{border:1.5px solid var(--line);color:var(--ink)}
-.map{position:relative;overflow:hidden;flex:none}
-.map img{display:block;width:100%;height:100%}
-.map svg{position:absolute;inset:0;width:100%;height:100%}
-.attr{position:absolute;right:8px;bottom:5px;font-size:9px;color:var(--muted)}
-.nav{display:flex;justify-content:space-around;padding:10px 6px 30px;font-size:12px;flex:none;margin-top:auto;background:var(--nav);color:var(--muted);border-top:1px solid var(--line)}
-.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;text-decoration:none;color:inherit}
-.nav a.on{color:var(--accent);font-weight:600}
+body{margin:0}
+button{font-family:inherit}
+.scroll{overflow-y:auto;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.hs{overflow-x:auto;scrollbar-width:none}
+.hs::-webkit-scrollbar{display:none}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+.swap{animation:swap .35s ease both}
+@keyframes swap{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:none}}
 </style>
 </helmet>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <clipPath id="kruh" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
-</defs></svg>
-<div class="fa">
-<div class="melt" style="height:372px;background-image:url('assets/foto-nelahozeves.jpg')"></div>
-  <div class="top"><span>Čtvrtek 30. října</span><span>Den 18</span></div>
-  <a href="Vyprava.dc.html" style="position:relative;margin-top:212px;padding:0 20px;display:flex;flex-direction:column;gap:3px;text-decoration:none;color:inherit">
-    <span class="sc" style="font-size:15px">Další zastávka · 3,0 km</span>
-    <span class="fell" style="font-size:38px;line-height:1">Zámek Nelahozeves</span>
-    <span class="muted" style="font-size:13.5px">Dojdete zítra při běžné chůzi.</span>
-  </a>
-  <a href="Pohlednice.dc.html" class="card" style="position:relative;margin:16px 20px 0;padding:12px 14px;display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
-    <div class="seal">✓</div>
-    <span style="font-size:14px;line-height:1.4">Vítejte zpět. Od posledně jste ušli <b>11,4 km</b>, došli do Kralup a dokončili <b>2. etapu</b>.</span>
-  </a>
-  <div style="position:relative;padding:16px 20px 0;display:flex;justify-content:space-between;align-items:baseline">
-    <span style="font-weight:600;font-size:14px">Na dalších 5 km</span><span style="font-size:13px;font-weight:600;color:var(--accent)">4 místa</span>
+<div class="{{themeClass}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif;">
+  <div class="scroll" style="flex: 1; min-height: 0; box-sizing: border-box; padding: 16px 20px {{padBottom}}; display: flex; flex-direction: column; gap: 16px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-size: 13px; color: #75644E;">Pondělí 2. listopadu</span>
+        <span style="font-family: 'IM Fell English', serif; font-size: 30px; line-height: 34px;">Vltavská stezka</span>
+      </div>
+      <button aria-label="Nastavení" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #D8C9A9; background: #F8F1E1; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#2B2118" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+      </button>
+    </div>
+
+    <div style="display: block; position: relative; height: 236px; border-radius: 18px; overflow: hidden; border: 1px solid #D8C9A9;">
+      <svg width="350" height="236" viewBox="0 0 350 236" aria-hidden="true" style="display: block;">
+        <defs>
+          <filter id="hwc" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+          <pattern id="hblkS" width="9" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><rect x="1" y="1" width="6" height="5" fill="none" stroke="#9A8C74" stroke-width="0.5"></rect></pattern>
+          <pattern id="hblkI" width="9" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><rect x="0" y="0" width="9" height="8" fill="#EBD5AE"></rect><rect x="1" y="1" width="6" height="5" fill="#D6A877" stroke="#8C5E3A" stroke-width="0.5"></rect></pattern>
+          <pattern id="htreS" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="3.5" r="2.2" fill="none" stroke="#9A8C74" stroke-width="0.6"></circle></pattern>
+          <pattern id="htreI" width="8" height="8" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="8" height="8" fill="#C9D3A0"></rect><circle cx="4" cy="3.5" r="2.5" fill="#6F9455" stroke="#3F5E32" stroke-width="0.5"></circle></pattern>
+          <clipPath id="hTroja"><circle cx="118" cy="194" r="11"></circle></clipPath>
+          <filter id="hgray"><feColorMatrix type="saturate" values="0.05"></feColorMatrix></filter>
+          <mask id="hink" maskUnits="userSpaceOnUse" x="0" y="0" width="390" height="600">
+            <rect x="0" y="0" width="390" height="600" fill="#000"></rect>
+            <path d="M135.5 562.7 L132.2 549.5 L125.4 523.2 L121.4 504.1 L120.1 492.3 L118.9 484.2 L117.8 480.0 L116.9 473.3 L116.1 464.2 L115.4 446.5 L114.7 420.1 L115.1 403.8 L116.4 397.7 L119.1 388.4 L123.2 376.1 L126.6 367.0 L129.3 361.2 L131.7 356.9 L133.7 354.1 L135.8 351.6 L137.9 349.3 L140.2 347.2 L142.7 345.3 L145.7 343.3 L149.2 341.3 L152.7 339.8 L156.0 338.7 L160.9 337.5 L167.4 336.3 L178.3 334.8 L193.6 333.2 L201.9 332.1 L203.4 331.6 L210.6 328.0 L223.6 321.2 L232.2 317.0 L236.6 315.2 L241.0 313.7 L245.2 312.4 L250.9 311.3 L258.0 310.4 L266.2 310.2 L275.7 310.7 L285.0 310.1 L294.3 308.3 L299.6 307.1 L300.9 306.5 L303.9 304.9 L308.4 302.3 L313.2 299.1 L318.3 295.4 L321.8 292.2 L323.7 289.7 L325.9 286.3 L328.4 282.0 L330.0 278.9 L330.6 277.1 L331.0 274.2 L331.4 270.4 L331.2 265.8 L330.7 260.5 L329.5 255.5 L327.8 250.8 L325.1 245.9 L321.5 240.9 L318.2 236.8 L315.3 233.8 L311.5 231.0 L307.0 228.2 L304.0 226.8 L302.5 226.6 L295.8 226.1 L283.7 225.1 L276.0 224.8 L272.8 225.1 L268.3 225.6 L262.7 226.5 L256.4 227.7 L249.4 229.3 L241.7 231.4 L233.2 233.9 L224.3 235.5 L215.1 236.1 L203.1 235.0 L188.4 232.1 L178.1 229.2 L172.3 226.4 L167.8 223.9 L164.5 221.7 L161.3 220.1 L158.4 218.8 L156.2 218.1 L154.7 217.9 L153.2 217.8 L151.7 217.9 L142.5 219.4 L135.6 220.5" fill="none" stroke="#fff" stroke-width="96" stroke-linecap="round" stroke-linejoin="round" filter="url(#hwc)"></path>
+          </mask>
+        </defs>
+        <rect x="0" y="0" width="350" height="236" fill="#EFE4CB"></rect>
+        <g transform="translate(-28 -150) scale(1.1)">
+          <g fill="url(#hblkS)" stroke="#9A8C74" stroke-width="0.6" opacity="0.8">
+            <path d="M150 365 L200 352 L215 380 L205 440 L190 520 L160 548 L150 540 L148 470 L140 420 L142 380 Z"></path>
+            <path d="M225 335 L320 326 L330 345 L310 372 L240 378 L218 360 Z"></path>
+            <path d="M240 262 L300 254 L322 268 L316 290 L290 300 L250 302 L238 288 Z"></path>
+            <path d="M150 268 L212 262 L222 300 L200 312 L160 316 L146 298 Z"></path>
+            <path d="M354 262 L388 255 L388 340 L352 336 L348 300 Z"></path>
+            <path d="M180 112 L250 104 L262 150 L232 178 L190 170 Z"></path>
+            <path d="M268 160 L330 150 L346 198 L302 204 L270 196 Z"></path>
+            <path d="M30 284 L118 274 L136 300 L126 340 L62 346 L30 330 Z"></path>
+          </g>
+          <g fill="url(#htreS)" stroke="#9A8C74" stroke-width="0.6" opacity="0.85">
+            <path d="M8 200 L58 194 L74 238 L42 262 L8 250 Z"></path>
+            <path d="M100 124 L160 117 L172 150 L142 166 L104 158 Z"></path>
+            <ellipse cx="232" cy="250" rx="30" ry="11"></ellipse>
+          </g>
+          <path d="M146.2 560.0 L142.9 546.9 L136.2 520.8 L132.2 502.0 L131.0 490.5 L129.8 482.7 L128.7 478.4 L127.8 472.1 L127.1 463.6 L126.4 446.2 L125.7 420.2 L126.0 404.8 L127.0 400.1 L129.6 391.8 L133.5 379.8 L136.7 371.2 L139.2 366.2 L141.1 362.6 L142.5 360.7 L144.0 358.8 L145.6 357.2 L147.3 355.6 L149.0 354.2 L151.3 352.7 L154.2 351.1 L156.7 349.9 L159.0 349.2 L163.1 348.2 L169.1 347.2 L179.8 345.8 L195.1 344.0 L204.4 342.7 L207.4 341.7 L215.5 337.8 L228.4 331.2 L236.8 327.0 L240.6 325.5 L244.2 324.2 L247.8 323.1 L252.6 322.2 L258.6 321.3 L266.6 321.2 L276.3 321.7 L286.2 321.0 L296.3 319.1 L302.7 317.6 L305.3 316.5 L309.2 314.6 L314.2 311.6 L319.7 308.0 L325.5 303.8 L329.8 299.8 L332.5 296.3 L335.2 292.1 L338.2 287.1 L340.1 283.0 L341.2 279.7 L341.9 275.6 L342.3 270.6 L342.1 265.0 L341.5 258.5 L340.0 252.3 L337.7 246.3 L334.5 240.3 L330.3 234.3 L326.3 229.4 L322.4 225.5 L317.7 221.9 L312.1 218.6 L307.7 216.6 L304.5 215.9 L296.7 215.1 L284.2 214.2 L276.0 213.8 L271.9 214.2 L266.8 214.8 L260.8 215.6 L254.0 216.9 L246.8 218.7 L239.0 220.7 L230.9 223.2 L223.0 224.7 L215.4 225.2 L204.7 224.2 L190.8 221.4 L181.7 218.9 L177.2 216.6 L173.2 214.3 L169.7 212.0 L166.0 210.1 L162.0 208.5 L158.7 207.5 L156.0 207.0 L153.2 206.9 L150.5 206.9 L140.8 208.4 L124.1 211.4 L112.5 212.7 L105.8 212.5 L98.8 210.5 L91.6 206.6 L84.7 201.1 L78.4 193.9 L72.7 186.3 L67.7 178.2 L64.8 169.2 L63.9 159.3 L63.6 153.4 L63.9 151.6 L65.0 148.5 L66.8 144.2 L69.9 139.3 L74.1 133.8 L77.8 128.1 L81.0 122.1 L82.9 116.4 L83.6 110.9 L83.2 105.7 L81.6 100.6 L79.1 96.0 L75.9 91.8 L69.3 86.1 L59.4 78.8 L52.6 72.6 L48.7 67.8 L46.4 63.6 L45.8 60.3 L45.8 56.6 L46.8 52.5 L48.2 48.9 L50.2 45.8 L52.0 43.5 L53.7 42.0 L54.8 41.0 L55.3 40.3 L55.6 40.0" fill="none" stroke="#B5A68D" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"></path>
+          <g mask="url(#hink)">
+            <rect x="0" y="0" width="390" height="600" fill="#F4E6C6"></rect>
+            <g fill="url(#hblkI)" stroke="#8C5E3A" stroke-width="0.7">
+              <path d="M150 365 L200 352 L215 380 L205 440 L190 520 L160 548 L150 540 L148 470 L140 420 L142 380 Z"></path>
+              <path d="M225 335 L320 326 L330 345 L310 372 L240 378 L218 360 Z"></path>
+              <path d="M240 262 L300 254 L322 268 L316 290 L290 300 L250 302 L238 288 Z"></path>
+              <path d="M150 268 L212 262 L222 300 L200 312 L160 316 L146 298 Z"></path>
+              <path d="M354 262 L388 255 L388 340 L352 336 L348 300 Z"></path>
+              <path d="M268 160 L330 150 L346 198 L302 204 L270 196 Z"></path>
+              <path d="M30 284 L118 274 L136 300 L126 340 L62 346 L30 330 Z"></path>
+            </g>
+            <g fill="url(#htreI)" stroke="#3F5E32" stroke-width="0.7">
+              <path d="M100 124 L160 117 L172 150 L142 166 L104 158 Z"></path>
+              <ellipse cx="232" cy="250" rx="30" ry="11"></ellipse>
+            </g>
+            <path d="M146.2 560.0 L142.9 546.9 L136.2 520.8 L132.2 502.0 L131.0 490.5 L129.8 482.7 L128.7 478.4 L127.8 472.1 L127.1 463.6 L126.4 446.2 L125.7 420.2 L126.0 404.8 L127.0 400.1 L129.6 391.8 L133.5 379.8 L136.7 371.2 L139.2 366.2 L141.1 362.6 L142.5 360.7 L144.0 358.8 L145.6 357.2 L147.3 355.6 L149.0 354.2 L151.3 352.7 L154.2 351.1 L156.7 349.9 L159.0 349.2 L163.1 348.2 L169.1 347.2 L179.8 345.8 L195.1 344.0 L204.4 342.7 L207.4 341.7 L215.5 337.8 L228.4 331.2 L236.8 327.0 L240.6 325.5 L244.2 324.2 L247.8 323.1 L252.6 322.2 L258.6 321.3 L266.6 321.2 L276.3 321.7 L286.2 321.0 L296.3 319.1 L302.7 317.6 L305.3 316.5 L309.2 314.6 L314.2 311.6 L319.7 308.0 L325.5 303.8 L329.8 299.8 L332.5 296.3 L335.2 292.1 L338.2 287.1 L340.1 283.0 L341.2 279.7 L341.9 275.6 L342.3 270.6 L342.1 265.0 L341.5 258.5 L340.0 252.3 L337.7 246.3 L334.5 240.3 L330.3 234.3 L326.3 229.4 L322.4 225.5 L317.7 221.9 L312.1 218.6 L307.7 216.6 L304.5 215.9 L296.7 215.1 L284.2 214.2 L276.0 213.8 L271.9 214.2 L266.8 214.8 L260.8 215.6 L254.0 216.9 L246.8 218.7 L239.0 220.7 L230.9 223.2 L223.0 224.7 L215.4 225.2 L204.7 224.2 L190.8 221.4 L181.7 218.9 L177.2 216.6 L173.2 214.3 L169.7 212.0 L166.0 210.1 L162.0 208.5 L158.7 207.5 L156.0 207.0 L153.2 206.9 L150.5 206.9 L140.8 208.4 L124.1 211.4 L112.5 212.7 L105.8 212.5 L98.8 210.5 L91.6 206.6 L84.7 201.1 L78.4 193.9 L72.7 186.3 L67.7 178.2 L64.8 169.2 L63.9 159.3 L63.6 153.4 L63.9 151.6 L65.0 148.5 L66.8 144.2 L69.9 139.3 L74.1 133.8 L77.8 128.1 L81.0 122.1 L82.9 116.4 L83.6 110.9 L83.2 105.7 L81.6 100.6 L79.1 96.0 L75.9 91.8 L69.3 86.1 L59.4 78.8 L52.6 72.6 L48.7 67.8 L46.4 63.6 L45.8 60.3 L45.8 56.6 L46.8 52.5 L48.2 48.9 L50.2 45.8 L52.0 43.5 L53.7 42.0 L54.8 41.0 L55.3 40.3 L55.6 40.0" fill="none" stroke="#8FB7B4" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" filter="url(#hwc)"></path>
+          </g>
+          <ellipse cx="216" cy="338" rx="11" ry="3" transform="rotate(-24 216 338)" fill="#B9C48A" stroke="#4E7F80" stroke-width="0.8"></ellipse>
+          <g stroke="#3A2A1C" stroke-width="1.6" stroke-linecap="round"><path d="M330 282 L352 290"></path><path d="M206 330 L214 352"></path><path d="M152 200 L158 222"></path></g>
+          <path d="M135.6 220.5 L125.5 222.2 L112.7 223.5 L103.8 223.2 L94.8 220.6 L85.6 215.6 L77.3 209.1 L70.1 201.0 L63.5 192.1 L57.6 182.4 L54.2 171.9 L53.0 160.5 L52.8 152.9 L53.4 149.0 L54.9 144.4 L57.2 139.0 L60.5 133.5 L64.8 127.9 L68.3 122.7" fill="none" stroke="#75644E" stroke-width="1.3" stroke-dasharray="2 4" stroke-linecap="round"></path>
+          <path d="M201.9 332.1 L203.4 331.6 L210.6 328.0 L223.6 321.2 L232.2 317.0 L236.6 315.2 L241.0 313.7 L245.2 312.4 L250.9 311.3 L258.0 310.4 L266.2 310.2 L275.7 310.7 L285.0 310.1 L294.3 308.3 L299.6 307.1 L300.9 306.5 L303.9 304.9 L308.4 302.3 L313.2 299.1 L318.3 295.4 L321.8 292.2 L323.7 289.7 L325.9 286.3 L328.4 282.0 L330.0 278.9 L330.6 277.1 L331.0 274.2 L331.4 270.4 L331.2 265.8 L330.7 260.5 L329.5 255.5 L327.8 250.8 L325.1 245.9 L321.5 240.9 L318.2 236.8 L315.3 233.8 L311.5 231.0 L307.0 228.2 L304.0 226.8 L302.5 226.6 L295.8 226.1 L283.7 225.1 L276.0 224.8 L272.8 225.1 L268.3 225.6 L262.7 226.5 L256.4 227.7 L249.4 229.3 L241.7 231.4 L233.2 233.9 L224.3 235.5 L215.1 236.1 L203.1 235.0 L188.4 232.1 L178.1 229.2 L172.3 226.4 L167.8 223.9 L164.5 221.7 L161.3 220.1 L158.4 218.8 L156.2 218.1 L154.7 217.9 L153.2 217.8 L151.7 217.9 L142.5 219.4 L135.6 220.5" fill="none" stroke="#9B2C22" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+          <g fill="rgba(155,44,34,0.14)" stroke="#9B2C22" stroke-width="1.5">
+            <circle cx="218" cy="324" r="6"></circle><circle cx="291" cy="309" r="6"></circle><circle cx="328" cy="282" r="6"></circle><circle cx="271" cy="225" r="6"></circle><circle cx="149" cy="237" r="6"></circle><circle cx="160" cy="205" r="6"></circle>
+          </g>
+          <g fill="#9B2C22"><circle cx="218" cy="324" r="1.5"></circle><circle cx="291" cy="309" r="1.5"></circle><circle cx="328" cy="282" r="1.5"></circle><circle cx="271" cy="225" r="1.5"></circle><circle cx="149" cy="237" r="1.5"></circle><circle cx="160" cy="205" r="1.5"></circle></g>
+          <path d="M287 323 L305 323 L301 328 L291 328 Z" fill="#9B2C22" stroke="#3A2A1C" stroke-width="0.8"></path>
+          <path d="M346 300 Q352 292 358 300 Q364 292 370 300 M344 300 L372 300" fill="none" stroke="#3A2A1C" stroke-width="1.1"></path>
+          <circle cx="118" cy="194" r="13" fill="#EFE4CB" stroke="#75644E" stroke-width="1.2" stroke-dasharray="2 2"></circle>
+          <image href="assets/foto-troja.jpg" x="107" y="183" width="22" height="22" preserveAspectRatio="xMidYMid slice" clip-path="url(#hTroja)" filter="url(#hgray)" opacity="0.8"></image>
+          <circle cx="57" cy="140" r="6" fill="#EFE4CB" stroke="#75644E" stroke-width="1" stroke-dasharray="1.5 1.5"></circle>
+          <text x="57" y="142.5" text-anchor="middle" font-family="'Work Sans', sans-serif" font-size="7" fill="#75644E">?</text>
+          <g font-family="'IM Fell English', serif" font-style="italic" font-size="10" fill="#3A2A1C">
+            <text x="240" y="292">Holešovice</text><text x="212" y="264">Stromovka</text><text x="160" y="306">Letná</text><text x="196" y="138">Bohnice</text><text x="20" y="168">Sedlec</text><text x="350" y="322">Libeň</text>
+          </g>
+          <circle class="pulse" cx="135.6" cy="220.5" r="10" fill="none" stroke="#9B2C22" stroke-width="2"></circle>
+          <circle cx="135.6" cy="220.5" r="5" fill="#9B2C22" stroke="#FBF5E8" stroke-width="2"></circle>
+        </g>
+        <rect x="3" y="3" width="344" height="230" rx="14" fill="none" stroke="#7F5718" stroke-width="0.6"></rect>
+      </svg>
+      <span style="position: absolute; left: 12px; top: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(248,241,225,0.92); border: 1px solid #D8C9A9; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">List I · Praha</span>
+      <span style="position: absolute; right: 12px; bottom: 12px; padding: 8px 12px; border-radius: 999px; background: #2B2118; color: #FBF5E8; font-size: 13px; font-weight: 600;">Otevřít atlas</span>
+      <sc-if value="{{emb}}" hint-placeholder-val="{{false}}">
+        <button onClick="{{goAtlas}}" aria-label="Otevřít atlas výpravy" style="position: absolute; inset: 0; border: none; background: transparent; cursor: pointer;"></button>
+      </sc-if>
+      <sc-if value="{{notEmb}}" hint-placeholder-val="{{true}}">
+        <a href="Vyprava.dc.html" aria-label="Otevřít atlas výpravy" style="position: absolute; inset: 0;"></a>
+      </sc-if>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span style="font-size: 14px; color: #5E4A32;">Etapa 1 ze 4 · Praha</span>
+        <span style="font-size: 15px; font-weight: 600; color: #9B2C22;">12,5 z 62 km</span>
+      </div>
+      <div style="display: flex; gap: 4px;">
+        <div style="flex: 18.6; height: 6px; border-radius: 3px; background: #D8C9A9; overflow: hidden;"><div style="width: 67%; height: 6px; background: #9B2C22;"></div></div>
+        <div style="flex: 17.2; height: 6px; border-radius: 3px; background: #D8C9A9;"></div>
+        <div style="flex: 14.2; height: 6px; border-radius: 3px; background: #D8C9A9;"></div>
+        <div style="flex: 12; height: 6px; border-radius: 3px; background: #D8C9A9;"></div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+      <div style="padding: 10px 12px; border-radius: 14px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column;">
+        <span style="font-size: 12px; color: #75644E;">Dnes</span>
+        <span style="font-family: 'IM Fell English', serif; font-size: 24px; line-height: 28px;">0,3 km</span>
+        <span style="font-size: 12px; color: #5E4A32;">ráno je mladé</span>
+      </div>
+      <div style="padding: 10px 12px; border-radius: 14px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column;">
+        <span style="font-size: 12px; color: #75644E;">Za 7 dní</span>
+        <span style="font-family: 'IM Fell English', serif; font-size: 24px; line-height: 28px;">11,2 km</span>
+        <span style="font-size: 12px; color: #5E4A32;">7 nových míst</span>
+      </div>
+      <div style="padding: 10px 12px; border-radius: 14px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column;">
+        <span style="font-size: 12px; color: #75644E;">Pohlednice</span>
+        <span style="font-family: 'IM Fell English', serif; font-size: 24px; line-height: 28px;">6,1 km</span>
+        <span style="font-size: 12px; color: #5E4A32;">v Roztokách</span>
+      </div>
+    </div>
+
+    <div style="padding: 14px; border-radius: 18px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; gap: 14px; align-items: center;">
+        <div style="flex-shrink: 0; width: 72px; height: 72px; border-radius: 50%; box-sizing: border-box; border: 1.5px dashed #75644E; padding: 3px;">
+          <img src="assets/foto-troja.jpg" alt="Trojský zámek" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: grayscale(1) sepia(0.25); opacity: 0.8; display: block;">
+        </div>
+        <div style="display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-family: 'IM Fell English SC', serif; font-size: 14px; letter-spacing: 0.6px; color: #7F5718;">Další zastávka</span>
+          <span style="font-family: 'IM Fell English', serif; font-size: 26px; line-height: 30px;">Trojský zámek</span>
+          <span style="font-size: 15px; font-weight: 600; color: #9B2C22;">40 m · asi 55 kroků</span>
+        </div>
+      </div>
+      <span style="font-family: 'IM Fell English', serif; font-style: italic; font-size: 18px; line-height: 24px;">Proč se celá čtvrť jmenuje podle Tróje, když tu žádný Odysseus nebyl?</span>
+      <sc-if value="{{emb}}" hint-placeholder-val="{{false}}">
+        <button onClick="{{goHadanka}}" style="min-height: 46px; border-radius: 14px; border: none; background: #9B2C22; color: #FBF5E8; font-size: 15px; font-weight: 600; cursor: pointer;">Tipnout si odpověď</button>
+      </sc-if>
+      <sc-if value="{{notEmb}}" hint-placeholder-val="{{true}}">
+        <a href="Hadanka.dc.html" style="min-height: 46px; border-radius: 14px; background: #9B2C22; color: #FBF5E8; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center;">Tipnout si odpověď</a>
+      </sc-if>
+    </div>
+
+    <div style="padding: 14px; border-radius: 18px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-family: 'IM Fell English SC', serif; font-size: 14px; letter-spacing: 0.6px; color: #7F5718;">Kam dnes dojdu?</span>
+        <span style="font-size: 13px; color: #5E4A32;">Vyberte procházku, ukážu, co cestou odemknete.</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+          <sc-if value="{{c.on}}" hint-placeholder-val="{{false}}">
+            <button onClick="{{c.pick}}" style="min-height: 44px; border-radius: 12px; border: none; background: #2B2118; color: #FBF5E8; font-size: 14px; font-weight: 600; cursor: pointer;">{{c.label}}</button>
+          </sc-if>
+          <sc-if value="{{c.off}}" hint-placeholder-val="{{true}}">
+            <button onClick="{{c.pick}}" style="min-height: 44px; border-radius: 12px; border: 1.5px solid #D8C9A9; background: #EFE4CB; color: #2B2118; font-size: 14px; cursor: pointer;">{{c.label}}</button>
+          </sc-if>
+        </sc-for>
+      </div>
+      <sc-for list="{{planList}}" as="p" hint-placeholder-count="1">
+        <div class="swap" style="display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-family: 'IM Fell English', serif; font-size: 20px; line-height: 25px;">{{p.headline}}</span>
+          <sc-for list="{{p.places}}" as="pl" hint-placeholder-count="2">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; border: 1.4px dashed #75644E;"></span>
+              <span style="flex: 1; font-size: 14px;">{{pl.name}}</span>
+              <span style="font-size: 13px; color: #75644E;">{{pl.dist}}</span>
+            </div>
+          </sc-for>
+          <span style="font-size: 13px; color: #5E4A32;">{{p.meta}}</span>
+          <span style="font-family: 'IM Fell English', serif; font-style: italic; font-size: 16px; color: #7F5718;">{{p.quip}}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span style="font-family: 'IM Fell English SC', serif; font-size: 14px; letter-spacing: 0.6px; color: #7F5718;">Nedávno objeveno</span>
+        <sc-if value="{{emb}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{goKronika}}" style="border: none; background: transparent; padding: 0; font-size: 14px; font-weight: 600; color: #9B2C22; min-height: 44px; cursor: pointer;">Kronika</button>
+        </sc-if>
+        <sc-if value="{{notEmb}}" hint-placeholder-val="{{true}}">
+          <a href="Kronika.dc.html" style="font-size: 14px; font-weight: 600; color: #9B2C22; text-decoration: none; min-height: 44px; display: flex; align-items: center;">Kronika</a>
+        </sc-if>
+      </div>
+      <div class="hs" style="display: flex; gap: 10px; margin: 0 -20px; padding: 0 20px;">
+        <sc-for list="{{recent}}" as="r" hint-placeholder-count="6">
+          <div style="flex-shrink: 0; width: 128px; padding: 12px; box-sizing: border-box; border-radius: 16px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column; gap: 8px;">
+            <span style="width: 30px; height: 30px; border-radius: 50%; box-sizing: border-box; border: 2.2px solid #9B2C22; background: rgba(155,44,34,0.12); box-shadow: inset 0 0 0 3px #F8F1E1, inset 0 0 0 4.2px #9B2C22; transform: rotate(-10deg);"></span>
+            <span style="font-family: 'IM Fell English', serif; font-size: 17px; line-height: 20px;">{{r.name}}</span>
+            <span style="font-size: 12px; color: #75644E;">{{r.when}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 14px; letter-spacing: 0.6px; color: #7F5718;">Kapitoly</span>
+      <sc-for list="{{chapters}}" as="ch" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <span style="font-family: 'IM Fell English', serif; font-size: 18px;">{{ch.name}}</span>
+            <span style="font-size: 13px; color: #75644E;">{{ch.count}}</span>
+          </div>
+          <div style="height: 5px; border-radius: 3px; background: #D8C9A9; overflow: hidden;"><div style="height: 5px; background: #9B2C22; width: {{ch.pct}};"></div></div>
+          <span style="font-size: 13px; color: #5E4A32;">{{ch.note}}</span>
+        </div>
+      </sc-for>
+    </div>
   </div>
-  <div style="position:relative;padding:2px 20px 0;display:flex;flex-direction:column"><div style="display:flex;align-items:center;gap:14px;padding:8px 0"><div class="dot" style="width:40px;height:40px">·</div>
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="fell" style="font-size:18px;line-height:1.15">Lobeček</span><span class="muted" style="font-size:12.5px">Malý objev · km 37,0</span></div>
-      <span class="num" style="font-weight:600;font-size:15px;white-space:nowrap">1,4 km</span></div><div style="display:flex;align-items:center;gap:14px;padding:8px 0"><div class="med" style="width:40px;height:40px;background-image:url('assets/foto-nelahozeves.jpg')"></div>
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="fell" style="font-size:18px;line-height:1.15">Zámek Nelahozeves</span><span class="muted" style="font-size:12.5px">Zastávka · km 38,6</span></div>
-      <span class="num" style="font-weight:600;font-size:15px;white-space:nowrap">3,0 km</span></div><div style="display:flex;align-items:center;gap:14px;padding:8px 0"><div class="dot" style="width:40px;height:40px">·</div>
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="fell" style="font-size:18px;line-height:1.15">Rodný dům Antonína Dvořáka</span><span class="muted" style="font-size:12.5px">Malý objev · km 38,6</span></div>
-      <span class="num" style="font-weight:600;font-size:15px;white-space:nowrap">3,0 km</span></div><div style="display:flex;align-items:center;gap:14px;padding:8px 0"><div class="med" style="width:40px;height:40px;background-image:url('assets/foto-veltrusy.jpg')"></div>
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="fell" style="font-size:18px;line-height:1.15">Zámek Veltrusy</span><span class="muted" style="font-size:12.5px">Zastávka · km 39,8</span></div>
-      <span class="num" style="font-weight:600;font-size:15px;white-space:nowrap">4,2 km</span></div></div>
-  <nav class="nav"><a href="Domu.dc.html" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Domů</a><a href="Vyprava.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z M9 4v14 M15 6v14"/></svg>Výprava</a><a href="Objevovat.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Objevovat</a><a href="Kronika.dc.html" class=""><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z M5 17a3 3 0 013-3h11"/></svg>Kronika</a></nav>
+
+  <sc-if value="{{notEmb}}" hint-placeholder-val="{{true}}">
+  <nav style="flex-shrink: 0; height: 72px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #F8F1E1; border-top: 1px solid #D8C9A9;">
+    <a href="Domu.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #9B2C22; font-size: 12px; font-weight: 600;">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 11 L12 4 L20 11 V20 H4 Z"></path></svg>Domů</a>
+    <a href="Vyprava.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #5E4A32; font-size: 12px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 6 L9 4 L15 6 L21 4 V18 L15 20 L9 18 L3 20 Z M9 4 V18 M15 6 V20"></path></svg>Výprava</a>
+    <a href="Objevovat.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #5E4A32; font-size: 12px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5 L13.5 13.5 L8.5 15.5 L10.5 10.5 Z"></path></svg>Objevovat</a>
+    <a href="Kronika.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: #5E4A32; font-size: 12px;">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 4 H17 A2 2 0 0 1 19 6 V20 H7 A2 2 0 0 1 5 18 Z M5 16 H19"></path></svg>Kronika</a>
+  </nav>
+  </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"embedded":{"editor":null},"onGo":{"editor":null},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  constructor(props) {
+    super(props);
+    this.state = { plan: 1 };
+    this.plans = [
+      { label: '1 km', headline: 'Za 1 km: Trojský zámek',
+        places: [{ name: 'Trojský zámek', dist: '40 m' }],
+        meta: 'asi 1 330 kroků · 12 minut', quip: 'Krátká procházka, dlouhá historie.' },
+      { label: '2 km', headline: 'Za 2 km: zámek a skály',
+        places: [{ name: 'Trojský zámek', dist: '40 m' }, { name: 'Sedlecké skály', dist: '1,9 km' }],
+        meta: 'asi 2 670 kroků · 24 minut', quip: 'Akorát na odpoledne s výhledem.' },
+      { label: '4 km', headline: 'Za 4 km: přes řeku přívozem',
+        places: [{ name: 'Trojský zámek', dist: '40 m' }, { name: 'Sedlecké skály', dist: '1,9 km' }, { name: 'Přívoz v Podbabě', dist: '3,4 km' }],
+        meta: 'asi 5 330 kroků · 48 minut', quip: 'Drobné na převozníka mít nemusíte.' },
+      { label: '6,1 km', headline: 'Za 6,1 km: konec první etapy',
+        places: [{ name: 'Trojský zámek', dist: '40 m' }, { name: 'Sedlecké skály', dist: '1,9 km' }, { name: 'Přívoz v Podbabě', dist: '3,4 km' }, { name: 'Zámek Roztoky', dist: '6,1 km' }],
+        meta: 'asi 8 130 kroků · 1 h 13 min', quip: 'V Roztokách na vás čeká pohlednice.' }
+    ];
+    this.recent = [
+      { name: 'Trojská lávka', when: 'včera' }, { name: 'Císařský ostrov', when: 'včera' },
+      { name: 'Plavební komora', when: 'sobota' }, { name: 'Libeňský most', when: 'sobota' },
+      { name: 'Holešovický přístav', when: 'pátek' }, { name: 'Ostrov Štvanice', when: 'pátek' }
+    ];
+    this.chapters = [
+      { name: 'Voraři', count: '4 z 5', pct: '80%', note: 'Poslední vor přirazí v Libčicích.' },
+      { name: 'Mosty a lávky', count: '3 ze 6', pct: '50%', note: 'Nejlepší most přijde u Hořína: zvedá se.' },
+      { name: 'Ostrovy', count: '2 ze 4', pct: '50%', note: 'Jeden z nich je celá obec.' },
+      { name: 'Šlechtická sídla', count: '0 z 5', pct: '0%', note: 'Začíná za 40 metrů.' }
+    ];
+  }
+  renderVals() {
+    const sel = this.state.plan;
+    return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
+      chips: this.plans.map((p, k) => ({ label: p.label, on: k === sel, off: k !== sel, pick: () => this.setState({ plan: k }) })),
+      planList: [this.plans[sel]],
+      recent: this.recent,
+      chapters: this.chapters,
+      emb: !!this.props.embedded,
+      notEmb: !this.props.embedded,
+      padBottom: this.props.embedded ? '100px' : '24px',
+      goAtlas: () => this.props.onGo && this.props.onGo('vyprava', 'zoom'),
+      goHadanka: () => this.props.onGo && this.props.onGo('hadanka', 'push'),
+      goKronika: () => this.props.onGo && this.props.onGo('kronika')
+    };
+  }
 }
 </script>
 </body>

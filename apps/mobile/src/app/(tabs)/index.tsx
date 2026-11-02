@@ -1,10 +1,12 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { Pressable, View } from "react-native";
+import Svg, { Circle, Line } from "react-native-svg";
 import { changeSentence, summarizeChange } from "@footatlas/core";
+import { LastUpdated } from "../../components/LastUpdated";
 import { Button, Card, Screen, StageBar, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
-import { formatDayLong, formatKm, pluralPlaces } from "../../format";
+import { formatDayLong, formatDistance, formatKm, pluralPlaces } from "../../format";
 import { fromHealthSource } from "../../health/names";
 import { useExpedition } from "../../state/ExpeditionProvider";
 import { useTheme } from "../../theme/ThemeProvider";
@@ -32,7 +34,7 @@ export default function Home() {
       <Screen>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <T variant="small">{formatDayLong(new Date())}</T>
-          <HeaderLinks />
+          <SettingsButton onPress={() => router.push("/nastaveni")} />
         </View>
         <T variant="display">{vltavska.name}</T>
         <T variant="body">{vltavska.summary}</T>
@@ -58,13 +60,13 @@ export default function Home() {
   );
 
   return (
-    <Screen>
+    <Screen onRefresh={ex.demo.enabled ? undefined : ex.refresh} refreshing={ex.refreshing}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <T variant="small">{formatDayLong(new Date())}</T>
         <T variant="small" style={{ flex: 1, textAlign: "right" }} numberOfLines={1}>
           {ex.demo.enabled ? "Ukázkový postup" : paused ? "Výprava je pozastavena" : vltavska.name}
         </T>
-        <HeaderLinks />
+        <SettingsButton onPress={() => router.push("/nastaveni")} />
       </View>
 
       {state.completed ? (
@@ -75,7 +77,7 @@ export default function Home() {
       ) : (
         <>
           <T variant="label">
-            Další zastávka · {formatKm(state.toNextStopM ?? 0)}
+            Další zastávka · {formatDistance(state.toNextStopM ?? 0, { stepLengthM: ex.stepLength.meters })}
           </T>
           <T variant="display">{next?.name}</T>
           <T variant="muted">
@@ -84,6 +86,7 @@ export default function Home() {
         </>
       )}
       <StageBar stages={vltavska.plan.stages} walkedM={state.walkedM} />
+      <LastUpdated />
 
       <Card style={{ flexDirection: "row", gap: 14, alignItems: "center" }}>
         <View
@@ -113,7 +116,7 @@ export default function Home() {
               <Pressable
                 key={u.id}
                 accessibilityRole="button"
-                accessibilityLabel={`${place.name}, ${formatKm(u.atM - state.walkedM)}`}
+                accessibilityLabel={`${place.name}, ${formatDistance(u.atM - state.walkedM)}`}
                 onPress={() => router.push({ pathname: "/zastavka/[id]", params: { id: u.id } })}
                 style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 10, minHeight: 56 }}
               >
@@ -125,7 +128,7 @@ export default function Home() {
                     {KIND_LABEL[place.kind]} · km {(place.atM / 1000).toFixed(1).replace(".", ",")}
                   </T>
                 </View>
-                <T variant="strong">{formatKm(u.atM - state.walkedM)}</T>
+                <T variant="strong">{formatDistance(u.atM - state.walkedM)}</T>
               </Pressable>
             );
           })}
@@ -142,19 +145,6 @@ export default function Home() {
     </Screen>
   );
 
-  function HeaderLinks() {
-    return (
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Pressable accessibilityRole="link" accessibilityLabel="Délka kroku" onPress={() => router.push("/delka-kroku")} hitSlop={12} style={{ paddingVertical: 4, paddingLeft: 8 }}>
-          <T variant="small" accent>
-            Délka kroku
-          </T>
-        </Pressable>
-        <DevLink onPress={() => router.push("/dev")} />
-      </View>
-    );
-  }
-
   function StatusNote() {
     if (status.kind === "unavailable") {
       return (
@@ -170,20 +160,24 @@ export default function Home() {
   }
 }
 
-/** Odkaz na vývojářský panel nahoře v hlavičce; dole na konci obsahu ho na telefonu zakrývala lišta. */
-function DevLink({ onPress }: { onPress: () => void }) {
-  if (!__DEV__) return null;
+/** Ozubené kolo v hlavičce, otevírá Nastavení. */
+function SettingsButton({ onPress }: { onPress: () => void }) {
+  const { colors } = useTheme();
+  const teeth = [0, 45, 90, 135, 180, 225, 270, 315];
   return (
     <Pressable
-      accessibilityRole="link"
-      accessibilityLabel="Vývojářský panel"
+      accessibilityRole="button"
+      accessibilityLabel="Nastavení"
       onPress={onPress}
-      hitSlop={12}
-      style={{ paddingVertical: 4, paddingLeft: 8 }}
+      style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center", marginRight: -10 }}
     >
-      <T variant="small" accent>
-        Vývoj
-      </T>
+      <Svg width={24} height={24} viewBox="0 0 24 24">
+        {teeth.map((a) => (
+          <Line key={a} x1={12} y1={2.5} x2={12} y2={5.5} stroke={colors.accent} strokeWidth={3} strokeLinecap="round" transform={`rotate(${a} 12 12)`} />
+        ))}
+        <Circle cx={12} cy={12} r={6.5} stroke={colors.accent} strokeWidth={2.2} fill="none" />
+        <Circle cx={12} cy={12} r={2.4} fill={colors.accent} />
+      </Svg>
     </Pressable>
   );
 }

@@ -3,7 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 import type { SQLiteDatabase } from "expo-sqlite";
 import { describe, expect, it } from "vitest";
 import { chronicleDays, pauseSession, resumeSession, startSession } from "@footatlas/core";
-import { adoptLegacy, loadRunning, saveRunning } from "./expeditionStore";
+import { adoptLegacy, loadEvents, loadRunning, recordEvents, saveRunning } from "./expeditionStore";
 import { lastReadAt, loadAllDays, recomputeStale, saveRaw } from "./chronicleStore";
 import { SCHEMA_VERSION } from "./migrations";
 import { migrate } from "./schema";
@@ -45,7 +45,7 @@ describe("databáze kroniky", () => {
     await migrate(db as never);
     await migrate(db as never);
     expect((raw.prepare("PRAGMA user_version").get() as { user_version: number }).user_version).toBe(SCHEMA_VERSION);
-    expect(raw.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all().map((r: unknown) => (r as { name: string }).name)).toEqual(["daily_motion", "expedition_period", "expedition_run", "source_state"]);
+    expect(raw.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all().map((r: unknown) => (r as { name: string }).name)).toEqual(["daily_motion", "expedition_event", "expedition_period", "expedition_run", "source_state"]);
   });
 
   it("novější databáze než aplikace se odmítne", async () => {
@@ -131,5 +131,26 @@ describe("databáze kroniky", () => {
     const newer = pauseSession(legacy, new Date("2026-10-21T08:00:00.000Z"));
     await saveRunning(db, newer);
     expect(await adoptLegacy(db, legacy)).toEqual({ session: newer, dropLegacy: true });
+  });
+
+  it("události výpravy: zápis je idempotentní a první den dosažení se nepřepisuje", async () => {
+    const { db, raw } = fakeDb();
+    await migrate(db as never);
+    const now = new Date("2026-10-31T08:00:00.000Z");
+    expect(await recordEvents(db, [{ kind: "place", ref: "a", atM: 100, reachedDay: "2026-10-30" }], now)).toBe(0); // žádná výprava
+    await saveRunning(db, startSession("vltavska-stezka", new Date("2026-10-30T08:00:00.000Z")));
+    const ev = [
+      { kind: "place" as const, ref: "b", atM: 2500, reachedDay: "2026-10-31" },
+      { kind: "place" as const, ref: "a", atM: 100, reachedDay: "2026-10-30" },
+    ];
+    expect(await recordEvents(db, ev, now)).toBe(2);
+    expect(await recordEvents(db, [{ kind: "place", ref: "a", atM: 100, reachedDay: "2026-11-05" }, ...ev], now)).toBe(0);
+    expect(await loadEvents(db)).toEqual([
+      { kind: "place", ref: "a", atM: 100, reachedDay: "2026-10-30" },
+      { kind: "place", ref: "b", atM: 2500, reachedDay: "2026-10-31" },
+    ]);
+    await saveRunning(db, null);
+    expect(await loadEvents(db)).toEqual([]);
+    expect(raw.prepare("SELECT COUNT(*) AS n FROM expedition_event").get()).toEqual({ n: 0 });
   });
 });

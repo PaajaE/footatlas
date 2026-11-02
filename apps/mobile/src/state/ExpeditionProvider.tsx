@@ -1,7 +1,10 @@
+import { AppState } from "react-native";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   computeState,
   isPaused,
+  localDateKey,
+  journeyEvents,
   markSeen as markSessionSeen,
   pauseSession,
   resolveStepLength,
@@ -9,16 +12,18 @@ import {
   sessionSlices,
   sessionStart,
   startSession,
-  walkedInSlicesM,
+  walkedBySlice,
   type ExpeditionSession,
   type ExpeditionState,
+  type JourneyEvent,
   type StepLength,
   type StepProfile,
 } from "@footatlas/core";
 import { vltavska } from "../data/vltavska";
 import { healthSource } from "../health";
 import { DEFAULT_DEMO, loadDemo, loadStepProfile, saveDemo, saveStepProfile, type DemoState } from "./storage";
-import { loadSession, saveSession } from "./sessionStore";
+import { loadJourneyEvents, loadSession, recordJourneyEvents, saveSession } from "./sessionStore";
+import { FOREGROUND_INTERVAL_MS, shouldRefresh } from "./refreshPolicy";
 
 export type DataStatus =
   | { kind: "loading" }
@@ -34,6 +39,12 @@ interface ExpeditionContextValue {
   active: boolean;
   paused: boolean;
   status: DataStatus;
+  /** Dosažená místa, etapy a cíl rozjeté výpravy s dnem dosažení (uložené v databázi). */
+  events: JourneyEvent[];
+  /** Kdy se naposledy úspěšně přečetla zdravotní data. */
+  lastReadAt: Date | null;
+  /** Běží čtení vyvolané stažením prstem (jen pro kolečko obnovy). */
+  refreshing: boolean;
   stepProfile: StepProfile;
   /** Délka kroku, kterou se kroky přepočítávají na vzdálenost. */
   stepLength: StepLength;
@@ -59,6 +70,13 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
   /** Vzdálenost výpravy z posledního načtení zdravotních dat. */
   const [measuredM, setMeasuredM] = useState(0);
   const [status, setStatus] = useState<DataStatus>({ kind: "loading" });
+  const [storedEvents, setEvents] = useState<JourneyEvent[]>([]);
+  const [lastReadAt, setLastReadAt] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const inFlightRef = useRef(false);
+  const pendingRef = useRef(false);
+  const lastReadRef = useRef<number | null>(null);
+  const [appActive, setAppActive] = useState(AppState.currentState === "active");
   const [stepProfile, setStepProfileState] = useState<StepProfile>({});
   const stepLength = useMemo(() => resolveStepLength(stepProfile), [stepProfile]);
   const sessionRef = useRef<ExpeditionSession | null>(null);
@@ -71,9 +89,10 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     await saveSession(next);
   }, []);
 
-  const refreshFor = useCallback(async (s: ExpeditionSession | null) => {
+  const readHealth = useCallback(async (s: ExpeditionSession | null) => {
     if (!s) {
       setMeasuredM(0);
+      setEvents([]);
       setStatus({ kind: "ok" });
       return;
     }
@@ -94,18 +113,51 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
           slices.map((x) => (x.whole || !healthSource.readInterval ? null : healthSource.readInterval(x.from, x.to, stepLengthRef.current))),
         ),
       ]);
-      setMeasuredM(walkedInSlicesM(slices, daily, intervalM));
+      const perSlice = walkedBySlice(slices, daily, intervalM);
+      setMeasuredM(perSlice.reduce((sum, x) => sum + x.distanceM, 0));
       setStatus({ kind: "ok" });
+      lastReadRef.current = now.getTime();
+      setLastReadAt(now);
+      // Den dosažení se počítá z dat, ne z okamžiku otevření aplikace; zapsané se už nemění.
+      try {
+        await recordJourneyEvents(journeyEvents(vltavska.plan, perSlice), now);
+        setEvents(await loadJourneyEvents());
+      } catch {
+        // Události jsou doplněk; chyba databáze nesmí shodit načtení postupu.
+      }
     } catch (e) {
       setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e) });
     }
   }, []);
+
+  /** Čtení nikdy neběží paralelně: když jedno běží, další se přeskočí. */
+  const refreshFor = useCallback(
+    async (s: ExpeditionSession | null, queue = true) => {
+      if (inFlightRef.current) {
+        // Změna výpravy (start, pauza, délka kroku) nesmí zůstat bez nového čtení.
+        if (queue) pendingRef.current = true;
+        return;
+      }
+      inFlightRef.current = true;
+      try {
+        await readHealth(s);
+        while (pendingRef.current) {
+          pendingRef.current = false;
+          await readHealth(sessionRef.current);
+        }
+      } finally {
+        inFlightRef.current = false;
+      }
+    },
+    [readHealth],
+  );
 
   useEffect(() => {
     (async () => {
       const [d, s, p] = await Promise.all([loadDemo(), loadSession(), loadStepProfile()]);
       stepLengthRef.current = resolveStepLength(p).meters;
       setStepProfileState(p);
+      setEvents(await loadJourneyEvents().catch(() => []));
       setDemoState(d);
       setSession(s);
       setReady(true);
@@ -160,9 +212,31 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     await refreshFor(next);
   }, [persistSession, refreshFor]);
 
+  // Kolečko „obnovuji“ jen při stažení prstem; automatická čtení běží potichu.
   const refresh = useCallback(async () => {
-    if (!demo.enabled) await refreshFor(sessionRef.current);
+    if (demo.enabled) return;
+    setRefreshing(true);
+    try {
+      await refreshFor(sessionRef.current, false);
+    } finally {
+      setRefreshing(false);
+    }
   }, [demo.enabled, refreshFor]);
+
+  const demoRef = useRef(demo.enabled);
+  demoRef.current = demo.enabled;
+
+  // Při návratu do popředí načíst znovu (s minimálním odstupem).
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      setAppActive(next === "active");
+      if (next !== "active" || demoRef.current || !sessionRef.current) return;
+      if (shouldRefresh({ now: Date.now(), lastReadAt: lastReadRef.current, inFlight: inFlightRef.current })) {
+        void refreshFor(sessionRef.current, false);
+      }
+    });
+    return () => sub.remove();
+  }, [refreshFor]);
 
   const setDemo = useCallback((patch: Partial<DemoState>) => {
     setDemoState((prev) => {
@@ -174,13 +248,27 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
 
   const resetAll = useCallback(async () => {
     await persistSession(null);
+    setEvents([]);
     setMeasuredM(0);
     setDemoState(DEFAULT_DEMO);
     await saveDemo(DEFAULT_DEMO);
     setStatus({ kind: "ok" });
   }, [persistSession]);
 
+  // Dokud je aplikace v popředí a výprava běží, čte se jednou za minutu. Na pozadí nic.
+  const polling = ready && appActive && !demo.enabled && session !== null && !isPaused(session);
+  useEffect(() => {
+    if (!polling) return;
+    const id = setInterval(() => void refreshFor(sessionRef.current, false), FOREGROUND_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [polling, refreshFor]);
+
   const walkedM = demo.enabled ? demo.walkedM : session ? measuredM : 0;
+  // V ukázkovém postupu se události dopočítají na místě (jako by vše bylo ušlé dnes) a neukládají se.
+  const events = useMemo(
+    () => (demo.enabled ? journeyEvents(vltavska.plan, [{ day: localDateKey(new Date()), distanceM: demo.walkedM }]) : storedEvents),
+    [demo.enabled, demo.walkedM, storedEvents],
+  );
   const previousM = demo.enabled ? demo.seenM : (session?.lastSeenWalkedM ?? 0);
   const active = demo.enabled || session !== null;
   const paused = !demo.enabled && session !== null && isPaused(session);
@@ -208,6 +296,9 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     active,
     paused,
     status,
+    events,
+    lastReadAt,
+    refreshing,
     stepProfile,
     stepLength,
     setStepProfile,

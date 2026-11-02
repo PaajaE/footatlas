@@ -2,80 +2,458 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<title>Karta života</title>
+<title>Návrat: Inkoust</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=Work+Sans:wght@400;500;600&amp;display=swap">
 <style>
-body{margin:0;font-family:'Work Sans',system-ui,sans-serif}
-.fa{--bg:#EFE4CB;--surface:#F8F1E1;--ink:#2B2118;--muted:#75644E;--line:#D8C9A9;--accent:#9B2C22;--accent-fg:#FBF5E8;--ochre:#8E6320;--nav:#F6EEDC;--panel:rgba(248,241,225,.95);--track:#DCCDAE;--lock:#B7A88E;--seal:#9B2C22;--seal-fg:#F6E7C8;--free:#3E7D52;--shadow:rgba(60,40,15,.22)}
-.fa{width:390px;height:844px;box-sizing:border-box;background:var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='390' height='844'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='.014' numOctaves='4' seed='9'/><feColorMatrix values='0 0 0 0 .62  0 0 0 0 .48  0 0 0 0 .26  0 0 0 .9 -.25'/></filter><rect width='100%25' height='100%25' filter='url(%23p)' opacity='0.55'/></svg>");background-blend-mode:multiply;color:var(--ink);position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:'Work Sans',system-ui,sans-serif}
-.fa *{box-sizing:border-box}
-.fell{font-family:'IM Fell English',Georgia,serif;font-weight:400}
-.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:400;letter-spacing:.05em;color:var(--ochre)}
-.muted{color:var(--muted)}
-.num{font-variant-numeric:tabular-nums}
-.melt{position:absolute;left:0;right:0;top:0;background-size:cover;background-position:center;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%);mask-image:linear-gradient(180deg,transparent 0,#000 18%,#000 44%,transparent 80%)}
-.edges{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.soft{-webkit-mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 72% 70% at 50% 50%,#000 62%,transparent 100%)}
-.top{position:relative;padding:54px 20px 0;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
-.top a{color:inherit;text-decoration:none}
-.eyebrow{display:flex;align-items:center;gap:8px;font-family:'IM Fell English SC',Georgia,serif;font-size:15px;letter-spacing:.06em;color:var(--ochre)}
-.eyebrow::before,.eyebrow::after{content:"";height:1px;width:20px;background:var(--ochre);opacity:.7}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.med{border-radius:50%;flex:none;background-size:cover;background-position:center;border:1.5px solid var(--ochre);outline:1px solid var(--line);outline-offset:3px;position:relative}
-.badge{position:absolute;right:-6px;bottom:-5px;width:20px;height:20px;background:var(--seal);color:var(--seal-fg);font-size:11px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
-.dot{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--lock);color:var(--muted)}
-.seal{width:36px;height:36px;flex:none;background:var(--seal);color:var(--seal-fg);display:flex;align-items:center;justify-content:center;font-size:14px;clip-path:polygon(50% 0,61% 10%,75% 5%,79% 20%,95% 25%,90% 39%,100% 50%,90% 61%,95% 75%,79% 80%,75% 95%,61% 90%,50% 100%,39% 90%,25% 95%,21% 80%,5% 75%,10% 61%,0 50%,10% 39%,5% 25%,21% 20%,25% 5%,39% 10%)}
-.rule{height:1px;background:var(--line)}
-.btn{display:block;text-align:center;text-decoration:none;font-weight:600;font-size:16px;padding:15px;border-radius:14px}
-.btn.pri{background:var(--accent);color:var(--accent-fg)}
-.btn.sec{border:1.5px solid var(--line);color:var(--ink)}
-.map{position:relative;overflow:hidden;flex:none}
-.map img{display:block;width:100%;height:100%}
-.map svg{position:absolute;inset:0;width:100%;height:100%}
-.attr{position:absolute;right:8px;bottom:5px;font-size:9px;color:var(--muted)}
-.nav{display:flex;justify-content:space-around;padding:10px 6px 30px;font-size:12px;flex:none;margin-top:auto;background:var(--nav);color:var(--muted);border-top:1px solid var(--line)}
-.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;text-decoration:none;color:inherit}
-.nav a.on{color:var(--accent);font-weight:600}
+body{margin:0}
+.t-calm{--d:9.5s}.t-def{--d:7s}.t-fast{--d:4.5s}
+.vp{position:absolute;left:0;top:118px;width:390px;height:600px;overflow:hidden}
+.cam{position:absolute;left:0;top:0;width:390px;height:600px;transform-origin:0 0;animation:cam var(--d,7s) linear both}
+@keyframes cam{
+0%{transform:translate(-62.2px,-369px) scale(1.9)}
+10%{transform:translate(-62.2px,-369px) scale(1.9);animation-timing-function:ease-in}
+28.75%{transform:translate(-260.4px,-296.9px) scale(1.9)}
+47.5%{transform:translate(-351px,-211px) scale(1.9)}
+66.25%{transform:translate(-269.7px,-138.2px) scale(1.9)}
+85%{transform:translate(-62.7px,-119px) scale(1.9);animation-timing-function:ease-in-out}
+100%{transform:translate(0px,0px) scale(1)}}
+.ink{stroke-dasharray:940;animation:ink var(--d,7s) linear both}
+@keyframes ink{0%,10%{stroke-dashoffset:723}28.75%{stroke-dashoffset:609.8}47.5%{stroke-dashoffset:496.5}66.25%{stroke-dashoffset:383.2}85%,100%{stroke-dashoffset:270}}
+.me{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#9B2C22;border:2.5px solid #FBF5E8;box-shadow:0 1px 3px rgba(43,33,24,.45);offset-path:path('M135.5 562.7 L132.2 549.5 L125.4 523.2 L121.4 504.1 L120.1 492.3 L118.9 484.2 L117.8 480.0 L116.9 473.3 L116.1 464.2 L115.4 446.5 L114.7 420.1 L115.1 403.8 L116.4 397.7 L119.1 388.4 L123.2 376.1 L126.6 367.0 L129.3 361.2 L131.7 356.9 L133.7 354.1 L135.8 351.6 L137.9 349.3 L140.2 347.2 L142.7 345.3 L145.7 343.3 L149.2 341.3 L152.7 339.8 L156.0 338.7 L160.9 337.5 L167.4 336.3 L178.3 334.8 L193.6 333.2 L201.9 332.1 L203.4 331.6 L210.6 328.0 L223.6 321.2 L232.2 317.0 L236.6 315.2 L241.0 313.7 L245.2 312.4 L250.9 311.3 L258.0 310.4 L266.2 310.2 L275.7 310.7 L285.0 310.1 L294.3 308.3 L299.6 307.1 L300.9 306.5 L303.9 304.9 L308.4 302.3 L313.2 299.1 L318.3 295.4 L321.8 292.2 L323.7 289.7 L325.9 286.3 L328.4 282.0 L330.0 278.9 L330.6 277.1 L331.0 274.2 L331.4 270.4 L331.2 265.8 L330.7 260.5 L329.5 255.5 L327.8 250.8 L325.1 245.9 L321.5 240.9 L318.2 236.8 L315.3 233.8 L311.5 231.0 L307.0 228.2 L304.0 226.8 L302.5 226.6 L295.8 226.1 L283.7 225.1 L276.0 224.8 L272.8 225.1 L268.3 225.6 L262.7 226.5 L256.4 227.7 L249.4 229.3 L241.7 231.4 L233.2 233.9 L224.3 235.5 L215.1 236.1 L203.1 235.0 L188.4 232.1 L178.1 229.2 L172.3 226.4 L167.8 223.9 L164.5 221.7 L161.3 220.1 L158.4 218.8 L156.2 218.1 L154.7 217.9 L153.2 217.8 L151.7 217.9 L142.5 219.4 L125.5 222.2 L112.7 223.5');offset-rotate:0deg;offset-anchor:50% 50%;animation:walk var(--d,7s) linear both}
+.me::after{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid rgba(155,44,34,.45);animation:halo 1.8s ease-out infinite}
+@keyframes walk{0%,10%{offset-distance:217px}85%,100%{offset-distance:670px}}
+@keyframes halo{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.4);opacity:0}}
+.raz{position:absolute;width:16px;height:16px;border-radius:50%;box-sizing:border-box;border:1.6px solid #9B2C22;background:rgba(155,44,34,.12);box-shadow:inset 0 0 0 2px #F3E7CC,inset 0 0 0 2.8px #9B2C22;transform:rotate(-10deg)}
+.raz::before{content:'';position:absolute;left:5px;top:5px;width:3px;height:3px;border-radius:50%;background:#9B2C22}
+.seal{position:absolute;width:28px;height:28px;border-radius:50%;box-sizing:border-box;border:3px solid #8E2A20;overflow:hidden;box-shadow:0 1px 0 #5A1610,0 2px 5px rgba(43,33,24,.4);background:#8E2A20}
+.seal img{width:100%;height:100%;object-fit:cover;display:block}
+.next{position:absolute;width:28px;height:28px;border-radius:50%;box-sizing:border-box;border:1.5px dashed #75644E;padding:2px;background:#EFE4CB}
+.next img{width:100%;height:100%;object-fit:cover;border-radius:50%;filter:grayscale(1) sepia(.25);opacity:.75;display:block}
+.next::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1.5px solid rgba(117,100,78,.6);animation:halo 2.4s ease-out infinite}
+.drop{opacity:0;animation:drop .6s cubic-bezier(.2,1.5,.4,1) both;animation-delay:calc(var(--d,7s) * var(--f,0.5))}
+.drop::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(155,44,34,.55);opacity:0;animation:burst .7s ease-out both;animation-delay:inherit}
+@keyframes drop{0%{opacity:0;transform:scale(2.6) rotate(-34deg)}55%{opacity:1;transform:scale(.86) rotate(-6deg)}100%{opacity:1;transform:scale(1) rotate(-10deg)}}
+@keyframes burst{0%{opacity:.9;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
+.flash{opacity:0;animation:flash 1.1s ease-out both;animation-delay:calc(var(--d,7s) * var(--f,0.5))}
+@keyframes flash{0%{opacity:0;transform:translateY(4px) scale(1.4)}35%{opacity:1;transform:translateY(0) scale(1.15)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.vg{transform-box:fill-box;transform-origin:center}
+.vg.drop{animation-name:vgdrop}
+@keyframes vgdrop{0%{opacity:0;transform:scale(2.2)}60%{opacity:1;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
+.reduced .cam{animation:none;transform:none}
+.reduced .ink{animation:fadeInk 1.2s ease both}
+@keyframes fadeInk{0%{stroke-dashoffset:723}100%{stroke-dashoffset:270}}
+.reduced .me{animation:none;offset-distance:670px}
+.reduced .drop{animation:fade .4s ease both;animation-delay:calc(.15s + var(--f,0.5) * 1.2s)}
+.reduced .drop::after,.reduced .flash{display:none}
+@keyframes fade{0%{opacity:0}100%{opacity:1;transform:rotate(-10deg)}}
+.skip .cam,.skip .ink,.skip .me,.skip .drop,.skip .drop::after,.skip .flash{animation-duration:1ms!important;animation-delay:0ms!important}
+.sheet{animation:up .5s cubic-bezier(.2,.9,.3,1) both}
+@keyframes up{0%{transform:translateY(100%)}100%{transform:translateY(0)}}
+.story{animation:fadeup .35s ease both}
+@keyframes fadeup{0%{opacity:0;transform:translateY(16px)}100%{opacity:1;transform:translateY(0)}}
+.bigraz{animation:drop .7s cubic-bezier(.2,1.5,.4,1) both}
+button{font-family:inherit}
 </style>
 </helmet>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <clipPath id="kruh" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
-</defs></svg>
-<div class="fa">
-<div style="padding:56px 24px 0;display:flex;justify-content:space-between;align-items:baseline">
-    <span class="fell" style="font-size:22px">FootAtlas</span><span class="muted" style="font-size:13px">Načteno z Apple Health</span>
+<div class="{{rootClass}} {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif;">
+
+  <div style="position: absolute; left: 0; top: 0; width: 390px; height: 118px; box-sizing: border-box; padding: 20px 20px 0; display: flex; flex-direction: column; gap: 2px; z-index: 2; background: #EFE4CB;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 13px; color: #75644E;">Pondělí 2. listopadu</span>
+      <button onClick="{{skip}}" style="border: none; background: transparent; color: #9B2C22; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 0 0 16px; cursor: pointer;">Přeskočit</button>
+    </div>
+    <div style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718; margin-top: -8px;">Od pátku jste ušli</div>
+    <div style="display: flex; align-items: baseline; gap: 10px;">
+      <span style="font-family: 'IM Fell English', serif; font-size: 44px; line-height: 46px;">{{km}} km</span>
+      <span style="font-size: 13px; color: #75644E;">Karlův most → Troja</span>
+    </div>
   </div>
-  <div style="padding:24px 24px 0;display:flex;flex-direction:column;gap:6px">
-    <span class="eyebrow">Za život jste ušli</span>
-    <div style="display:flex;align-items:baseline;gap:10px"><span class="fell num" style="font-size:84px;line-height:.95">14 200</span><span class="fell" style="font-size:28px">km</span></div>
-    <p style="margin:4px 0 0;font-size:17px;line-height:1.45">To je z Prahy až do Tokia a ještě 5 100 km dál, přes Tichý oceán.</p>
+
+  <sc-if value="{{on}}" hint-placeholder-val="{{true}}">
+  <div class="vp">
+    <div class="cam">
+      <svg width="390" height="600" viewBox="0 0 390 600" aria-hidden="true" style="position: absolute; left: 0; top: 0;">
+        <defs>
+          <filter id="wc" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7" result="n"></feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+            <feGaussianBlur stdDeviation="0.8"></feGaussianBlur>
+          </filter>
+          <filter id="pencil" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="3" result="n"></feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+          </filter>
+          <pattern id="blkS" width="9" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><rect x="1" y="1" width="6" height="5" fill="none" stroke="#9A8C74" stroke-width="0.5"></rect></pattern>
+          <pattern id="blkI" width="9" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><rect x="0" y="0" width="9" height="8" fill="#EBD5AE"></rect><rect x="1" y="1" width="6" height="5" fill="#D6A877" stroke="#8C5E3A" stroke-width="0.5"></rect></pattern>
+          <pattern id="treS" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="3.5" r="2.2" fill="none" stroke="#9A8C74" stroke-width="0.6"></circle><path d="M4 5.7 L4 7.4" stroke="#9A8C74" stroke-width="0.6"></path></pattern>
+          <pattern id="treI" width="8" height="8" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="8" height="8" fill="#C9D3A0"></rect><circle cx="4" cy="3.5" r="2.5" fill="#6F9455" stroke="#3F5E32" stroke-width="0.5"></circle><path d="M4 6 L4 7.6" stroke="#5E4A32" stroke-width="0.7"></path></pattern>
+          <pattern id="vinS" width="6" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(-25)"><path d="M0 2 L6 2" stroke="#9A8C74" stroke-width="0.6" stroke-dasharray="1 1.4"></path></pattern>
+          <pattern id="vinI" width="6" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(-25)"><rect x="0" y="0" width="6" height="4" fill="#D9D39A"></rect><path d="M0 2 L6 2" stroke="#6E7A34" stroke-width="0.9" stroke-dasharray="1.2 1.2"></path></pattern>
+          <mask id="inkmask" maskUnits="userSpaceOnUse" x="0" y="0" width="390" height="600">
+            <rect x="0" y="0" width="390" height="600" fill="#000"></rect>
+            <g filter="url(#wc)">
+              <path class="ink" d="M135.5 562.7 L132.2 549.5 L125.4 523.2 L121.4 504.1 L120.1 492.3 L118.9 484.2 L117.8 480.0 L116.9 473.3 L116.1 464.2 L115.4 446.5 L114.7 420.1 L115.1 403.8 L116.4 397.7 L119.1 388.4 L123.2 376.1 L126.6 367.0 L129.3 361.2 L131.7 356.9 L133.7 354.1 L135.8 351.6 L137.9 349.3 L140.2 347.2 L142.7 345.3 L145.7 343.3 L149.2 341.3 L152.7 339.8 L156.0 338.7 L160.9 337.5 L167.4 336.3 L178.3 334.8 L193.6 333.2 L201.9 332.1 L203.4 331.6 L210.6 328.0 L223.6 321.2 L232.2 317.0 L236.6 315.2 L241.0 313.7 L245.2 312.4 L250.9 311.3 L258.0 310.4 L266.2 310.2 L275.7 310.7 L285.0 310.1 L294.3 308.3 L299.6 307.1 L300.9 306.5 L303.9 304.9 L308.4 302.3 L313.2 299.1 L318.3 295.4 L321.8 292.2 L323.7 289.7 L325.9 286.3 L328.4 282.0 L330.0 278.9 L330.6 277.1 L331.0 274.2 L331.4 270.4 L331.2 265.8 L330.7 260.5 L329.5 255.5 L327.8 250.8 L325.1 245.9 L321.5 240.9 L318.2 236.8 L315.3 233.8 L311.5 231.0 L307.0 228.2 L304.0 226.8 L302.5 226.6 L295.8 226.1 L283.7 225.1 L276.0 224.8 L272.8 225.1 L268.3 225.6 L262.7 226.5 L256.4 227.7 L249.4 229.3 L241.7 231.4 L233.2 233.9 L224.3 235.5 L215.1 236.1 L203.1 235.0 L188.4 232.1 L178.1 229.2 L172.3 226.4 L167.8 223.9 L164.5 221.7 L161.3 220.1 L158.4 218.8 L156.2 218.1 L154.7 217.9 L153.2 217.8 L151.7 217.9 L142.5 219.4 L125.5 222.2 L112.7 223.5 L103.8 223.2 L94.8 220.6 L85.6 215.6 L77.3 209.1 L70.1 201.0 L63.5 192.1 L57.6 182.4 L54.2 171.9 L53.0 160.5 L52.8 152.9 L53.4 149.0 L54.9 144.4 L57.2 139.0 L60.5 133.5 L64.8 127.9 L68.3 122.7 L70.8 118.0 L72.3 114.0 L72.8 110.7 L72.5 107.6 L71.6 104.7 L70.1 101.9 L68.0 99.3 L62.0 94.3 L52.2 87.0 L44.7 80.1 L39.7 73.8 L36.5 67.5 L35.1 61.4 L35.0 55.3 L36.4 49.4 L38.4 44.1 L41.2 39.6 L43.7 36.4 L45.8 34.3 L47.0 33.2 L47.1 33.0 L47.2 32.9" fill="none" stroke="#fff" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"></path>
+            </g>
+          </mask>
+        </defs>
+
+        <rect x="0" y="0" width="390" height="600" fill="#EFE4CB"></rect>
+
+        <g fill="url(#blkS)" stroke="#9A8C74" stroke-width="0.6" opacity="0.8">
+          <path d="M150 365 L200 352 L215 380 L205 440 L190 520 L160 548 L150 540 L148 470 L140 420 L142 380 Z"></path>
+          <path d="M225 335 L320 326 L330 345 L310 372 L240 378 L218 360 Z"></path>
+          <path d="M215 392 L300 386 L322 430 L290 480 L222 500 L200 470 L208 420 Z"></path>
+          <path d="M240 262 L300 254 L322 268 L316 290 L290 300 L250 302 L238 288 Z"></path>
+          <path d="M150 268 L212 262 L222 300 L200 312 L160 316 L146 298 Z"></path>
+          <path d="M38 360 L100 352 L108 380 L106 428 L70 436 L36 420 Z"></path>
+          <path d="M62 474 L108 470 L112 520 L122 572 L82 578 L60 520 Z"></path>
+          <path d="M354 262 L388 255 L388 340 L352 336 L348 300 Z"></path>
+          <path d="M180 112 L250 104 L262 150 L232 178 L190 170 Z"></path>
+          <path d="M268 160 L330 150 L346 198 L302 204 L270 196 Z"></path>
+          <path d="M30 284 L118 274 L136 300 L126 340 L62 346 L30 330 Z"></path>
+        </g>
+        <g fill="url(#treS)" stroke="#9A8C74" stroke-width="0.6" opacity="0.85">
+          <path d="M8 200 L58 194 L74 238 L42 262 L8 250 Z"></path>
+          <path d="M100 124 L160 117 L172 150 L142 166 L104 158 Z"></path>
+          <path d="M66 440 L104 436 L106 466 L72 470 Z"></path>
+          <ellipse cx="232" cy="250" rx="30" ry="11"></ellipse>
+          <path d="M290 60 L370 52 L380 110 L330 130 L292 112 Z"></path>
+        </g>
+        <ellipse cx="108" cy="186" rx="24" ry="11" fill="url(#vinS)"></ellipse>
+        <g stroke="#8A7C66" stroke-width="1.2" stroke-linecap="round" fill="none">
+          <path d="M110 395 L142 393"></path><path d="M128 370 L150 376"></path><path d="M114 440 L140 440"></path><path d="M120 505 L145 503"></path><path d="M128 545 L152 538"></path><path d="M330 282 L352 290"></path><path d="M206 330 L214 352"></path><path d="M152 200 L158 222"></path>
+        </g>
+        <ellipse cx="216" cy="338" rx="11" ry="3" transform="rotate(-24 216 338)" fill="#EFE4CB" stroke="#8A7C66" stroke-width="0.7"></ellipse>
+        <g fill="none" stroke="#8A7C66" stroke-width="0.8" stroke-linejoin="round">
+          <path d="M54 398 L90 398 L90 390 L86 390 L86 386 L82 386 L82 390 L66 390 L66 382 L64 374 L62 382 L62 390 L58 390 L58 386 L54 386 Z M70 390 L70 376 L72 369 L74 376 L74 390"></path>
+          <path d="M150 556 L176 556 L176 548 L172 548 L172 536 L170 531 L168 536 L168 548 L160 548 L160 536 L158 531 L156 536 L156 548 L150 548 Z"></path>
+          <path d="M84 432 L80 452 M84 432 L88 452 M81 446 L87 446"></path>
+          <path d="M104 172 L132 172 L132 164 L128 164 L128 160 L108 160 L108 164 L104 164 Z M108 160 L118 154 L128 160"></path>
+        </g>
+        <g filter="url(#pencil)" opacity="0.75">
+          <path d="M146.2 560.0 L142.9 546.9 L136.2 520.8 L132.2 502.0 L131.0 490.5 L129.8 482.7 L128.7 478.4 L127.8 472.1 L127.1 463.6 L126.4 446.2 L125.7 420.2 L126.0 404.8 L127.0 400.1 L129.6 391.8 L133.5 379.8 L136.7 371.2 L139.2 366.2 L141.1 362.6 L142.5 360.7 L144.0 358.8 L145.6 357.2 L147.3 355.6 L149.0 354.2 L151.3 352.7 L154.2 351.1 L156.7 349.9 L159.0 349.2 L163.1 348.2 L169.1 347.2 L179.8 345.8 L195.1 344.0 L204.4 342.7 L207.4 341.7 L215.5 337.8 L228.4 331.2 L236.8 327.0 L240.6 325.5 L244.2 324.2 L247.8 323.1 L252.6 322.2 L258.6 321.3 L266.6 321.2 L276.3 321.7 L286.2 321.0 L296.3 319.1 L302.7 317.6 L305.3 316.5 L309.2 314.6 L314.2 311.6 L319.7 308.0 L325.5 303.8 L329.8 299.8 L332.5 296.3 L335.2 292.1 L338.2 287.1 L340.1 283.0 L341.2 279.7 L341.9 275.6 L342.3 270.6 L342.1 265.0 L341.5 258.5 L340.0 252.3 L337.7 246.3 L334.5 240.3 L330.3 234.3 L326.3 229.4 L322.4 225.5 L317.7 221.9 L312.1 218.6 L307.7 216.6 L304.5 215.9 L296.7 215.1 L284.2 214.2 L276.0 213.8 L271.9 214.2 L266.8 214.8 L260.8 215.6 L254.0 216.9 L246.8 218.7 L239.0 220.7 L230.9 223.2 L223.0 224.7 L215.4 225.2 L204.7 224.2 L190.8 221.4 L181.7 218.9 L177.2 216.6 L173.2 214.3 L169.7 212.0 L166.0 210.1 L162.0 208.5 L158.7 207.5 L156.0 207.0 L153.2 206.9 L150.5 206.9 L140.8 208.4 L124.1 211.4 L112.5 212.7 L105.8 212.5 L98.8 210.5 L91.6 206.6 L84.7 201.1 L78.4 193.9 L72.7 186.3 L67.7 178.2 L64.8 169.2 L63.9 159.3 L63.6 153.4 L63.9 151.6 L65.0 148.5 L66.8 144.2 L69.9 139.3 L74.1 133.8 L77.8 128.1 L81.0 122.1 L82.9 116.4 L83.6 110.9 L83.2 105.7 L81.6 100.6 L79.1 96.0 L75.9 91.8 L69.3 86.1 L59.4 78.8 L52.6 72.6 L48.7 67.8 L46.4 63.6 L45.8 60.3 L45.8 56.6 L46.8 52.5 L48.2 48.9 L50.2 45.8 L52.0 43.5 L53.7 42.0 L54.8 41.0 L55.3 40.3 L55.6 40.0" fill="none" stroke="#8A7C66" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M146.2 560.0 L142.9 546.9 L136.2 520.8 L132.2 502.0 L131.0 490.5 L129.8 482.7 L128.7 478.4 L127.8 472.1 L127.1 463.6 L126.4 446.2 L125.7 420.2 L126.0 404.8 L127.0 400.1 L129.6 391.8 L133.5 379.8 L136.7 371.2 L139.2 366.2 L141.1 362.6 L142.5 360.7 L144.0 358.8 L145.6 357.2 L147.3 355.6 L149.0 354.2 L151.3 352.7 L154.2 351.1 L156.7 349.9 L159.0 349.2 L163.1 348.2 L169.1 347.2 L179.8 345.8 L195.1 344.0 L204.4 342.7 L207.4 341.7 L215.5 337.8 L228.4 331.2 L236.8 327.0 L240.6 325.5 L244.2 324.2 L247.8 323.1 L252.6 322.2 L258.6 321.3 L266.6 321.2 L276.3 321.7 L286.2 321.0 L296.3 319.1 L302.7 317.6 L305.3 316.5 L309.2 314.6 L314.2 311.6 L319.7 308.0 L325.5 303.8 L329.8 299.8 L332.5 296.3 L335.2 292.1 L338.2 287.1 L340.1 283.0 L341.2 279.7 L341.9 275.6 L342.3 270.6 L342.1 265.0 L341.5 258.5 L340.0 252.3 L337.7 246.3 L334.5 240.3 L330.3 234.3 L326.3 229.4 L322.4 225.5 L317.7 221.9 L312.1 218.6 L307.7 216.6 L304.5 215.9 L296.7 215.1 L284.2 214.2 L276.0 213.8 L271.9 214.2 L266.8 214.8 L260.8 215.6 L254.0 216.9 L246.8 218.7 L239.0 220.7 L230.9 223.2 L223.0 224.7 L215.4 225.2 L204.7 224.2 L190.8 221.4 L181.7 218.9 L177.2 216.6 L173.2 214.3 L169.7 212.0 L166.0 210.1 L162.0 208.5 L158.7 207.5 L156.0 207.0 L153.2 206.9 L150.5 206.9 L140.8 208.4 L124.1 211.4 L112.5 212.7 L105.8 212.5 L98.8 210.5 L91.6 206.6 L84.7 201.1 L78.4 193.9 L72.7 186.3 L67.7 178.2 L64.8 169.2 L63.9 159.3 L63.6 153.4 L63.9 151.6 L65.0 148.5 L66.8 144.2 L69.9 139.3 L74.1 133.8 L77.8 128.1 L81.0 122.1 L82.9 116.4 L83.6 110.9 L83.2 105.7 L81.6 100.6 L79.1 96.0 L75.9 91.8 L69.3 86.1 L59.4 78.8 L52.6 72.6 L48.7 67.8 L46.4 63.6 L45.8 60.3 L45.8 56.6 L46.8 52.5 L48.2 48.9 L50.2 45.8 L52.0 43.5 L53.7 42.0 L54.8 41.0 L55.3 40.3 L55.6 40.0" fill="none" stroke="#EFE4CB" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"></path>
+          <ellipse cx="232" cy="250" rx="30" ry="11" fill="none" stroke="#8A7C66" stroke-width="0.8" stroke-dasharray="2 3"></ellipse>
+          <ellipse cx="172" cy="321" rx="24" ry="8" fill="none" stroke="#8A7C66" stroke-width="0.8" stroke-dasharray="2 3"></ellipse>
+          <ellipse cx="108" cy="186" rx="24" ry="11" fill="none" stroke="#8A7C66" stroke-width="0.8" stroke-dasharray="2 3"></ellipse>
+          <path d="M150 326 l5 -7 M157 327 l5 -7 M164 327 l5 -7 M171 328 l5 -7 M178 328 l5 -7 M185 328 l5 -7 M80 178 l6 -6 M88 176 l6 -6 M96 174 l6 -6 M104 172 l6 -6 M112 171 l6 -6 M120 171 l6 -6 M42 150 l5 -6 M44 140 l5 -6 M46 130 l5 -6 M48 120 l5 -6 M200 150 l4 -6 M208 148 l4 -6 M216 147 l4 -6 M224 147 l4 -6" stroke="#8A7C66" stroke-width="0.7" fill="none"></path>
+        </g>
+
+        <g mask="url(#inkmask)">
+          <rect x="0" y="0" width="390" height="600" fill="#F4E6C6"></rect>
+          <g fill="url(#blkI)" stroke="#8C5E3A" stroke-width="0.7">
+            <path d="M150 365 L200 352 L215 380 L205 440 L190 520 L160 548 L150 540 L148 470 L140 420 L142 380 Z"></path>
+            <path d="M225 335 L320 326 L330 345 L310 372 L240 378 L218 360 Z"></path>
+            <path d="M215 392 L300 386 L322 430 L290 480 L222 500 L200 470 L208 420 Z"></path>
+            <path d="M240 262 L300 254 L322 268 L316 290 L290 300 L250 302 L238 288 Z"></path>
+            <path d="M150 268 L212 262 L222 300 L200 312 L160 316 L146 298 Z"></path>
+            <path d="M38 360 L100 352 L108 380 L106 428 L70 436 L36 420 Z"></path>
+            <path d="M62 474 L108 470 L112 520 L122 572 L82 578 L60 520 Z"></path>
+            <path d="M354 262 L388 255 L388 340 L352 336 L348 300 Z"></path>
+            <path d="M180 112 L250 104 L262 150 L232 178 L190 170 Z"></path>
+            <path d="M268 160 L330 150 L346 198 L302 204 L270 196 Z"></path>
+            <path d="M30 284 L118 274 L136 300 L126 340 L62 346 L30 330 Z"></path>
+          </g>
+          <g fill="url(#treI)" stroke="#3F5E32" stroke-width="0.7">
+            <path d="M8 200 L58 194 L74 238 L42 262 L8 250 Z"></path>
+            <path d="M100 124 L160 117 L172 150 L142 166 L104 158 Z"></path>
+            <path d="M66 440 L104 436 L106 466 L72 470 Z"></path>
+            <ellipse cx="232" cy="250" rx="30" ry="11"></ellipse>
+            <path d="M290 60 L370 52 L380 110 L330 130 L292 112 Z"></path>
+          </g>
+          <ellipse cx="108" cy="186" rx="24" ry="11" fill="url(#vinI)" stroke="#6E7A34" stroke-width="0.7"></ellipse>
+          <ellipse cx="232" cy="250" rx="31" ry="12" fill="#9DB57A" opacity="0.7" filter="url(#wc)"></ellipse>
+          <ellipse cx="172" cy="321" rx="25" ry="9" fill="#9DB57A" opacity="0.7" filter="url(#wc)"></ellipse>
+          <ellipse cx="108" cy="186" rx="25" ry="12" fill="#B9C48A" opacity="0.7" filter="url(#wc)"></ellipse>
+          <ellipse cx="300" cy="275" rx="22" ry="16" fill="#E2C79A" opacity="0.6" filter="url(#wc)"></ellipse>
+          <ellipse cx="160" cy="430" rx="26" ry="40" fill="#E2C79A" opacity="0.5" filter="url(#wc)"></ellipse>
+          <path d="M146.2 560.0 L142.9 546.9 L136.2 520.8 L132.2 502.0 L131.0 490.5 L129.8 482.7 L128.7 478.4 L127.8 472.1 L127.1 463.6 L126.4 446.2 L125.7 420.2 L126.0 404.8 L127.0 400.1 L129.6 391.8 L133.5 379.8 L136.7 371.2 L139.2 366.2 L141.1 362.6 L142.5 360.7 L144.0 358.8 L145.6 357.2 L147.3 355.6 L149.0 354.2 L151.3 352.7 L154.2 351.1 L156.7 349.9 L159.0 349.2 L163.1 348.2 L169.1 347.2 L179.8 345.8 L195.1 344.0 L204.4 342.7 L207.4 341.7 L215.5 337.8 L228.4 331.2 L236.8 327.0 L240.6 325.5 L244.2 324.2 L247.8 323.1 L252.6 322.2 L258.6 321.3 L266.6 321.2 L276.3 321.7 L286.2 321.0 L296.3 319.1 L302.7 317.6 L305.3 316.5 L309.2 314.6 L314.2 311.6 L319.7 308.0 L325.5 303.8 L329.8 299.8 L332.5 296.3 L335.2 292.1 L338.2 287.1 L340.1 283.0 L341.2 279.7 L341.9 275.6 L342.3 270.6 L342.1 265.0 L341.5 258.5 L340.0 252.3 L337.7 246.3 L334.5 240.3 L330.3 234.3 L326.3 229.4 L322.4 225.5 L317.7 221.9 L312.1 218.6 L307.7 216.6 L304.5 215.9 L296.7 215.1 L284.2 214.2 L276.0 213.8 L271.9 214.2 L266.8 214.8 L260.8 215.6 L254.0 216.9 L246.8 218.7 L239.0 220.7 L230.9 223.2 L223.0 224.7 L215.4 225.2 L204.7 224.2 L190.8 221.4 L181.7 218.9 L177.2 216.6 L173.2 214.3 L169.7 212.0 L166.0 210.1 L162.0 208.5 L158.7 207.5 L156.0 207.0 L153.2 206.9 L150.5 206.9 L140.8 208.4 L124.1 211.4 L112.5 212.7 L105.8 212.5 L98.8 210.5 L91.6 206.6 L84.7 201.1 L78.4 193.9 L72.7 186.3 L67.7 178.2 L64.8 169.2 L63.9 159.3 L63.6 153.4 L63.9 151.6 L65.0 148.5 L66.8 144.2 L69.9 139.3 L74.1 133.8 L77.8 128.1 L81.0 122.1 L82.9 116.4 L83.6 110.9 L83.2 105.7 L81.6 100.6 L79.1 96.0 L75.9 91.8 L69.3 86.1 L59.4 78.8 L52.6 72.6 L48.7 67.8 L46.4 63.6 L45.8 60.3 L45.8 56.6 L46.8 52.5 L48.2 48.9 L50.2 45.8 L52.0 43.5 L53.7 42.0 L54.8 41.0 L55.3 40.3 L55.6 40.0" fill="none" stroke="#8FB7B4" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" filter="url(#wc)"></path>
+          <path d="M150 326 l5 -7 M157 327 l5 -7 M164 327 l5 -7 M171 328 l5 -7 M178 328 l5 -7 M185 328 l5 -7 M80 178 l6 -6 M88 176 l6 -6 M96 174 l6 -6 M104 172 l6 -6 M112 171 l6 -6 M120 171 l6 -6" stroke="#5E4A32" stroke-width="0.9" fill="none"></path>
+          <ellipse cx="216" cy="338" rx="11" ry="3" transform="rotate(-24 216 338)" fill="#B9C48A" stroke="#4E7F80" stroke-width="0.8"></ellipse>
+          <g stroke="#3A2A1C" stroke-width="1.8" stroke-linecap="round" fill="none">
+            <path d="M110 395 L142 393"></path><path d="M128 370 L150 376"></path><path d="M114 440 L140 440"></path><path d="M120 505 L145 503"></path><path d="M128 545 L152 538"></path><path d="M330 282 L352 290"></path><path d="M206 330 L214 352"></path><path d="M152 200 L158 222"></path>
+          </g>
+          <g stroke="#3A2A1C" stroke-width="0.9" stroke-linejoin="round">
+            <path d="M54 398 L90 398 L90 390 L86 390 L86 386 L82 386 L82 390 L66 390 L66 382 L64 374 L62 382 L62 390 L58 390 L58 386 L54 386 Z" fill="#E9D3A6"></path>
+            <path d="M70 390 L70 376 L72 369 L74 376 L74 390 Z" fill="#7C8C8A"></path>
+            <path d="M150 556 L176 556 L176 548 L172 548 L172 536 L170 531 L168 536 L168 548 L160 548 L160 536 L158 531 L156 536 L156 548 L150 548 Z" fill="#E9D3A6"></path>
+            <path d="M84 432 L80 452 M84 432 L88 452 M81 446 L87 446" fill="none"></path>
+            <path d="M104 172 L132 172 L132 164 L128 164 L128 160 L108 160 L108 164 L104 164 Z" fill="#E7B49A"></path>
+            <path d="M108 160 L118 154 L128 160 Z" fill="#9B2C22"></path>
+          </g>
+        </g>
+
+        <path d="M135.5 562.7 L132.2 549.5 L125.4 523.2 L121.4 504.1 L120.1 492.3 L118.9 484.2 L117.8 480.0 L116.9 473.3 L116.1 464.2 L115.4 446.5 L114.7 420.1 L115.1 403.8 L116.4 397.7 L119.1 388.4 L123.2 376.1 L126.6 367.0 L129.3 361.2 L131.7 356.9 L133.7 354.1 L135.8 351.6 L137.9 349.3 L140.2 347.2 L142.7 345.3 L145.7 343.3 L149.2 341.3 L152.7 339.8 L156.0 338.7 L160.9 337.5 L167.4 336.3 L178.3 334.8 L193.6 333.2 L201.9 332.1 L203.4 331.6 L210.6 328.0 L223.6 321.2 L232.2 317.0 L236.6 315.2 L241.0 313.7 L245.2 312.4 L250.9 311.3 L258.0 310.4 L266.2 310.2 L275.7 310.7 L285.0 310.1 L294.3 308.3 L299.6 307.1 L300.9 306.5 L303.9 304.9 L308.4 302.3 L313.2 299.1 L318.3 295.4 L321.8 292.2 L323.7 289.7 L325.9 286.3 L328.4 282.0 L330.0 278.9 L330.6 277.1 L331.0 274.2 L331.4 270.4 L331.2 265.8 L330.7 260.5 L329.5 255.5 L327.8 250.8 L325.1 245.9 L321.5 240.9 L318.2 236.8 L315.3 233.8 L311.5 231.0 L307.0 228.2 L304.0 226.8 L302.5 226.6 L295.8 226.1 L283.7 225.1 L276.0 224.8 L272.8 225.1 L268.3 225.6 L262.7 226.5 L256.4 227.7 L249.4 229.3 L241.7 231.4 L233.2 233.9 L224.3 235.5 L215.1 236.1 L203.1 235.0 L188.4 232.1 L178.1 229.2 L172.3 226.4 L167.8 223.9 L164.5 221.7 L161.3 220.1 L158.4 218.8 L156.2 218.1 L154.7 217.9 L153.2 217.8 L151.7 217.9 L142.5 219.4 L125.5 222.2 L112.7 223.5 L103.8 223.2 L94.8 220.6 L85.6 215.6 L77.3 209.1 L70.1 201.0 L63.5 192.1 L57.6 182.4 L54.2 171.9 L53.0 160.5 L52.8 152.9 L53.4 149.0 L54.9 144.4 L57.2 139.0 L60.5 133.5 L64.8 127.9 L68.3 122.7 L70.8 118.0 L72.3 114.0 L72.8 110.7 L72.5 107.6 L71.6 104.7 L70.1 101.9 L68.0 99.3 L62.0 94.3 L52.2 87.0 L44.7 80.1 L39.7 73.8 L36.5 67.5 L35.1 61.4 L35.0 55.3 L36.4 49.4 L38.4 44.1 L41.2 39.6 L43.7 36.4 L45.8 34.3 L47.0 33.2 L47.1 33.0 L47.2 32.9" fill="none" stroke="#75644E" stroke-width="1.3" stroke-dasharray="2 4" stroke-linecap="round"></path>
+        <path class="ink" d="M135.5 562.7 L132.2 549.5 L125.4 523.2 L121.4 504.1 L120.1 492.3 L118.9 484.2 L117.8 480.0 L116.9 473.3 L116.1 464.2 L115.4 446.5 L114.7 420.1 L115.1 403.8 L116.4 397.7 L119.1 388.4 L123.2 376.1 L126.6 367.0 L129.3 361.2 L131.7 356.9 L133.7 354.1 L135.8 351.6 L137.9 349.3 L140.2 347.2 L142.7 345.3 L145.7 343.3 L149.2 341.3 L152.7 339.8 L156.0 338.7 L160.9 337.5 L167.4 336.3 L178.3 334.8 L193.6 333.2 L201.9 332.1 L203.4 331.6 L210.6 328.0 L223.6 321.2 L232.2 317.0 L236.6 315.2 L241.0 313.7 L245.2 312.4 L250.9 311.3 L258.0 310.4 L266.2 310.2 L275.7 310.7 L285.0 310.1 L294.3 308.3 L299.6 307.1 L300.9 306.5 L303.9 304.9 L308.4 302.3 L313.2 299.1 L318.3 295.4 L321.8 292.2 L323.7 289.7 L325.9 286.3 L328.4 282.0 L330.0 278.9 L330.6 277.1 L331.0 274.2 L331.4 270.4 L331.2 265.8 L330.7 260.5 L329.5 255.5 L327.8 250.8 L325.1 245.9 L321.5 240.9 L318.2 236.8 L315.3 233.8 L311.5 231.0 L307.0 228.2 L304.0 226.8 L302.5 226.6 L295.8 226.1 L283.7 225.1 L276.0 224.8 L272.8 225.1 L268.3 225.6 L262.7 226.5 L256.4 227.7 L249.4 229.3 L241.7 231.4 L233.2 233.9 L224.3 235.5 L215.1 236.1 L203.1 235.0 L188.4 232.1 L178.1 229.2 L172.3 226.4 L167.8 223.9 L164.5 221.7 L161.3 220.1 L158.4 218.8 L156.2 218.1 L154.7 217.9 L153.2 217.8 L151.7 217.9 L142.5 219.4 L125.5 222.2 L112.7 223.5 L103.8 223.2 L94.8 220.6 L85.6 215.6 L77.3 209.1 L70.1 201.0 L63.5 192.1 L57.6 182.4 L54.2 171.9 L53.0 160.5 L52.8 152.9 L53.4 149.0 L54.9 144.4 L57.2 139.0 L60.5 133.5 L64.8 127.9 L68.3 122.7 L70.8 118.0 L72.3 114.0 L72.8 110.7 L72.5 107.6 L71.6 104.7 L70.1 101.9 L68.0 99.3 L62.0 94.3 L52.2 87.0 L44.7 80.1 L39.7 73.8 L36.5 67.5 L35.1 61.4 L35.0 55.3 L36.4 49.4 L38.4 44.1 L41.2 39.6 L43.7 36.4 L45.8 34.3 L47.0 33.2 L47.1 33.0 L47.2 32.9" fill="none" stroke="#9B2C22" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path>
+
+        <g font-family="'IM Fell English', serif" font-style="italic" fill="#5E4A32" font-size="10">
+          <text x="94" y="470" transform="rotate(-86 94 470)" font-size="11" fill="#4E7F80">Vltava</text>
+          <text x="152" y="566">Vyšehrad</text>
+          <text x="150" y="486">Nové Město</text>
+          <text x="140" y="410">Staré Město</text>
+          <text x="58" y="402">Malá Strana</text>
+          <text x="160" y="310">Letná</text>
+          <text x="240" y="292">Holešovice</text>
+          <text x="346" y="322">Libeň</text>
+          <text x="212" y="264">Stromovka</text>
+          <text x="92" y="168">Troja</text>
+          <text x="196" y="138">Bohnice</text>
+          <text x="20" y="168">Sedlec</text>
+          <text x="14" y="94">Podbaba</text>
+        </g>
+
+        <g class="drop vg" style="--f: 0.39;" stroke="#3A2A1C" stroke-width="0.9" stroke-linejoin="round">
+          <path d="M287 323 L305 323 L301 328 L291 328 Z" fill="#9B2C22"></path>
+          <path d="M296 323 L296 313 L303 320 Z" fill="#F8F1E1"></path>
+        </g>
+        <g class="drop vg" style="--f: 0.47;" stroke="#3A2A1C" stroke-width="1.1" fill="none" stroke-linecap="round">
+          <path d="M346 300 Q352 292 358 300 Q364 292 370 300 M344 300 L372 300"></path>
+        </g>
+        <g class="drop vg" style="--f: 0.64;" stroke="#3A2A1C" stroke-width="1.1" fill="none" stroke-linecap="round">
+          <path d="M278 205 L278 216 M290 205 L290 216 M278 210.5 L290 210.5"></path>
+          <path d="M281 207 L287 214" stroke="#4E7F80"></path>
+        </g>
+        <g class="drop vg" style="--f: 0.27;" fill="#6F9455" stroke="#3F5E32" stroke-width="0.6">
+          <circle cx="212" cy="337" r="1.6"></circle><circle cx="217" cy="335.5" r="1.6"></circle><circle cx="221" cy="334" r="1.6"></circle>
+        </g>
+
+        <g stroke="#7F5718" fill="none">
+          <rect x="4" y="4" width="382" height="592" stroke-width="1.2"></rect>
+          <rect x="8" y="8" width="374" height="584" stroke-width="0.5"></rect>
+        </g>
+        <g>
+          <rect x="246" y="14" width="132" height="44" fill="#F8F1E1" stroke="#7F5718" stroke-width="1"></rect>
+          <rect x="249" y="17" width="126" height="38" fill="none" stroke="#7F5718" stroke-width="0.4"></rect>
+          <text x="312" y="33" text-anchor="middle" font-family="'IM Fell English SC', serif" font-size="11" letter-spacing="1" fill="#2B2118">List I · Praha</text>
+          <path d="M282 44 L343 44 M282 41 L282 47 M312.5 42 L312.5 46 M343 41 L343 47" stroke="#2B2118" stroke-width="0.8"></path>
+          <rect x="282" y="43" width="30.5" height="2" fill="#2B2118"></rect>
+          <text x="348" y="47" font-family="'Work Sans', sans-serif" font-size="7" fill="#2B2118">1 km</text>
+        </g>
+        <g transform="translate(352 540)">
+          <circle r="17" fill="none" stroke="#7F5718" stroke-width="0.6"></circle>
+          <circle r="13" fill="none" stroke="#7F5718" stroke-width="0.4" stroke-dasharray="1 2"></circle>
+          <path d="M0 -20 L3 -3 L20 0 L3 3 L0 20 L-3 3 L-20 0 L-3 -3 Z" fill="#E2C79A" stroke="#7F5718" stroke-width="0.6"></path>
+          <path d="M0 -20 L3 -3 L0 0 Z M20 0 L3 3 L0 0 Z M0 20 L-3 3 L0 0 Z M-20 0 L-3 -3 L0 0 Z" fill="#7F5718"></path>
+          <text x="0" y="-23" text-anchor="middle" font-family="'IM Fell English SC', serif" font-size="9" fill="#7F5718">S</text>
+        </g>
+
+        <g font-family="'Work Sans', sans-serif" font-size="7" fill="#75644E" text-anchor="middle">
+          <circle cx="56.9" cy="139.7" r="6" fill="#EFE4CB" stroke="#75644E" stroke-width="1" stroke-dasharray="1.5 1.5"></circle>
+          <text x="56.9" y="142.2">?</text>
+          <circle cx="43.4" cy="78.5" r="6" fill="#EFE4CB" stroke="#75644E" stroke-width="1" stroke-dasharray="1.5 1.5"></circle>
+          <text x="43.4" y="81">?</text>
+        </g>
+      </svg>
+
+      <div class="seal" style="left: 119px; top: 538px;"><img src="assets/foto-vysehrad.jpg" alt="Vyšehrad"></div>
+      <span class="raz" style="left: 117px; top: 513px;"></span>
+      <span class="raz" style="left: 111px; top: 475px;"></span>
+      <span class="raz" style="left: 110px; top: 386px;"></span>
+
+      <span class="raz drop" style="left: 210px; top: 316px; --f: 0.26;"></span>
+      <span class="raz drop" style="left: 283px; top: 301px; --f: 0.38;"></span>
+      <span class="raz drop" style="left: 320px; top: 274px; --f: 0.46;"></span>
+      <span class="raz drop" style="left: 263px; top: 217px; --f: 0.63;"></span>
+      <span class="raz drop" style="left: 141px; top: 229px; --f: 0.80;"></span>
+      <span class="raz drop" style="left: 152px; top: 197px; --f: 0.83;"></span>
+
+      <div class="flash" style="position: absolute; left: 196px; top: 296px; font-family: 'IM Fell English', serif; font-size: 9px; color: #2B2118; white-space: nowrap; transform-origin: left center; text-shadow: 0 0 3px #F4E6C6, 0 0 2px #F4E6C6, 0 0 1px #F4E6C6; --f: 0.27;">Ostrov Štvanice</div>
+      <div class="flash" style="position: absolute; left: 262px; top: 322px; font-family: 'IM Fell English', serif; font-size: 9px; color: #2B2118; white-space: nowrap; transform-origin: left center; text-shadow: 0 0 3px #F4E6C6, 0 0 2px #F4E6C6, 0 0 1px #F4E6C6; --f: 0.39;">Holešovický přístav</div>
+      <div class="flash" style="position: absolute; left: 290px; top: 258px; font-family: 'IM Fell English', serif; font-size: 9px; color: #2B2118; white-space: nowrap; transform-origin: left center; text-shadow: 0 0 3px #F4E6C6, 0 0 2px #F4E6C6, 0 0 1px #F4E6C6; --f: 0.47;">Libeňský most</div>
+      <div class="flash" style="position: absolute; left: 236px; top: 238px; font-family: 'IM Fell English', serif; font-size: 9px; color: #2B2118; white-space: nowrap; transform-origin: left center; text-shadow: 0 0 3px #F4E6C6, 0 0 2px #F4E6C6, 0 0 1px #F4E6C6; --f: 0.64;">Plavební komora</div>
+      <div class="flash" style="position: absolute; left: 156px; top: 238px; font-family: 'IM Fell English', serif; font-size: 9px; color: #2B2118; white-space: nowrap; transform-origin: left center; text-shadow: 0 0 3px #F4E6C6, 0 0 2px #F4E6C6, 0 0 1px #F4E6C6; --f: 0.80;">Císařský ostrov</div>
+      <div class="flash" style="position: absolute; left: 164px; top: 196px; font-family: 'IM Fell English', serif; font-size: 9px; color: #2B2118; white-space: nowrap; transform-origin: left center; text-shadow: 0 0 3px #F4E6C6, 0 0 2px #F4E6C6, 0 0 1px #F4E6C6; --f: 0.84;">Trojská lávka</div>
+
+      <div class="next" style="left: 106px; top: 180px;"><img src="assets/foto-troja.jpg" alt="Trojský zámek, zatím zamčeno"></div>
+      <div class="me"></div>
+    </div>
   </div>
-  <div class="map soft" style="width:342px;height:220px;margin:14px 24px 0"><img src="assets/mapa-svet-karta.jpg" alt=""><svg viewBox="0 0 342 220" aria-hidden="true"><circle cx="23.4" cy="95.6" r="4.5" fill="#9B2C22" stroke="#F8F1E1" stroke-width="1.5"/><text x="25.4" y="112.6" font-family="IM Fell English, serif" font-style="italic" font-size="13" fill="#2B2118">Praha</text><path d="M225.3 127.5 v-16 l10 4 -10 4" fill="#9B2C22" stroke="#2B2118" stroke-width=".8"/><text x="181.3" y="145.5" font-family="IM Fell English, serif" font-style="italic" font-size="13" fill="#2B2118">Tokio, 9 100 km</text><circle cx="318.4" cy="100.3" r="14" fill="#9B2C22" opacity=".2"/><circle cx="318.4" cy="100.3" r="6.5" fill="#9B2C22" stroke="#FFF6E6" stroke-width="2.4"/><g transform="translate(40 178) scale(0.8)"><circle r="21" fill="#F8F1E1" fill-opacity=".85" stroke="#2B2118" stroke-width=".8"/><circle r="17" fill="none" stroke="#2B2118" stroke-width=".5"/>
-      <polygon points="0,-24 4,-4 24,0 4,4 0,24 -4,4 -24,0 -4,-4" fill="#2B2118"/><polygon points="0,-24 4,-4 0,0 -4,-4" fill="#9B2C22"/>
-      <polygon points="14,-14 2,-2 -14,14 -2,2" fill="#2B2118" opacity=".45"/><polygon points="-14,-14 -2,2 14,14 2,-2" fill="#2B2118" opacity=".45"/>
-      <text y="-28" text-anchor="middle" font-family="IM Fell English, serif" font-size="10" fill="#2B2118">S</text></g></svg><span class="attr">© OpenStreetMap</span></div>
-  <div style="padding:14px 24px 0;display:flex;flex-direction:column;gap:9px">
-    <div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Z čeho se číslo skládá</span><span class="muted">od roku 2016</span></div>
-    <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px"><div style="flex:85;background:var(--accent)"></div><div style="flex:15;background:repeating-linear-gradient(135deg,var(--accent) 0 3px,var(--track) 3px 6px)"></div></div>
-    <div style="display:flex;flex-direction:column;gap:4px;font-size:13.5px" class="num"><div style="display:flex;justify-content:space-between"><span>Ověřeno ze zdravotních dat</span><span>12 100 km</span></div><div class="muted" style="display:flex;justify-content:space-between"><span>Odhad z kroků</span><span>2 100 km</span></div></div>
+  </sc-if>
+
+  <div style="position: absolute; left: 0; top: 718px; width: 390px; height: 126px; box-sizing: border-box; padding: 14px 20px 0; display: flex; flex-direction: column; gap: 2px; background: #EFE4CB; border-top: 1px solid #D8C9A9;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Další zastávka</span>
+      <span style="font-size: 15px; font-weight: 600; color: #9B2C22;">40 m · asi 55 kroků</span>
+    </div>
+    <div style="font-family: 'IM Fell English', serif; font-size: 26px; line-height: 30px;">Trojský zámek</div>
+    <div style="font-family: 'IM Fell English', serif; font-style: italic; font-size: 15px; line-height: 20px; color: #5E4A32;">Hádanka: proč se celá čtvrť jmenuje podle Tróje?</div>
   </div>
-  <div style="margin-top:auto;padding:0 24px 34px;display:flex;flex-direction:column;gap:12px">
-    <a href="Domu.dc.html" class="btn pri">Vybrat první výpravu</a>
-    <a href="#share" class="btn sec">Sdílet kartu jako obrázek</a>
-    <span class="muted" style="text-align:center;font-size:13px">Data zůstávají na vašem telefonu.</span>
+
+  <sc-if value="{{done}}" hint-placeholder-val="{{false}}">
+  <div class="sheet" style="position: absolute; left: 0; bottom: 0; width: 390px; box-sizing: border-box; padding: 18px 20px 24px; background: #F8F1E1; border-radius: 22px 22px 0 0; box-shadow: 0 -6px 24px rgba(43,33,24,0.18); display: flex; flex-direction: column; gap: 12px; z-index: 5;">
+    <div style="width: 40px; height: 4px; border-radius: 2px; background: #D8C9A9; align-self: center;"></div>
+    <div style="display: flex; flex-direction: column; gap: 0;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Cestou jste potkali</span>
+      <span style="font-family: 'IM Fell English', serif; font-size: 30px; line-height: 34px;">6 nových míst</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px;">
+      <sc-for list="{{found}}" as="item" hint-placeholder-count="6">
+        <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+          <span style="position: relative; flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; border: 1.6px solid #9B2C22; background: rgba(155,44,34,0.12); box-shadow: inset 0 0 0 2px #F8F1E1, inset 0 0 0 2.8px #9B2C22; transform: rotate(-10deg);"></span>
+          <span style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{item.name}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px; padding-top: 6px; border-top: 1px solid #D8C9A9;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Trojský zámek</span>
+        <span style="font-size: 14px; font-weight: 600; color: #9B2C22;">40 m · asi 55 kroků</span>
+      </div>
+      <span style="font-family: 'IM Fell English', serif; font-style: italic; font-size: 14px; color: #5E4A32;">Proč se celá čtvrť jmenuje podle Tróje?</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onClick="{{replay}}" style="flex: 1; min-height: 48px; border-radius: 14px; border: 1.5px solid #D8C9A9; background: transparent; color: #2B2118; font-size: 15px; font-weight: 600; cursor: pointer;">Přehrát znovu</button>
+      <button onClick="{{openStory}}" style="flex: 1.4; min-height: 48px; border-radius: 14px; border: none; background: #9B2C22; color: #FBF5E8; font-size: 15px; font-weight: 600; cursor: pointer;">Projít objevy</button>
+    </div>
+    <sc-if value="{{emb}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{goHome}}" style="min-height: 44px; border: none; background: transparent; color: #9B2C22; font-size: 15px; font-weight: 600; cursor: pointer;">Pokračovat na Domů</button>
+    </sc-if>
   </div>
+  </sc-if>
+
+  <sc-if value="{{storyOpen}}" hint-placeholder-val="{{false}}">
+  <div style="position: absolute; inset: 0; background: #EFE4CB; z-index: 10; box-sizing: border-box; padding: 18px 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="display: flex; gap: 4px; flex: 1;">
+        <sc-for list="{{dots}}" as="dot" hint-placeholder-count="6">
+          <sc-if value="{{dot.active}}" hint-placeholder-val="{{false}}">
+            <span style="flex: 1; height: 4px; border-radius: 2px; background: #9B2C22;"></span>
+          </sc-if>
+          <sc-if value="{{dot.idle}}" hint-placeholder-val="{{true}}">
+            <span style="flex: 1; height: 4px; border-radius: 2px; background: #D8C9A9;"></span>
+          </sc-if>
+        </sc-for>
+      </div>
+      <span style="font-size: 13px; color: #75644E;">{{pos}}</span>
+      <button onClick="{{closeStory}}" aria-label="Zavřít" style="width: 44px; height: 44px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3 L15 15 M15 3 L3 15" stroke="#2B2118" stroke-width="1.8" stroke-linecap="round"></path></svg>
+      </button>
+    </div>
+
+    <sc-for list="{{cardList}}" as="card" hint-placeholder-count="1">
+    <div class="story" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+      <div style="height: 196px; border-radius: 18px; background: #F4E6C6; border: 1px solid #D8C9A9; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+        <div class="bigraz" style="width: 150px; height: 150px; border-radius: 50%; box-sizing: border-box; border: 4px solid #9B2C22; box-shadow: inset 0 0 0 7px #F4E6C6, inset 0 0 0 9px #9B2C22; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #9B2C22; background: rgba(155,44,34,0.06); transform: rotate(-10deg);">
+          <span style="font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 1.5px;">Vltavská stezka</span>
+          <span style="font-family: 'IM Fell English', serif; font-size: 30px; line-height: 32px;">km {{card.km}}</span>
+          <span style="font-family: 'IM Fell English SC', serif; font-size: 12px; letter-spacing: 1px;">{{card.stampDay}}</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Malý objev · km {{card.km}}</span>
+        <span style="font-family: 'IM Fell English', serif; font-size: 34px; line-height: 38px;">{{card.name}}</span>
+      </div>
+      <p style="margin: 0; font-family: 'IM Fell English', serif; font-style: italic; font-size: 22px; line-height: 29px; color: #2B2118;">„{{card.hook}}“</p>
+      <p style="margin: 0; font-size: 15px; line-height: 22px; color: #5E4A32;">{{card.context}}</p>
+      <span style="font-size: 13px; color: #75644E;">Došli jste sem {{card.day}}</span>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: #F8F1E1; border: 1px solid #D8C9A9;">
+        <span style="flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; border: 1.6px solid #9B2C22; box-shadow: inset 0 0 0 2px #F8F1E1, inset 0 0 0 3px #9B2C22; transform: rotate(-10deg);"></span>
+        <span style="font-size: 14px; line-height: 19px; color: #2B2118;">{{card.extra}}</span>
+      </div>
+    </div>
+    </sc-for>
+
+    <div style="display: flex; gap: 10px;">
+      <button onClick="{{prev}}" style="flex: 1; min-height: 48px; border-radius: 14px; border: 1.5px solid #D8C9A9; background: transparent; color: #2B2118; font-size: 15px; font-weight: 600; cursor: pointer;">Zpět</button>
+      <button onClick="{{next}}" style="flex: 1.4; min-height: 48px; border-radius: 14px; border: none; background: #9B2C22; color: #FBF5E8; font-size: 15px; font-weight: 600; cursor: pointer;">{{nextLabel}}</button>
+    </div>
+  </div>
+  </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"tempo":{"editor":"enum","options":["klidné","výchozí","rychlé"],"default":"výchozí"},"omezitPohyb":{"editor":"boolean","default":false},"embedded":{"editor":null},"onGo":{"editor":null},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  constructor(props) {
+    super(props);
+    this.state = { on: false, done: false, skipped: false, km: '0,0', storyOpen: false, i: 0 };
+    this.found = [
+      { name: 'Ostrov Štvanice' }, { name: 'Holešovický přístav' }, { name: 'Libeňský most' },
+      { name: 'Plavební komora Troja' }, { name: 'Císařský ostrov' }, { name: 'Trojská lávka' }
+    ];
+    this.cards = [
+      { name: 'Ostrov Štvanice', km: '4,8', day: 'v pátek 30. října', stampDay: '30. 10. 2026',
+        hook: 'Jméno má po štvanicích: na ostrově se kdysi pořádaly zápasy psů se zvířaty.',
+        context: 'Dnes se tu místo zvěře honí tenisové míčky a hokejové puky.', extra: 'Na mapě přibyly stromy na ostrově. Sbírka Ostrovy: 1 ze 4.' },
+      { name: 'Holešovický přístav', km: '6,0', day: 'v pátek 30. října', stampDay: '30. 10. 2026',
+        hook: 'Nejdřív nesloužil obchodu, ale zimě: lodě se sem schovávaly před ledem.',
+        context: 'Ochranný a zimní přístav vznikl v letech 1892–1895. Obchod sem dorazil, až když led odplul.', extra: 'Na mapě kotví nová loďka. Kapitola Voraři: 3 z 5.' },
+      { name: 'Libeňský most', km: '6,9', day: 'v sobotu 31. října', stampDay: '31. 10. 2026',
+        hook: 'Bývá označován za jediný kubistický most na světě.',
+        context: 'Navrhl ho Pavel Janák. Jeho oblouk z prostého betonu, bez jediného prutu výztuže, má největší rozpětí svého druhu v Evropě.', extra: 'Na mapě se klenou nové oblouky. Kapitola Mosty a lávky: 2 ze 6.' },
+      { name: 'Plavební komora Troja', km: '8,9', day: 'v sobotu 31. října', stampDay: '31. 10. 2026',
+        hook: 'Lodě tu nejedou po řece, ale umělým průplavem dlouhým asi tři kilometry.',
+        context: 'Kanál podél Císařského ostrova se ve své době jmenoval Vltavský průplav. Přejít se dá jediným veřejným mostem, takže si ho zapamatujte.', extra: 'Na mapě se zavřela vrata komory. Kapitola Voraři: 4 z 5.' },
+      { name: 'Císařský ostrov', km: '12,0', day: 'v neděli 1. listopadu', stampDay: '1. 11. 2026',
+        hook: 'Největší pražský ostrov: asi 66 hektarů, zhruba 90 fotbalových hřišť.',
+        context: 'Velkou část ostrova dnes zabírá ústřední pražská čistírna odpadních vod. Největší ostrov, nejméně romantická práce.', extra: 'Sbírka Ostrovy: 2 ze 4. Další čeká až v Lužci.' },
+      { name: 'Trojská lávka', km: '12,2', day: 'v neděli 1. listopadu', stampDay: '1. 11. 2026',
+        hook: 'Než ji postavili, převážel tu přívoz a v zimě ho nahradil pontonový most.',
+        context: 'Lávka spojuje Troju s Císařským ostrovem. Přívozník by vám dnes záviděl: přes řeku jste přešli suchou nohou.', extra: 'Kapitola Mosty a lávky: 3 ze 6. Trojský zámek je 40 m před vámi.' }
+    ];
+  }
+  componentDidMount() { this.play(); }
+  componentWillUnmount() { this.stop(); }
+  componentDidUpdate(prev) {
+    if (prev.tempo !== this.props.tempo || prev.omezitPohyb !== this.props.omezitPohyb) this.play();
+  }
+  durMs() {
+    if (this.props.omezitPohyb) return 1800;
+    const t = this.props.tempo ?? 'výchozí';
+    return t === 'klidné' ? 9500 : t === 'rychlé' ? 4500 : 7000;
+  }
+  stop() { clearInterval(this.iv); clearTimeout(this.to); }
+  play() {
+    this.stop();
+    this.setState({ on: false, done: false, skipped: false, km: '0,0', storyOpen: false });
+    this.to = setTimeout(() => {
+      const d = this.durMs();
+      const t0 = Date.now();
+      const reduced = !!this.props.omezitPohyb;
+      this.setState({ on: true });
+      this.iv = setInterval(() => {
+        const e = (Date.now() - t0) / d;
+        let p = reduced ? e : (e - 0.10) / 0.75;
+        p = Math.max(0, Math.min(1, p));
+        const km = (9.1 * p).toFixed(1).replace('.', ',');
+        if (km !== this.state.km) this.setState({ km });
+        if (e >= 1.04) { clearInterval(this.iv); this.setState({ done: true, km: '9,1' }); }
+      }, 50);
+    }, 80);
+  }
+  renderVals() {
+    const tempo = this.props.tempo ?? 'výchozí';
+    const tClass = tempo === 'klidné' ? 't-calm' : tempo === 'rychlé' ? 't-fast' : 't-def';
+    const i = this.state.i;
+    const last = i >= this.cards.length - 1;
+    return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
+      rootClass: [tClass, this.props.omezitPohyb ? 'reduced' : '', this.state.skipped ? 'skip' : ''].join(' '),
+      on: this.state.on,
+      done: this.state.done && !this.state.storyOpen,
+      km: this.state.km,
+      found: this.found,
+      storyOpen: this.state.storyOpen,
+      cardList: [this.cards[i]],
+      pos: (i + 1) + ' z ' + this.cards.length,
+      dots: this.cards.map((c, k) => ({ active: k <= i, idle: k > i })),
+      nextLabel: last ? 'Hotovo' : 'Další',
+      skip: () => { this.stop(); this.setState({ skipped: true, km: '9,1', done: true }); },
+      replay: () => this.play(),
+      openStory: () => this.setState({ storyOpen: true, i: 0 }),
+      closeStory: () => this.setState({ storyOpen: false }),
+      prev: () => this.setState({ i: Math.max(0, i - 1) }),
+      next: () => (last ? (this.props.onGo ? this.props.onGo('domu', 'reveal') : this.setState({ storyOpen: false })) : this.setState({ i: i + 1 })),
+      emb: !!this.props.embedded,
+      goHome: () => this.props.onGo && this.props.onGo('domu', 'reveal')
+    };
+  }
 }
 </script>
 </body>

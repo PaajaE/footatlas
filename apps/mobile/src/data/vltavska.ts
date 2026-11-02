@@ -6,6 +6,7 @@ import {
   type RoutePoint,
 } from "@footatlas/core";
 import expeditionJson from "@footatlas/content/data/vltavska-stezka/expedition.json";
+import obsahJson from "@footatlas/content/data/vltavska-stezka/obsah.json";
 import routeJson from "@footatlas/content/data/vltavska-stezka/route.json";
 
 /** Místo tak, jak ho potřebují obrazovky (draft i vydané). */
@@ -19,6 +20,27 @@ export interface AppPlace {
   atM: number;
   draft: boolean;
   photo?: string;
+  /** Obsah z obsah.json (chybí u míst bez příběhu). */
+  hook?: string;
+  teaser?: string;
+  riddle?: AppRiddle;
+  context?: string;
+  visitTip?: string;
+  chapterId?: string;
+}
+
+export interface AppRiddle {
+  question: string;
+  options: [string, string, string];
+  answer: 0 | 1 | 2;
+}
+
+export interface AppChapter {
+  id: string;
+  title: string;
+  blurb: string;
+  /** Id míst kapitoly v pořadí trasy. */
+  placeIds: string[];
 }
 
 export interface LoadedExpedition {
@@ -29,6 +51,7 @@ export interface LoadedExpedition {
   totalM: number;
   plan: ExpeditionPlan;
   places: AppPlace[];
+  chapters: AppChapter[];
   placesById: Map<string, AppPlace>;
   route: RoutePoint[];
   cumulative: number[];
@@ -80,6 +103,33 @@ function load(): LoadedExpedition {
       photo: p.photo,
     }))
     .sort((a, b) => a.atM - b.atM);
+  const obsah = obsahJson as unknown as {
+    chapters: Array<{ id: string; title: string; blurb: string }>;
+    stories: Array<{
+      id: string;
+      hook: string;
+      teaser?: string;
+      riddle?: AppRiddle;
+      context?: string;
+      visitTip?: string;
+      chapterId?: string;
+    }>;
+  };
+  const stories = new Map(obsah.stories.map((st) => [st.id, st]));
+  for (const p of places) {
+    const st = stories.get(p.id);
+    if (!st) continue;
+    p.hook = st.hook;
+    p.teaser = st.teaser;
+    p.riddle = st.riddle;
+    p.context = st.context;
+    p.visitTip = st.visitTip;
+    p.chapterId = st.chapterId;
+  }
+  const chapters: AppChapter[] = obsah.chapters.map((c) => ({
+    ...c,
+    placeIds: places.filter((p) => p.chapterId === c.id).map((p) => p.id),
+  }));
   const route: RoutePoint[] = (routeJson as unknown as { coordinates: [number, number][] }).coordinates.map(([lon, lat]) => ({
     lat,
     lon,
@@ -96,6 +146,7 @@ function load(): LoadedExpedition {
       places: places.map((p) => ({ id: p.id, kind: p.kind, atM: p.atM })),
     }),
     places,
+    chapters,
     placesById: new Map(places.map((p) => [p.id, p])),
     route,
     cumulative: cumulativeM(route),

@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from "expo-sqlite";
-import { isPaused, parseSession, type ExpeditionSession } from "@footatlas/core";
+import { isPaused, parseSession, type ExpeditionSession, type JourneyEvent } from "@footatlas/core";
 import { serialized } from "./lock";
 
 const RUNNING = "status IN ('active', 'paused')";
@@ -30,6 +30,7 @@ export function saveRunning(db: SQLiteDatabase, s: ExpeditionSession | null): Pr
       );
       // Cizí klíče jsou zapnuté jen na jednom spojení, proto se období mažou výslovně.
       if (existing && (!s || existing.expedition_id !== s.expeditionId)) {
+        await txn.runAsync("DELETE FROM expedition_event WHERE run_id = ?", existing.id);
         await txn.runAsync("DELETE FROM expedition_period WHERE run_id = ?", existing.id);
         await txn.runAsync("DELETE FROM expedition_run WHERE id = ?", existing.id);
       }
@@ -67,4 +68,42 @@ export async function adoptLegacy(db: SQLiteDatabase, legacy: ExpeditionSession 
   await saveRunning(db, legacy);
   const saved = await loadRunning(db);
   return { session: saved, dropLegacy: saved !== null };
+}
+
+/**
+ * Zapíše události rozjeté výpravy. Už zapsané se nepřepisují: den, kdy se místa poprvé dosáhlo, zůstane,
+ * i kdyby se později změnila data (pozdní synchronizace, jiná délka kroku). Vrací počet nově zapsaných.
+ */
+export async function recordEvents(db: SQLiteDatabase, events: readonly JourneyEvent[], now: Date): Promise<number> {
+  if (events.length === 0) return 0;
+  let added = 0;
+  await serialized(() =>
+    db.withExclusiveTransactionAsync(async (txn) => {
+      const run = await txn.getFirstAsync<{ id: number }>(`SELECT id FROM expedition_run WHERE ${RUNNING}`);
+      if (!run) return;
+      for (const e of events) {
+        const r = await txn.runAsync(
+          "INSERT OR IGNORE INTO expedition_event (run_id, kind, ref, at_m, reached_day, noticed_at) VALUES (?, ?, ?, ?, ?, ?)",
+          run.id,
+          e.kind,
+          e.ref,
+          e.atM,
+          e.reachedDay,
+          now.toISOString(),
+        );
+        added += r.changes;
+      }
+    }),
+  );
+  return added;
+}
+
+/** Události rozjeté výpravy, seřazené podle dne a kilometru. */
+export async function loadEvents(db: SQLiteDatabase): Promise<JourneyEvent[]> {
+  const rows = await db.getAllAsync<{ kind: JourneyEvent["kind"]; ref: string; at_m: number; reached_day: string }>(
+    `SELECT e.kind, e.ref, e.at_m, e.reached_day FROM expedition_event e
+     JOIN expedition_run r ON r.id = e.run_id WHERE r.status IN ('active', 'paused')
+     ORDER BY e.at_m, e.kind`,
+  );
+  return rows.map((r) => ({ kind: r.kind, ref: r.ref, atM: r.at_m, reachedDay: r.reached_day }));
 }

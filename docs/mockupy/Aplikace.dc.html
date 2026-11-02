@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>FootAtlas aplikace</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=Work+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit}
+.scr{position:absolute;inset:0;overflow:hidden;background:#EFE4CB}
+.enter-right{animation:eRight .4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes eRight{0%{transform:translateX(48px);opacity:0}100%{transform:none;opacity:1}}
+.enter-left{animation:eLeft .4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes eLeft{0%{transform:translateX(-48px);opacity:0}100%{transform:none;opacity:1}}
+.enter-zoom{animation:eZoom .6s cubic-bezier(.65,0,.25,1) both}
+@keyframes eZoom{0%{clip-path:inset(82px 20px 454px 20px round 18px)}100%{clip-path:inset(0px 0px 0px 0px round 0px)}}
+.enter-push{animation:ePush .45s cubic-bezier(.2,.8,.2,1) both;box-shadow:-12px 0 30px rgba(43,33,24,.25)}
+@keyframes ePush{0%{transform:translateX(100%)}100%{transform:none}}
+.enter-back{animation:eBack .42s cubic-bezier(.2,.8,.2,1) both}
+@keyframes eBack{0%{transform:translateX(-25%);filter:brightness(.85)}100%{transform:none;filter:none}}
+.enter-reveal{animation:eReveal .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes eReveal{0%{transform:translateY(40px) scale(.96);opacity:0;border-radius:28px}100%{transform:none;opacity:1;border-radius:0}}
+.enter-fade{animation:eFade .4s ease both}
+@keyframes eFade{0%{opacity:0}100%{opacity:1}}
+.leave-push{animation:lPush .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes lPush{0%{transform:none;filter:none}100%{transform:translateX(-25%);filter:brightness(.85)}}
+.leave-back{animation:lBack .42s cubic-bezier(.4,0,.6,1) both;box-shadow:-12px 0 30px rgba(43,33,24,.25)}
+@keyframes lBack{0%{transform:none}100%{transform:translateX(100%)}}
+.leave-fade{animation:lFade .25s ease both}
+@keyframes lFade{0%{opacity:1}100%{opacity:0}}
+.leave-stay{}
+.navIn{animation:navIn .5s cubic-bezier(.2,.8,.2,1) .15s both}
+@keyframes navIn{0%{transform:translateY(100%)}100%{transform:none}}
+.pill{position:absolute;top:8px;height:56px;width:25%;transition:left .38s cubic-bezier(.2,.8,.2,1)}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #2B2118; font-family: 'Work Sans', sans-serif;">
+
+  <sc-if value="{{v.navrat}}" hint-placeholder-val="{{true}}">
+    <div class="scr {{c.navrat}}" style="z-index: {{z.navrat}};">
+      <dc-import name="Main" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-if>
+  <sc-if value="{{v.domu}}" hint-placeholder-val="{{false}}">
+    <div class="scr {{c.domu}}" style="z-index: {{z.domu}};">
+      <dc-import name="Domu" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-if>
+  <sc-if value="{{v.vyprava}}" hint-placeholder-val="{{false}}">
+    <div class="scr {{c.vyprava}}" style="z-index: {{z.vyprava}};">
+      <dc-import name="Vyprava" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-if>
+  <sc-if value="{{v.objevovat}}" hint-placeholder-val="{{false}}">
+    <div class="scr {{c.objevovat}}" style="z-index: {{z.objevovat}};">
+      <dc-import name="Objevovat" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-if>
+  <sc-if value="{{v.kronika}}" hint-placeholder-val="{{false}}">
+    <div class="scr {{c.kronika}}" style="z-index: {{z.kronika}};">
+      <dc-import name="Kronika" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-if>
+  <sc-if value="{{v.hadanka}}" hint-placeholder-val="{{false}}">
+    <div class="scr {{c.hadanka}}" style="z-index: {{z.hadanka}};">
+      <dc-import name="Hadanka" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showNav}}" hint-placeholder-val="{{false}}">
+    <nav class="navIn" style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 10; height: 72px; background: rgba(248,241,225,0.97); border-top: 1px solid #D8C9A9; box-shadow: 0 -4px 16px rgba(43,33,24,0.08);">
+      <div class="pill" style="left: {{pillLeft}};"><div style="margin: 0 14px; height: 56px; border-radius: 16px; background: rgba(155,44,34,0.10);"></div></div>
+      <div style="position: relative; height: 72px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+          <button onClick="{{t.go}}" aria-label="{{t.label}}" style="border: none; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{t.color}}; font-size: 12px; font-weight: {{t.weight}};">
+            <sc-if value="{{t.isHome}}" hint-placeholder-val="{{false}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 11 L12 4 L20 11 V20 H4 Z"></path></svg></sc-if>
+            <sc-if value="{{t.isMap}}" hint-placeholder-val="{{false}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 6 L9 4 L15 6 L21 4 V18 L15 20 L9 18 L3 20 Z M9 4 V18 M15 6 V20"></path></svg></sc-if>
+            <sc-if value="{{t.isDisc}}" hint-placeholder-val="{{false}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5 L13.5 13.5 L8.5 15.5 L10.5 10.5 Z"></path></svg></sc-if>
+            <sc-if value="{{t.isBook}}" hint-placeholder-val="{{false}}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 4 H17 A2 2 0 0 1 19 6 V20 H7 A2 2 0 0 1 5 18 Z M5 16 H19"></path></svg></sc-if>
+            <span>{{t.label}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </nav>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"start":{"editor":"enum","options":["návrat","domů"],"default":"návrat"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const start = (props.start ?? 'návrat') === 'domů' ? 'domu' : 'navrat';
+    this.state = { screen: start, prev: null, enter: 'enter-fade', leave: 'leave-stay', backOnTop: false, hist: [] };
+    this.TABS = ['domu', 'vyprava', 'objevovat', 'kronika'];
+    this.LABELS = { domu: 'Domů', vyprava: 'Výprava', objevovat: 'Objevovat', kronika: 'Kronika' };
+  }
+  componentDidUpdate(prev) {
+    if (prev.start !== this.props.start) {
+      const s = (this.props.start ?? 'návrat') === 'domů' ? 'domu' : 'navrat';
+      this.setState({ screen: s, prev: null, enter: 'enter-fade', hist: [] });
+    }
+  }
+  componentWillUnmount() { clearTimeout(this.to); }
+  go(target, how) {
+    const cur = this.state.screen;
+    let hist = this.state.hist.slice();
+    let enter = 'enter-fade', leave = 'leave-fade', backOnTop = false;
+    if (target === 'back') {
+      target = hist.pop() || 'domu';
+      enter = 'enter-back'; leave = 'leave-back'; backOnTop = true;
+    } else if (target === cur) {
+      return;
+    } else if (how === 'push') {
+      hist.push(cur); enter = 'enter-push'; leave = 'leave-push';
+    } else if (how === 'zoom') {
+      hist = []; enter = 'enter-zoom'; leave = 'leave-stay';
+    } else if (how === 'reveal' || cur === 'navrat') {
+      hist = []; enter = 'enter-reveal'; leave = 'leave-fade';
+    } else {
+      hist = [];
+      const a = this.TABS.indexOf(cur), b = this.TABS.indexOf(target);
+      enter = a >= 0 && b >= 0 ? (b > a ? 'enter-right' : 'enter-left') : 'enter-fade';
+      leave = 'leave-fade';
+    }
+    clearTimeout(this.to);
+    this.setState({ screen: target, prev: cur, enter, leave, backOnTop, hist });
+    this.to = setTimeout(() => this.setState({ prev: null }), 720);
+  }
+  renderVals() {
+    const { screen, prev, enter, leave, backOnTop } = this.state;
+    const all = ['navrat', 'domu', 'vyprava', 'objevovat', 'kronika', 'hadanka'];
+    const v = {}, c = {}, z = {};
+    all.forEach((s) => {
+      v[s] = s === screen || s === prev;
+      c[s] = s === screen ? enter : s === prev ? leave : '';
+      z[s] = s === screen ? (backOnTop ? 2 : 3) : s === prev ? (backOnTop ? 3 : 2) : 1;
+    });
+    const navTab = this.TABS.indexOf(screen);
+    return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
+      v, c, z, yes: true, vzhled: this.props.vzhled ?? 'den',
+      go: (t, how) => this.go(t, how),
+      showNav: navTab >= 0,
+      pillLeft: (Math.max(0, navTab) * 25) + '%',
+      tabs: this.TABS.map((t, k) => ({
+        label: this.LABELS[t], go: () => this.go(t),
+        color: k === navTab ? '#9B2C22' : '#5E4A32', weight: k === navTab ? '600' : '400',
+        isHome: k === 0, isMap: k === 1, isDisc: k === 2, isBook: k === 3
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

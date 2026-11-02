@@ -82,3 +82,68 @@ Datum: 30. 10. 2026 · Stav: přijato
 - Dosavadní vývojový build byl podepsaný debug klíčem, přechod na release klíč proto vyžadoval jednu odinstalaci (smazaná lokální data; kronika se načetla znovu z Health Connectu).
 - Backend se v této fázi nepoužívá; obsah je v APK. Mapa je otevřená věc: koridor 26 MB přibalit do APK a při prvním spuštění zkopírovat do úložiště aplikace (`pmtiles://` čte jen soubory v `files/`), nebo stahovat z hostingu.
 - Postup a stav ověření: `docs/release-apk.md`.
+
+## 0010 Mapa v aplikaci: MapLibre nad přibaleným koridorem
+Datum: 30. 10. 2026 · Stav: přijato, ověřeno na emulátoru Android 16 (vývojový i release build); část o přibalení dlaždic do APK nahrazena rozhodnutím 0013 (stahování z R2)
+
+- `ExpeditionMap` kreslí MapLibre Native: vlastní OSM dlaždice z koridoru Vltavské stezky (PMTiles, 26 MB), pergamenový styl z `packages/map-style`, trasa (ušlá plná, zbývající čárkovaná), zastávky, malé objevy a poloha jako vrstvy GeoJSON. Klepnutí na místo otevře zastávku. Popisky zastávek rozmísťuje MapLibre (kolize), ruční rozmisťování ze SVG náhledu odpadlo.
+- **Úvodní pohled** je kolem polohy a další zastávky (jako v mockupu), ne celá trasa; tlačítko „Celá trasa“ / „Moje poloha“ přepíná. Mapa podle motivu přepíná den a noc.
+- **Data jsou v APK.** Metro přibalí `assets/map/vltava-koridor5.pmtiles` a písma (Noto Sans Regular a Italic, rozsahy pro češtinu); při prvním spuštění se zkopírují do úložiště aplikace (`src/map/mapAssets.ts`), protože MapLibre čte `pmtiles://` jen ze souboru. Kopie nese otisk souboru v názvu, dokončená se pozná podle značky `.ok`. Backend se nepoužívá.
+- Velký soubor PMTiles není v gitu; `tools/maps/copy-to-app.sh` ho zkopíruje z `tools/maps/out/` (viz `docs/mapy-osm.md`), `tools/release-apk.sh` to dělá sám.
+- Záloha: web a selhání přípravy dat ukážou dosavadní náhled trasy (`RouteSketch`). Atribuce „© přispěvatelé OpenStreetMap“ je vidět přímo na mapě.
+- Silnice 1. až 3. třídy se ve stylu zobrazují od zoomu 9,5 (v přehledu celé trasy je jinak mapa nepřehledná).
+- Zbývá: iOS (knihovna má u `pmtiles://` na iOS otevřený problém), ověření na reálném telefonu a na slabších zařízeních, medailony s fotkami a pečeti ze mockupů, další výpravy (data pro další koridory, stahování).
+
+## 0011 Medailony zastávek a atribuce obrázků
+Datum: 30. 10. 2026 · Stav: přijato, ověřeno na emulátoru Android 16 (vývojový i release build, světlý i tmavý režim)
+
+- Zastávky na mapě jsou **medailony** podle mockupu: fotka v kruhovém ořezu s kroužkem, u dosažených odznak „došlo se“, další zastávka má tlustší kroužek, zamčené jsou šedé. Zastávka bez fotky má kruh s ikonou věže. Malé objevy jsou tečky (dosažené plné, ostatní prázdné).
+- Medailony jsou hotové obrázky (`apps/mobile/assets/map/medallions`, @3x, pro den a noc) vyrobené skriptem `tools/maps/make-medallions.py` z fotek v `docs/mockupy/assets`; vykresluje je MapLibre jako symbolovou vrstvu. Důvod proti nativním pohledům: stabilní vykreslení, popisky a ikony se rozmisťují společně (kolize) a ikony se zvětšují s přiblížením (v přehledu celé trasy jsou malé).
+- Fotky jsou z Wikimedia Commons (CC BY-SA a jiné) a platí pro ně povinná atribuce. Obrazovka **Zdroje a licence** (odkaz dole na Domů) je vypisuje spolu s daty OSM a písmy; zdroj pravdy je `src/data/credits.ts` a `docs/mockupy/assets/ZDROJE.md`. **Před vydáním ověřit autora a licenci u každého souboru** (u Trojského zámku autor v metadatech chybí) a nahradit fotky z mockupů ověřenými podle šablony zastávky (spec 7.3).
+- Metro pozná `@3x` variantu sám, v `require` se přípona škálování neuvádí.
+
+## 0012 Dny dosažení míst se ukládají
+Datum: 31. 10. 2026 · Stav: přijato, ověřeno na emulátoru (ukázkový postup); reálná data zatím ne
+
+- Dosažená místa, dokončené etapy a cíl výpravy se ukládají do tabulky `expedition_event` (migrace verze 3) **s dnem, kdy je výprava dosáhla**, ne s dnem, kdy to aplikace zjistila při otevření. Den počítá čistá funkce `journeyEvents` (`packages/core/src/journey.ts`) z vzdáleností po úsecích výpravy (`walkedBySlice`): první úsek, ve kterém kumulativní součet dosáhl kilometru místa.
+- Zapsané události se nepřepisují (`INSERT OR IGNORE`): den prvního dosažení zůstane, i když se později změní data (pozdní synchronizace hodinek) nebo délka kroku. Smazání výpravy smaže i její události.
+- Kronika ukazuje sekci Výprava: dokončené etapy, odemčená místa s datem (posledních pět, ostatní na tlačítko). V ukázkovém postupu se události dopočítají na místě a neukládají se.
+- Neřeší se: dokončená výprava jako samostatný záznam (stav `completed`), znovu spuštěná výprava, historie dřívějších výprav v Kronice.
+
+## 0013 Mapa se stahuje z Cloudflare R2, ne z APK ani z gitu
+Datum: 31. 10. 2026 · Stav: přijato, nasazeno; stahování ověřeno proti produkci na emulátoru Android 16 (release build)
+
+- Koridor Vltavské stezky (26 MB PMTiles) **není v gitu ani v APK**. Leží v R2 bucketu `footatlas-content` pod `maps/<název>-<12 znaků SHA-256>.pmtiles` a aplikace ho při prvním spuštění stáhne do úložiště (`src/map/mapAssets.ts`), ověří velikost a použije jako `pmtiles://file://…`. Název s otiskem obsahu znamená, že se soubor nemění a smí se kešovat navždy; nová verze dat = nový název, nová verze aplikace (`src/map/mapSource.ts` generuje `tools/maps/publish.sh`).
+- Doručuje ho Worker `apps/api` (`GET /content/<klíč>`, HEAD, `Range`, `ETag`, `Cache-Control: immutable` pro `maps/`). Bucket zůstává soukromý, veřejný je jen Worker. Adresa serveru je v `app.json` v `extra.apiBaseUrl`.
+- Důvod: velké binárky nepatří do gitu (každá verze zůstane v historii navždy) a ani do APK (při více výpravách by rostlo); R2 nemá poplatky za odchozí data a Worker dává kontrolu nad kešováním.
+- První spuštění potřebuje připojení (26 MB); do té doby a při selhání se ukazuje náhled trasy se zprávou a tlačítkem „Zkusit znovu“. Písma map (0,6 MB) zůstávají v APK.
+- **Stav 31. 10. 2026:** Worker `footatlas-api` je nasazený na `https://footatlas-api.ecerpavel.workers.dev` (vazba `CONTENT` → `footatlas-content`), adresa je v `app.json` (`extra.apiBaseUrl`). Ověřeno: `/health`, HEAD, `Range`, 404 pro chybějící klíč i pokus o průchod cestou, SHA-256 staženého souboru shodný s originálem; release APK 1.3.1 (5) po `pm clear` stáhl mapu z produkce a vykreslil ji. Neověřeno: reálný telefon a iOS, vlastní doména místo `workers.dev`.
+
+## 0014 Světlý vzhled výchozí, vzdálenosti lidsky, Nastavení
+Datum: 2. 11. 2026 · Stav: přijato, ověřeno testy a typecheckem; na telefonu NEOVĚŘENO
+
+- Výchozí vzhled je světlý pergamen pro všechny (`app.json` `userInterfaceStyle: "light"`); volba Světlý / Tmavý / Podle systému se ukládá v AsyncStorage (`ThemeProvider`, `storage.ts`).
+- Zbývající vzdálenost k místu: `formatDistance` (`apps/mobile/src/format.ts`): pod 15 m „Jste tady“, pod 1 km metry po 10 m a „asi N kroků“ z osobní délky kroku, do 10 km na desetiny, dál celé km. „0,0 km“ se už nezobrazí.
+- Nová obrazovka `/nastaveni` (vzhled, délka kroku, zdroje a licence, vývoj jen v `__DEV__`), na Domů ji otevírá ozubené kolo.
+- Známé: zvolený tmavý vzhled se po spuštění na okamžik ukáže světlý, než se volba načte.
+
+## 0015 Živá obnova v popředí
+Datum: 2. 11. 2026 · Stav: přijato, ověřeno testy; chování na zařízení NEOVĚŘENO
+
+- Vzdálenost výpravy se čte znovu při návratu aplikace do popředí (nejdřív 15 s po posledním čtení), každou minutu, dokud je aplikace aktivní a výprava běží, a stažením prstem na Domů. Na pozadí se nečte nic. Čtení se nepřekrývají; změny výpravy (start, pauza, délka kroku) se při běžícím čtení zařadí za něj (`ExpeditionProvider`, `refreshPolicy.ts`).
+- Kolečko obnovy jen při stažení prstem, automatická čtení běží potichu. Domů ukazuje „Aktualizováno před N min“ a po 2 minutách vysvětlení, že zdroj zapisuje kroky s prodlevou.
+
+## 0016 Příběhy míst odděleně od geometrie
+Datum: 2. 11. 2026 · Stav: přijato; texty NEOVĚŘENÉ (`verified: false`)
+
+- Obsah míst (háček, upoutávka, hádanka se třemi možnostmi, kontext, tip „Až tam půjdete“, kapitola, zdroje) je v `packages/content/data/vltavska-stezka/obsah.json` se schématem `story.ts`; `expedition.json` nese jen polohy a vzdálenosti. Důvod: text a trasa se mění nezávisle.
+- Hotovo 14 míst 1. etapy a 5 kapitol. Detail místa: odemčené ukáže háček, kontext, tip, den dosažení a postup kapitoly; zamčené upoutávku, hádanku a vzdálenost. Karta „Koncept obsahu“ zmizela; neověřenost se eviduje v datech, ne v UI.
+- Před vydáním: ověřit vše dle `docs/obsah-vltavska-podklady.md` (úkoly k ověření), doplnit zbývající etapy.
+
+## 0017 Pěší trasa po souši
+Datum: 2. 11. 2026 · Stav: přijato; v terénu NEOVĚŘENO
+
+- Trasa Vltavské stezky už nevede středem řeky: pěší routing OSRM nad OpenStreetMap (ODbL) přes vybrané body na břehu, zjednodušeno (`tools/route/build-walking-route.mjs`, `DRY=1` jen report). 62,25 km, 4 etapy končící v Roztokách, Kralupech, Vraňanech a v Mělníku (16,7 / 17,0 / 17,8 / 10,8 km).
+- Místa na druhém břehu se nenavštěvují, jen promítají („výhled přes řeku“); 9 míst je dál než 500 m od trasy (nejvíc Klecany 3 km).
+- Trasa se od staré čáry vzdálí nejvýš 1,5 km, mapový koridor stačí.
+- Rizika: přívozy (Podbaba, Libčice, Lužec) jezdí sezónně; úsek Červený mlýn → Vraňany je nejvíc zakřivený (1,8× vzdušné vzdálenosti), projít na mapě. Hustota: jediná mezera nad 4 km (Výhled na Říp → Vepřek, 4,4 km), doplnit objev.

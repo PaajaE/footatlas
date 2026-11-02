@@ -1,7 +1,7 @@
 const { withAppBuildGradle } = require("expo/config-plugins");
 
 /**
- * Release build podepisuje vlastní klíč, ne veřejně známý debug klíč ze šablony.
+ * Release (a debug) build podepisuje vlastní klíč, ne veřejně známý debug klíč ze šablony.
  * Cesta ke klíči a hesla se čtou z vlastností Gradle (`~/.gradle/gradle.properties`), nikdy z repozitáře:
  *   FOOTATLAS_KEYSTORE, FOOTATLAS_KEY_ALIAS, FOOTATLAS_STORE_PASSWORD, FOOTATLAS_KEY_PASSWORD
  * Bez nich vyjde nepodepsané APK, které nejde nainstalovat; build tedy nikdy tiše nepoužije debug klíč.
@@ -25,10 +25,16 @@ module.exports = function withReleaseSigning(config) {
       /(release \{\s*\/\/ Caution![^\n]*\n\s*\/\/ see [^\n]*\n\s*)signingConfig signingConfigs\.debug/,
       "$1signingConfig findProperty('FOOTATLAS_KEYSTORE') ? signingConfigs.release : null",
     );
-    if (withBuildType === withSigningConfig || withSigningConfig === src) {
+    // Debug build se podepisuje stejným klíčem (je-li k dispozici), aby se vývojový build instaloval přes release
+    // bez odinstalace, tedy bez ztráty dat v telefonu.
+    const withDebug = withBuildType.replace(
+      /(buildTypes \{\s*debug \{\s*)signingConfig signingConfigs\.debug/,
+      "$1signingConfig findProperty('FOOTATLAS_KEYSTORE') ? signingConfigs.release : signingConfigs.debug",
+    );
+    if (withBuildType === withSigningConfig || withSigningConfig === src || withDebug === withBuildType) {
       throw new Error("withReleaseSigning: šablona app/build.gradle má jiný tvar, plugin je potřeba upravit.");
     }
-    cfg.modResults.contents = withBuildType;
+    cfg.modResults.contents = withDebug;
     return cfg;
   });
 };

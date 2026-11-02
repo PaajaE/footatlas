@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Sestaví podepsané release APK pro instalaci mimo Google Play.
 # Použití: tools/release-apk.sh            (výstup dist/footatlas-<verze>-<versionCode>.apk)
+# Mapa se stahuje ze serveru (extra.apiBaseUrl v app.json musí být nastaveno), v APK není.
 # Potřebuje klíč a hesla v ~/.gradle/gradle.properties (FOOTATLAS_*), viz docs/release-apk.md.
 set -euo pipefail
 

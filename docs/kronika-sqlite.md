@@ -130,7 +130,7 @@ Přepočet po změně pravidla: projít řádky s `rule_version < aktuální`, z
 
 ## Obrazovka Kronika
 
-Podle mockupu `docs/mockupy/Kronika.dc.html` (záložky Statistiky, Životní cesta, Výpravy) a spec 8. Všechny dotazy jdou nad pohledem vybraných dnů. V SQL ho lze udělat jako `VIEW`, ale protože výběr zdroje je v core, jednodušší je načíst `daily_motion` celé (tisíce řádků, jednotky ms) a agregovat v core. SQL agregace níže jsou pro případ, že by to bylo pomalé.
+Podle původního mockupu `docs/mockupy/v1/Kronika.dc.html` (záložky Statistiky, Životní cesta, Výpravy; nový návrh Kroniky je v `docs/mockupy/Kronika.dc.html`) a spec 8. Všechny dotazy jdou nad pohledem vybraných dnů. V SQL ho lze udělat jako `VIEW`, ale protože výběr zdroje je v core, jednodušší je načíst `daily_motion` celé (tisíce řádků, jednotky ms) a agregovat v core. SQL agregace níže jsou pro případ, že by to bylo pomalé.
 
 ### Statistiky
 | Prvek | Výpočet |

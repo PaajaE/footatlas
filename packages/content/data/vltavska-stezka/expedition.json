@@ -4,14 +4,14 @@
   "summary": "Z Vyšehradu podél Vltavy k soutoku s Labem v Mělníku.",
   "status": "draft",
   "routeType": "virtual",
-  "routeSource": "Tok Vltavy z dat OpenStreetMap (ODbL), © přispěvatelé OpenStreetMap, zjednodušeno; není to vyznačená stezka",
+  "routeSource": "Pěší trasa po souši vypočtená pěším routingem OSRM nad daty OpenStreetMap (ODbL), © přispěvatelé OpenStreetMap, zjednodušeno; není to vyznačená stezka",
   "routeFile": "route.json",
-  "totalM": 62022,
+  "totalM": 62254,
   "stageEndsM": [
-    18648,
-    35815,
-    50041,
-    62022
+    16745,
+    33726,
+    51486,
+    62254
   ],
   "chapters": [],
   "places": [
@@ -21,7 +21,7 @@
       "name": "Vyšehrad",
       "lat": 50.0645,
       "lon": 14.418,
-      "unlockAtM": 171,
+      "unlockAtM": 0,
       "text": "Skalní ostroh nad řekou, start výpravy.",
       "draft": true,
       "photo": "vysehrad"
@@ -32,7 +32,7 @@
       "name": "Výtoň",
       "lat": 50.0688,
       "lon": 14.415,
-      "unlockAtM": 688,
+      "unlockAtM": 625,
       "text": "Bývalá celnice, kde se platilo za dřevo plavené po řece.",
       "draft": true
     },
@@ -42,7 +42,7 @@
       "name": "Rašínovo nábřeží",
       "lat": 50.0745,
       "lon": 14.4135,
-      "unlockAtM": 1333,
+      "unlockAtM": 1288,
       "text": "Náplavka, kde kdysi kotvily vory.",
       "draft": true
     },
@@ -52,7 +52,7 @@
       "name": "Karlův most",
       "lat": 50.0865,
       "lon": 14.4114,
-      "unlockAtM": 2708,
+      "unlockAtM": 2576,
       "text": "Kamenný most ze 14. století.",
       "draft": true,
       "photo": "karluv-most"
@@ -63,7 +63,7 @@
       "name": "Ostrov Štvanice",
       "lat": 50.096,
       "lon": 14.433,
-      "unlockAtM": 4770,
+      "unlockAtM": 4936,
       "text": "Ostrov, kde se kdysi štvala zvěř.",
       "draft": true
     },
@@ -73,7 +73,7 @@
       "name": "Holešovický přístav",
       "lat": 50.105,
       "lon": 14.447,
-      "unlockAtM": 5954,
+      "unlockAtM": 6611,
       "text": "Přístav z doby, kdy po Vltavě jezdily nákladní lodě.",
       "draft": true
     },
@@ -83,7 +83,7 @@
       "name": "Libeňský most",
       "lat": 50.102,
       "lon": 14.461,
-      "unlockAtM": 6896,
+      "unlockAtM": 6611,
       "text": "Kubistický most přes řeku a ostrov.",
       "draft": true
     },
@@ -93,7 +93,7 @@
       "name": "Plavební komora Troja",
       "lat": 50.1133,
       "lon": 14.4439,
-      "unlockAtM": 8916,
+      "unlockAtM": 7562,
       "text": "Lodě tu překonávají jez.",
       "draft": true
     },
@@ -103,7 +103,7 @@
       "name": "Císařský ostrov",
       "lat": 50.113,
       "lon": 14.416,
-      "unlockAtM": 12034,
+      "unlockAtM": 9832,
       "text": "Největší pražský ostrov.",
       "draft": true
     },
@@ -113,7 +113,7 @@
       "name": "Trojská lávka",
       "lat": 50.116,
       "lon": 14.418,
-      "unlockAtM": 12163,
+      "unlockAtM": 9832,
       "text": "Lávka mezi Trojou a Císařským ostrovem.",
       "draft": true
     },
@@ -123,7 +123,7 @@
       "name": "Trojský zámek",
       "lat": 50.1165,
       "lon": 14.4115,
-      "unlockAtM": 12545,
+      "unlockAtM": 10477,
       "text": "Barokní letohrádek s francouzskou zahradou.",
       "draft": true,
       "photo": "troja"
@@ -134,7 +134,7 @@
       "name": "Sedlecké skály",
       "lat": 50.124,
       "lon": 14.396,
-      "unlockAtM": 14421,
+      "unlockAtM": 12364,
       "text": "Skalní stěny nad řekou, oblíbené lezci.",
       "draft": true
     },
@@ -144,7 +144,7 @@
       "name": "Přívoz v Podbabě",
       "lat": 50.135,
       "lon": 14.3955,
-      "unlockAtM": 15898,
+      "unlockAtM": 13756,
       "text": "Přívoz, který převáží přes řeku už staletí.",
       "draft": true
     },
@@ -154,7 +154,7 @@
       "name": "Zámek Roztoky",
       "lat": 50.158,
       "lon": 14.398,
-      "unlockAtM": 18648,
+      "unlockAtM": 16745,
       "text": "Zámek s muzeem, konec první etapy.",
       "draft": true,
       "photo": "roztoky"
@@ -165,7 +165,7 @@
       "name": "Levý Hradec",
       "lat": 50.163,
       "lon": 14.377,
-      "unlockAtM": 21869,
+      "unlockAtM": 18940,
       "text": "Hradiště, kde podle tradice stál první kostel v Čechách.",
       "draft": true,
       "photo": "vltava-levy-hradec"
@@ -176,7 +176,7 @@
       "name": "Skály u Řeže",
       "lat": 50.178,
       "lon": 14.36,
-      "unlockAtM": 26163,
+      "unlockAtM": 22474,
       "text": "Údolí se tu zužuje mezi skalami.",
       "draft": true
     },
@@ -186,7 +186,7 @@
       "name": "Klecanské hradiště",
       "lat": 50.175,
       "lon": 14.408,
-      "unlockAtM": 27367,
+      "unlockAtM": 24753,
       "text": "Pravěké hradiště na druhém břehu.",
       "draft": true
     },
@@ -196,7 +196,7 @@
       "name": "Husinec",
       "lat": 50.174,
       "lon": 14.372,
-      "unlockAtM": 27367,
+      "unlockAtM": 24753,
       "text": "Obec na pravém břehu naproti skalám.",
       "draft": true
     },
@@ -206,7 +206,7 @@
       "name": "Libčice nad Vltavou",
       "lat": 50.199,
       "lon": 14.36,
-      "unlockAtM": 29574,
+      "unlockAtM": 26521,
       "text": "Bývalá voroplavecká obec v úzkém údolí. Odtud se otevírá výhled na skalnaté svahy nad řekou.",
       "draft": true,
       "photo": "libcice"
@@ -217,7 +217,7 @@
       "name": "Přívoz do Letek",
       "lat": 50.213,
       "lon": 14.353,
-      "unlockAtM": 31070,
+      "unlockAtM": 28537,
       "text": "Přívoz převáží chodce a kola na druhý břeh.",
       "draft": true
     },
@@ -227,7 +227,7 @@
       "name": "Dolany nad Vltavou",
       "lat": 50.229,
       "lon": 14.335,
-      "unlockAtM": 33726,
+      "unlockAtM": 31206,
       "text": "Vesnice na pravém břehu kousek před Kralupy.",
       "draft": true
     },
@@ -237,7 +237,7 @@
       "name": "Kralupy nad Vltavou",
       "lat": 50.24,
       "lon": 14.311,
-      "unlockAtM": 35815,
+      "unlockAtM": 33726,
       "text": "Město na řece, konec druhé etapy.",
       "draft": true
     },
@@ -247,7 +247,7 @@
       "name": "Lobeček",
       "lat": 50.252,
       "lon": 14.306,
-      "unlockAtM": 37142,
+      "unlockAtM": 35408,
       "text": "Čtvrť na levém břehu s výhledem na zámek.",
       "draft": true
     },
@@ -257,7 +257,7 @@
       "name": "Zámek Nelahozeves",
       "lat": 50.262,
       "lon": 14.299,
-      "unlockAtM": 38202,
+      "unlockAtM": 36901,
       "text": "Renesanční zámek nad řekou s psaníčkovými sgrafity.",
       "draft": true,
       "photo": "nelahozeves2"
@@ -268,7 +268,7 @@
       "name": "Rodný dům Antonína Dvořáka",
       "lat": 50.264,
       "lon": 14.2985,
-      "unlockAtM": 38415,
+      "unlockAtM": 36901,
       "text": "Skladatel se tu narodil roku 1841.",
       "draft": true
     },
@@ -278,7 +278,7 @@
       "name": "Zámek Veltrusy",
       "lat": 50.272,
       "lon": 14.326,
-      "unlockAtM": 39864,
+      "unlockAtM": 40241,
       "text": "Barokní zámek v rozlehlém parku nad Vltavou.",
       "draft": true,
       "photo": "veltrusy"
@@ -289,7 +289,7 @@
       "name": "Červený mlýn",
       "lat": 50.281,
       "lon": 14.333,
-      "unlockAtM": 41432,
+      "unlockAtM": 41888,
       "text": "Romantická stavba v zámeckém parku.",
       "draft": true
     },
@@ -299,7 +299,7 @@
       "name": "Lužní les",
       "lat": 50.293,
       "lon": 14.342,
-      "unlockAtM": 42093,
+      "unlockAtM": 42065,
       "text": "Les, který řeka pravidelně zaplavuje.",
       "draft": true
     },
@@ -309,7 +309,7 @@
       "name": "Výhled na Říp",
       "lat": 50.297,
       "lon": 14.3257,
-      "unlockAtM": 44957,
+      "unlockAtM": 45636,
       "text": "Na obzoru se poprvé ukáže hora Říp.",
       "draft": true
     },
@@ -319,7 +319,7 @@
       "name": "Vepřek",
       "lat": 50.298,
       "lon": 14.352,
-      "unlockAtM": 48733,
+      "unlockAtM": 50033,
       "text": "Vesnička na okraji říční nivy.",
       "draft": true
     },
@@ -329,7 +329,7 @@
       "name": "Slepé rameno",
       "lat": 50.312,
       "lon": 14.365,
-      "unlockAtM": 49285,
+      "unlockAtM": 50559,
       "text": "Staré koryto, kde se zastavila voda.",
       "draft": true
     },
@@ -339,7 +339,7 @@
       "name": "Plavební kanál Vraňany",
       "lat": 50.322,
       "lon": 14.372,
-      "unlockAtM": 50041,
+      "unlockAtM": 51486,
       "text": "Kanál, který zkracuje plavbu k Labi. Konec třetí etapy.",
       "draft": true
     },
@@ -349,7 +349,7 @@
       "name": "Lužec nad Vltavou",
       "lat": 50.32,
       "lon": 14.399,
-      "unlockAtM": 51808,
+      "unlockAtM": 54898,
       "text": "Obec s kostelem na terase nad nivou.",
       "draft": true
     },
@@ -359,7 +359,7 @@
       "name": "Polabská rovina",
       "lat": 50.33,
       "lon": 14.42,
-      "unlockAtM": 53765,
+      "unlockAtM": 56714,
       "text": "Krajina se otevírá, na obzoru Říp.",
       "draft": true
     },
@@ -369,7 +369,7 @@
       "name": "Říční tůně",
       "lat": 50.318,
       "lon": 14.4423,
-      "unlockAtM": 56955,
+      "unlockAtM": 58138,
       "text": "Tůně, kde se v létě drží žáby a vážky.",
       "draft": true
     },
@@ -379,7 +379,7 @@
       "name": "První pohled na Mělník",
       "lat": 50.3247,
       "lon": 14.4737,
-      "unlockAtM": 59326,
+      "unlockAtM": 59417,
       "text": "Na ostrohu se objeví zámek a kostel.",
       "draft": true
     },
@@ -389,7 +389,7 @@
       "name": "Zámek Hořín",
       "lat": 50.3396,
       "lon": 14.4783,
-      "unlockAtM": 61087,
+      "unlockAtM": 60593,
       "text": "Zámek s parkem kousek před soutokem.",
       "draft": true
     },
@@ -399,7 +399,7 @@
       "name": "Soutok v Mělníku",
       "lat": 50.353,
       "lon": 14.472,
-      "unlockAtM": 62022,
+      "unlockAtM": 62254,
       "text": "Vltava se tu vlévá do Labe. Cíl výpravy.",
       "draft": true,
       "photo": "melnik"

@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, StageBar, T } from "../../components/ui";
 import { ExpeditionMap } from "../../components/ExpeditionMap";
 import { vltavska } from "../../data/vltavska";
-import { formatKm } from "../../format";
+import { formatDistance, formatKm } from "../../format";
 import { useExpedition } from "../../state/ExpeditionProvider";
 import { useTheme } from "../../theme/ThemeProvider";
 
@@ -12,7 +12,7 @@ export default function Expedition() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { state, active, walkedM, demo } = useExpedition();
+  const { state, active, walkedM, demo, stepLength } = useExpedition();
 
   if (!active) {
     return (
@@ -38,7 +38,7 @@ export default function Expedition() {
             {demo.enabled ? " · ukázkový postup" : ""}
           </T>
           <T variant="strong" accent style={{ flexShrink: 0 }}>
-            {(state.walkedM / 1000).toFixed(1).replace(".", ",")} / {Math.round(vltavska.totalM / 1000)} km
+            {formatKm(state.walkedM)} / {formatKm(vltavska.totalM)}
           </T>
         </View>
       </View>
@@ -51,9 +51,6 @@ export default function Expedition() {
         height={420}
         onPlacePress={(id) => router.push({ pathname: "/zastavka/[id]", params: { id } })}
       />
-      <T variant="small" style={{ paddingHorizontal: 20, paddingTop: 4 }}>
-        Náhled trasy bez podkladové mapy. Mapa přijde později.
-      </T>
 
       <View style={{ flex: 1, justifyContent: "flex-end", padding: 16 }}>
         <Card style={{ gap: 10 }}>
@@ -64,13 +61,13 @@ export default function Expedition() {
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
                 <T variant="label">Další zastávka</T>
                 <T variant="title" style={{ color: colors.accent }}>
-                  {formatKm(state.toNextStopM ?? 0)}
+                  {formatDistance(state.toNextStopM ?? 0, { stepLengthM: stepLength.meters })}
                 </T>
               </View>
               <T variant="title">{next.name}</T>
               {nextSmall && (
                 <T variant="muted">
-                  Malý objev za {formatKm(state.toNextM ?? 0)}: <T variant="strong">{nextSmall.name}</T>
+                  Malý objev za {formatDistance(state.toNextM ?? 0)}: <T variant="strong">{nextSmall.name}</T>
                 </T>
               )}
               <Button

@@ -70,19 +70,32 @@ export function walkedInSlicesM(
   daily: readonly DailyRecord[],
   intervalM: readonly (number | null | undefined)[] = [],
 ): number {
+  return walkedBySlice(slices, daily, intervalM).reduce((sum, s) => sum + s.distanceM, 0);
+}
+
+/** Vzdálenost jednoho úseku výpravy a lokální den, do kterého patří. */
+export interface SliceDistance {
+  day: string;
+  distanceM: number;
+}
+
+/**
+ * Totéž co `walkedInSlicesM`, ale po úsecích (stejné pořadí jako `slices`): z toho jde poznat,
+ * ve kterém dni výprava dosáhla daného kilometru. Opakovaný celý den bez čtení intervalu má 0.
+ */
+export function walkedBySlice(
+  slices: readonly DaySlice[],
+  daily: readonly DailyRecord[],
+  intervalM: readonly (number | null | undefined)[] = [],
+): SliceDistance[] {
   const byDay = new Map<string, number>();
   for (const r of daily) byDay.set(r.date, (byDay.get(r.date) ?? 0) + r.distanceM);
   const countedDays = new Set<string>();
-  let sum = 0;
-  slices.forEach((s, i) => {
+  return slices.map((s, i) => {
     const part = intervalM[i];
-    if (!s.whole && typeof part === "number") {
-      sum += Math.max(0, part);
-      return;
-    }
-    if (countedDays.has(s.day)) return;
+    if (!s.whole && typeof part === "number") return { day: s.day, distanceM: Math.max(0, part) };
+    if (countedDays.has(s.day)) return { day: s.day, distanceM: 0 };
     countedDays.add(s.day);
-    sum += byDay.get(s.day) ?? 0;
+    return { day: s.day, distanceM: byDay.get(s.day) ?? 0 };
   });
-  return sum;
 }
