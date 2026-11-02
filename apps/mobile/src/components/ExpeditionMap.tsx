@@ -94,18 +94,29 @@ function LiveMap({ route, cumulative, places, walkedM, height, onPlacePress, ass
   const camera = useRef<CameraRef>(null);
   const [view, setView] = useState<{ zoom: number; lat: number } | null>(null);
 
-  // Úvodní pohled: kolem polohy a další zastávky (jako v mockupu), ne celá trasa; ta je na tlačítko.
+  // Úvodní pohled: posledních pár kilometrů ušlé trasy až po další zastávku, aby bylo vidět vybarvení
+  // za vámi i cíl před vámi; celá trasa je na tlačítko.
   const initial = useMemo(() => {
     const next = places.find((p) => p.kind === "stop" && p.atM > walkedM);
-    const lon = next ? (you.lon + next.lon) / 2 : you.lon;
-    const lat = next ? (you.lat + next.lat) / 2 : you.lat;
-    const dLat = next ? Math.abs(next.lat - you.lat) * 111_000 : 0;
-    const dLon = next ? Math.abs(next.lon - you.lon) * 111_000 * Math.cos((you.lat * Math.PI) / 180) : 0;
+    const from = Math.max(0, walkedM - 4000);
+    const to = next ? next.atM : walkedM;
+    const pts: Array<[number, number]> = [[you.lon, you.lat]];
+    if (next) pts.push([next.lon, next.lat]);
+    route.forEach((p, i) => {
+      const m = cumulative[i] ?? 0;
+      if (m >= from && m <= to) pts.push([p.lon, p.lat]);
+    });
+    const lons = pts.map((q) => q[0]);
+    const lats = pts.map((q) => q[1]);
+    const lon = (Math.min(...lons) + Math.max(...lons)) / 2;
+    const lat = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const dLat = (Math.max(...lats) - Math.min(...lats)) * 111_000;
+    const dLon = (Math.max(...lons) - Math.min(...lons)) * 111_000 * Math.cos((lat * Math.PI) / 180);
     const span = Math.max(dLat, dLon, 1500);
     // Metrů na bod obrazovky při zoomu z na této šířce: ≈ 50 300 / 2^z; do šířky ~260 bodů se vejde `span`.
     const zoom = Math.min(13, Math.max(9.5, Math.log2((50_300 * 260) / (span * 1.5))));
     return { center: [lon, lat] as [number, number], zoom: Math.round(zoom * 10) / 10 };
-  }, [places, walkedM, you]);
+  }, [places, walkedM, you, route, cumulative]);
   const done = useMemo(() => [...coords.slice(0, Math.max(1, you.segment + 1)), [you.lon, you.lat] as [number, number]], [coords, you]);
 
   // Maska vybarvení: papír s dírou kolem ušlého úseku (vnější okraj plně krycí, vnitřní zčásti, aby byl okraj měkký).

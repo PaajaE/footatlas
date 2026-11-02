@@ -70,6 +70,12 @@ export default function Expedition() {
         />
       )}
 
+      {/* Pergamenový pás pod stavovým řádkem, aby se hodiny a ikony nepletly do popisků mapy. */}
+      <View
+        pointerEvents="none"
+        style={{ position: "absolute", top: 0, left: 0, right: 0, height: insets.top, backgroundColor: colors.bg, opacity: 0.85 }}
+      />
+
       <View
         onLayout={(e) => setCardH(e.nativeEvent.layout.height)}
         style={{
