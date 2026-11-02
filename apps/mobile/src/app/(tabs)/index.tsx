@@ -2,6 +2,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { Pressable, View } from "react-native";
 import { changeSentence, summarizeChange } from "@footatlas/core";
+import { LastUpdated } from "../../components/LastUpdated";
 import { Button, Card, Screen, StageBar, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
 import { formatDayLong, formatKm, pluralPlaces } from "../../format";
@@ -59,7 +60,7 @@ export default function Home() {
   );
 
   return (
-    <Screen>
+    <Screen onRefresh={ex.demo.enabled ? undefined : ex.refresh} refreshing={ex.refreshing}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <T variant="small">{formatDayLong(new Date())}</T>
         <T variant="small" style={{ flex: 1, textAlign: "right" }} numberOfLines={1}>
@@ -85,6 +86,7 @@ export default function Home() {
         </>
       )}
       <StageBar stages={vltavska.plan.stages} walkedM={state.walkedM} />
+      <LastUpdated />
 
       <Card style={{ flexDirection: "row", gap: 14, alignItems: "center" }}>
         <View
