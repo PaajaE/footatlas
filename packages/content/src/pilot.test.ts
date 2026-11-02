@@ -16,7 +16,7 @@ describe("pilotní výprava Vltavská stezka", () => {
     if (!parsed.success) throw new Error(JSON.stringify(parsed.error.issues, null, 1));
     expect(parsed.data.status).toBe("draft");
     expect(parsed.data.routeType).toBe("virtual");
-    expect(parsed.data.places).toHaveLength(38);
+    expect(parsed.data.places).toHaveLength(39);
   });
 
   it("délka v metadatech odpovídá geometrii", () => {
@@ -39,7 +39,7 @@ describe("pilotní výprava Vltavská stezka", () => {
     }
   });
 
-  it("hustota míst splňuje cíle spec 7.2 až na jednu známou mezeru", () => {
+  it("hustota míst splňuje cíle spec 7.2", () => {
     const e = parsed.data!;
     const plan = buildPlan({
       totalM: e.totalM,
@@ -48,10 +48,9 @@ describe("pilotní výprava Vltavská stezka", () => {
     });
     const r = densityReport(plan);
     expect(r.stops).toBe(10);
-    expect(r.discoveries).toBe(28);
+    expect(r.discoveries).toBe(29);
     expect(r.avgGapM).toBeLessThan(2_000);
-    // Výhled na Říp -> Vepřek je 4,4 km, limit je 4 km. Doplnit objev, pak tento řádek odstranit.
-    expect(r.issues).toEqual(["Největší mezera mezi místy je 4.4 km, limit je 4 km."]);
+    expect(r.issues).toEqual([]);
   });
 
   it("po konci druhé etapy (Kralupy) je další zastávka Zámek Nelahozeves", () => {

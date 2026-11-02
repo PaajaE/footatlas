@@ -32,6 +32,26 @@ describe("obsah.json", () => {
     }
   });
 
+  // Místa bez příběhu jsou záměrná: nemají dosud doložený konkrétní příběh (rozhodnutí 0023).
+  const BEZ_PRIBEHU = ["stara-vltava", "tune"];
+
+  it("každé místo 2. až 4. etapy má příběh, kromě záměrně bez příběhu", () => {
+    const places = load("expedition.json").places as { id: string }[];
+    const withStory = new Set(file!.stories.map((s) => s.id));
+    for (const p of places) {
+      if (BEZ_PRIBEHU.includes(p.id)) expect(withStory.has(p.id), p.id).toBe(false);
+      else expect(withStory.has(p.id), p.id).toBe(true);
+    }
+  });
+
+  it("hádanka má tři různé možnosti a každý příběh nejméně jeden zdroj", () => {
+    for (const s of file!.stories) {
+      expect(new Set(s.riddle?.options).size, s.id).toBe(s.riddle ? 3 : 0);
+      expect(s.sources.length, s.id).toBeGreaterThanOrEqual(1);
+      expect(s.verified, s.id).toBe(false);
+    }
+  });
+
   it("správná odpověď hádanky je platný index", () => {
     for (const s of file!.stories) {
       if (!s.riddle) continue;
