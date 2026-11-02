@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Hádanka a příchod</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=Work+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit}
+.locked img{filter:blur(7px) grayscale(1) sepia(.3);transform:scale(1.08)}
+.reveal img{animation:unblur 1.6s ease both}
+@keyframes unblur{0%{filter:blur(7px) grayscale(1) sepia(.3);transform:scale(1.08)}100%{filter:none;transform:scale(1)}}
+.seal{animation:drop .65s cubic-bezier(.2,1.5,.4,1) both;animation-delay:1.1s}
+@keyframes drop{0%{opacity:0;transform:scale(2.6) rotate(-34deg)}55%{opacity:1;transform:scale(.88) rotate(-4deg)}100%{opacity:1;transform:scale(1) rotate(-10deg)}}
+.rise{animation:rise .5s ease both}
+.r1{animation-delay:1.5s}.r2{animation-delay:1.9s}.r3{animation-delay:2.3s}
+@keyframes rise{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+.toast{animation:toast .5s cubic-bezier(.2,.9,.3,1) both}
+@keyframes toast{0%{opacity:0;transform:translateY(-20px)}100%{opacity:1;transform:translateY(0)}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column;">
+  <sc-if value="{{emb}}" hint-placeholder-val="{{false}}">
+    <button onClick="{{back}}" aria-label="Zpět" style="position: absolute; right: 12px; top: 12px; z-index: 5; width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(43,33,24,0.82); cursor: pointer; display: flex; align-items: center; justify-content: center;">
+      <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3 L15 15 M15 3 L3 15" stroke="#FBF5E8" stroke-width="1.8" stroke-linecap="round"></path></svg>
+    </button>
+  </sc-if>
+
+  <sc-if value="{{isLocked}}" hint-placeholder-val="{{true}}">
+  <div class="locked" style="height: 230px; overflow: hidden; position: relative;">
+    <img src="assets/foto-troja.jpg" alt="Trojský zámek, rozmazaný, dokud ho nedojdete" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(239,228,203,0) 55%, #EFE4CB 100%);"></div>
+    <div style="position: absolute; left: 16px; top: 16px; padding: 6px 12px; border-radius: 999px; background: rgba(43,33,24,0.82); color: #FBF5E8; font-size: 13px; font-weight: 600;">Zatím zamčeno</div>
+  </div>
+  <div style="padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Zastávka · km 12,5</span>
+      <span style="font-family: 'IM Fell English', serif; font-size: 38px; line-height: 42px;">Trojský zámek</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="display: flex; justify-content: space-between; font-size: 14px;">
+        <span style="color: #5E4A32;">Od Trojské lávky</span>
+        <span style="font-weight: 600; color: #9B2C22;">ještě 40 m · asi 55 kroků</span>
+      </div>
+      <div style="height: 6px; border-radius: 3px; background: #D8C9A9; overflow: hidden;"><div style="width: 90%; height: 6px; background: #9B2C22;"></div></div>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 14px; letter-spacing: 0.6px; color: #7F5718;">Hádanka</span>
+      <span style="font-family: 'IM Fell English', serif; font-size: 23px; line-height: 28px;">Proč se celá čtvrť jmenuje podle Tróje?</span>
+      <span style="font-size: 13px; color: #75644E;">Tipněte si, odpověď se ukáže u zámku. Žádné body.</span>
+      <sc-for list="{{options}}" as="opt" hint-placeholder-count="3">
+        <sc-if value="{{opt.picked}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{opt.pick}}" style="min-height: 48px; text-align: left; padding: 10px 14px; border-radius: 14px; border: 2px solid #9B2C22; background: rgba(155,44,34,0.08); color: #2B2118; font-size: 15px; font-weight: 600; cursor: pointer;">{{opt.label}}</button>
+        </sc-if>
+        <sc-if value="{{opt.idle}}" hint-placeholder-val="{{true}}">
+          <button onClick="{{opt.pick}}" style="min-height: 48px; text-align: left; padding: 10px 14px; border-radius: 14px; border: 1.5px solid #D8C9A9; background: #EFE4CB; color: #2B2118; font-size: 15px; cursor: pointer;">{{opt.label}}</button>
+        </sc-if>
+      </sc-for>
+      <sc-if value="{{hasPick}}" hint-placeholder-val="{{false}}">
+        <span style="font-size: 13px; color: #5E4A32;">Tip máte uložený. Uvidíme za 55 kroků.</span>
+      </sc-if>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 14px; letter-spacing: 0.6px; color: #7F5718;">Cestou k zámku</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; border: 1.6px solid #9B2C22; background: rgba(155,44,34,0.12); box-shadow: inset 0 0 0 2px #EFE4CB, inset 0 0 0 2.8px #9B2C22;"></span>
+        <span style="flex: 1; font-size: 14px;">Trojská lávka</span><span style="font-size: 13px; color: #75644E;">před 380 m</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; border: 1.4px dashed #75644E;"></span>
+        <span style="flex: 1; font-size: 14px;">Sedlecké skály</span><span style="font-size: 13px; color: #75644E;">za 1,9 km</span>
+      </div>
+    </div>
+    <div style="flex: 1;"></div>
+    <button onClick="{{arrive}}" style="min-height: 48px; border-radius: 14px; border: 1.5px dashed #75644E; background: transparent; color: #5E4A32; font-size: 14px; font-weight: 600; cursor: pointer;">Prototyp: simulovat příchod</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{isArrived}}" hint-placeholder-val="{{false}}">
+  <div class="toast" style="position: absolute; left: 16px; right: 68px; top: 16px; z-index: 3; padding: 12px 16px; border-radius: 16px; background: #2B2118; color: #FBF5E8; font-size: 14px; font-weight: 600; box-shadow: 0 6px 18px rgba(43,33,24,0.3);">Právě jste došli k Trojskému zámku</div>
+  <div class="reveal" style="height: 230px; overflow: hidden; position: relative;">
+    <img src="assets/foto-troja.jpg" alt="Trojský zámek" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(239,228,203,0) 60%, #EFE4CB 100%);"></div>
+    <div class="seal" style="position: absolute; right: 18px; bottom: 6px; width: 74px; height: 74px; border-radius: 50%; box-sizing: border-box; border: 5px solid #8E2A20; background: radial-gradient(circle at 40% 35%, #C2463A, #9B2C22 60%, #6A1A13); box-shadow: 0 3px 8px rgba(43,33,24,0.45); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #F6D9CF;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 10px; letter-spacing: 1px;">Troja</span>
+      <span style="font-family: 'IM Fell English', serif; font-size: 18px; line-height: 18px;">km 12,5</span>
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 9px;">2. 11. 2026</span>
+    </div>
+  </div>
+  <div style="padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1;">
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Zastávka · km 12,5 · odemčeno</span>
+      <span style="font-family: 'IM Fell English', serif; font-size: 38px; line-height: 42px;">Trojský zámek</span>
+    </div>
+    <div class="rise r1" style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 14px; font-weight: 600; color: #9B2C22;">{{verdict}}</span>
+      <p style="margin: 0; font-family: 'IM Fell English', serif; font-style: italic; font-size: 22px; line-height: 29px;">„Podle antických výjevů ve výzdobě zámku. Předtím se tu říkalo Zadní Ovenec.“</p>
+    </div>
+    <p class="rise r2" style="margin: 0; font-size: 15px; line-height: 22px; color: #5E4A32;">Letní sídlo nechal v letech 1679–1685 postavit hrabě Václav Vojtěch ze Šternberka. Vnější schodiště zdobí sochy bratří Heermannů z Drážďan.</p>
+    <div class="rise r3" style="display: flex; flex-direction: column; gap: 4px; padding-top: 10px; border-top: 1px solid #D8C9A9;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 14px; letter-spacing: 0.6px; color: #7F5718;">Až tam jednou půjdete</span>
+      <span style="font-size: 14px; line-height: 20px; color: #5E4A32;">Zámek spravuje Galerie hlavního města Prahy. Podívejte se na schodiště ze zahrady, ne zevnitř.</span>
+    </div>
+    <div class="rise r3" style="display: flex; gap: 10px;">
+      <div style="flex: 1; padding: 12px; border-radius: 16px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Šlechtická sídla</span>
+        <div style="display: flex; gap: 4px;"><span style="flex: 1; height: 5px; border-radius: 3px; background: #9B2C22;"></span><span style="flex: 1; height: 5px; border-radius: 3px; background: #D8C9A9;"></span><span style="flex: 1; height: 5px; border-radius: 3px; background: #D8C9A9;"></span><span style="flex: 1; height: 5px; border-radius: 3px; background: #D8C9A9;"></span><span style="flex: 1; height: 5px; border-radius: 3px; background: #D8C9A9;"></span></div>
+        <span style="font-size: 13px; color: #5E4A32;">1 z 5 · další Roztoky</span>
+      </div>
+      <div style="flex: 1; padding: 12px; border-radius: 16px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Další · 1,9 km</span>
+        <span style="font-family: 'IM Fell English', serif; font-size: 17px; line-height: 20px;">Sedlecké skály</span>
+        <span style="font-size: 13px; color: #5E4A32;">Proč sem chodí lezci i botanici?</span>
+      </div>
+    </div>
+    <div style="flex: 1;"></div>
+    <div style="display: flex; gap: 10px;">
+      <button onClick="{{reset}}" style="flex: 1; min-height: 48px; border-radius: 14px; border: 1.5px solid #D8C9A9; background: transparent; color: #2B2118; font-size: 15px; font-weight: 600; cursor: pointer;">Znovu</button>
+      <button style="flex: 1.4; min-height: 48px; border-radius: 14px; border: none; background: #9B2C22; color: #FBF5E8; font-size: 15px; font-weight: 600; cursor: pointer;" onClick="{{toMap}}">Na mapu</button>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"embedded":{"editor":null},"onGo":{"editor":null},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'locked', pick: null };
+    this.opts = [
+      { id: 'a', label: 'Podle antických výjevů na zámku' },
+      { id: 'b', label: 'Podle tří vesnic, které tu splynuly' },
+      { id: 'c', label: 'Podle hospody U Trojského koně' }
+    ];
+  }
+  renderVals() {
+    const pick = this.state.pick;
+    return {
+      isLocked: this.state.phase === 'locked',
+      isArrived: this.state.phase === 'arrived',
+      hasPick: pick !== null,
+      options: this.opts.map((o) => ({
+        label: o.label,
+        picked: pick === o.id,
+        idle: pick !== o.id,
+        pick: () => this.setState({ pick: o.id })
+      })),
+      verdict: pick === null ? 'Odpověď' : pick === 'a' ? 'Tipovali jste správně' : 'Tohle možná překvapí',
+      arrive: () => this.setState({ phase: 'arrived' }),
+      reset: () => this.setState({ phase: 'locked', pick: null }),
+      emb: !!this.props.embedded,
+      back: () => this.props.onGo && this.props.onGo('back'),
+      toMap: () => (this.props.onGo ? this.props.onGo('vyprava', 'zoom') : this.setState({ phase: 'locked', pick: null }))
+    };
+  }
+}
+</script>
+</body>
+</html>
