@@ -1,0 +1,221 @@
+{
+  "expeditionId": "vltavska-stezka",
+  "chapters": [
+    { "id": "vorari", "title": "Voraři", "blurb": "Řeka jako silnice a dřevo jako náklad. Platilo se sekerou." },
+    { "id": "mosty", "title": "Mosty a lávky", "blurb": "Suchou nohou přes řeku, od kamenných oblouků po kubistický beton." },
+    { "id": "ostrovy", "title": "Ostrovy", "blurb": "Kousek země uprostřed řeky. Jeden z nich je celá obec." },
+    { "id": "pocatky", "title": "Počátky Čech", "blurb": "Hradiště, rotundy a biskupové. Tady to všechno začalo, nebo se to aspoň vypráví." },
+    { "id": "sidla", "title": "Šlechtická sídla", "blurb": "Hrabata si vybírala nejlepší břehy a my z nich dnes máme výhledy." }
+  ],
+  "stories": [
+    {
+      "id": "vysehrad",
+      "hook": "Pod skálou má Vltava největší hloubku v celé Praze.",
+      "teaser": "Výprava začíná na skále, pod kterou se řeka schovává do hloubky.",
+      "riddle": {
+        "question": "Čím je Vltava pod vyšehradskou skálou výjimečná?",
+        "options": ["Má tu největší hloubku v Praze", "Teče tu nahoru", "Je tu nejužší v celé Praze"],
+        "answer": 0
+      },
+      "context": "Skála z ordovických břidlic tu padá 42 metrů přímo do řeky. Nahoře stojí nejstarší pražská rotunda, svatého Martina, a na hřbitově odpočívají Dvořák i Smetana. Výprava nemohla začít výš.",
+      "visitTip": "Z hradeb nad skálou je nejlepší pohled proti proudu na celou Prahu. Lavičky jsou zadarmo, výhled taky.",
+      "chapterId": "pocatky",
+      "sources": [{ "title": "Vyšehrad (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Vy%C5%A1ehrad" }],
+      "verified": false
+    },
+    {
+      "id": "vyton",
+      "hook": "Clo se tu platilo sekerou: dvanáctina klád z každého voru.",
+      "teaser": "Tady celník nebral peníze, ale dřevo.",
+      "riddle": {
+        "question": "Čím se na Výtoni platilo clo za vor dřeva?",
+        "options": ["Mincí vhozenou do řeky", "Dvanáctinou klád, vytnutou z voru", "Jedním pivem pro celníka"],
+        "answer": 1
+      },
+      "context": "Ve 14. století se tu vybíralo clo z plaveného dřeva „vytínáním“: z voru se vytnula dvanáctina klád. Celnice, jejíž jádro pochází z 16. století, je poslední pozůstatek Podskalí. Dnes v ní sídlí muzeum vorařství.",
+      "visitTip": "Prohlédněte si bývalou celnici zblízka a představte si hromadu klád, které tu zůstaly po vytínání.",
+      "chapterId": "vorari",
+      "sources": [{ "title": "Výtoň (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/V%C3%BDto%C5%88_(Praha)" }],
+      "verified": false
+    },
+    {
+      "id": "naplavka",
+      "hook": "V kobkách nábřeží jsou prý největší otáčivá okna svého druhu na světě.",
+      "teaser": "Pod nábřežím se skrývají okna, která se umějí otočit.",
+      "riddle": {
+        "question": "Jak se Rašínovu nábřeží říkalo v letech 1951 až 1990?",
+        "options": ["Nábřeží U Vorařů", "Nábřeží Bedřicha Engelse", "Nábřeží Vodníka Česílka"],
+        "answer": 1
+      },
+      "context": "Okna v kobkách pod nábřežím jsou otáčivá a vyrobená ze sedmicentimetrového plexiskla. Nábřeží se v letech 1951 až 1990 jmenovalo Nábřeží Bedřicha Engelse.",
+      "visitTip": "Projděte se podél vody a zkuste vypátrat okna v kobkách pod nábřežím.",
+      "chapterId": "vorari",
+      "sources": [{ "title": "Rašínovo nábřeží (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Ra%C5%A1%C3%ADnovo_n%C3%A1b%C5%99e%C5%BE%C3%AD" }],
+      "verified": false
+    },
+    {
+      "id": "karluv-most",
+      "hook": "Pět set let se mu říkalo prostě Kamenný most.",
+      "teaser": "Jméno, které dnes zná každý, dostal teprve nedávno.",
+      "riddle": {
+        "question": "Jak se Karlovu mostu říkalo, než se kolem roku 1870 vžilo jeho dnešní jméno?",
+        "options": ["Zlatý most", "Přemyslovský most", "Kamenný most"],
+        "answer": 2
+      },
+      "context": "Je to nejstarší stojící most přes Vltavu v Praze. Jméno „Karlův“ se vžilo až kolem roku 1870. Slavné datum 9. 7. 1357 v 5:31 je sporné: rok 1358 z jedné kroniky se přes sto let zaměňoval za 1357, takže palindrom může být jen legenda.",
+      "visitTip": "Zkuste na most přijít bez davu a podívat se na něj i z nábřeží.",
+      "chapterId": "mosty",
+      "sources": [{ "title": "Karlův most (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Karl%C5%AFv_most" }],
+      "verified": false
+    },
+    {
+      "id": "stvanice",
+      "hook": "Jméno má po štvanicích, dnes se tu honí tenisové míčky.",
+      "teaser": "Jméno ostrova prozrazuje, co se tu dělo se zvěří.",
+      "riddle": {
+        "question": "Podle čeho má ostrov Štvanice jméno?",
+        "options": ["Podle pana Štvance, správce ostrova", "Podle štvanic, zápasů psů se zvířaty", "Podle rybářů, kteří tu štvali pstruhy"],
+        "answer": 1
+      },
+      "context": "Na ostrově se kdysi pořádaly štvanice, zápasy psů se zvířaty. Dnes se tu místo zvěře honí tenisové míčky a hokejové puky.",
+      "visitTip": "Stačí se rozhlédnout: kdo tu dnes honí míčky a puky?",
+      "chapterId": "ostrovy",
+      "sources": [{ "title": "Štvanice (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/%C5%A0tvanice" }],
+      "verified": false
+    },
+    {
+      "id": "holesovice",
+      "hook": "Nejdřív nesloužil obchodu, ale zimě: lodě se sem schovávaly před ledem.",
+      "teaser": "Postavili ho kvůli počasí, ne kvůli obchodu.",
+      "riddle": {
+        "question": "Proč vznikl Holešovický přístav?",
+        "options": ["Aby v něm lodě přečkaly led", "Aby se v něm vařilo pivo", "Aby měly vory kde spát"],
+        "answer": 0
+      },
+      "context": "Ochranný a zimní přístav vznikl v letech 1892 až 1895. Obchodním se stal až v letech 1896 až 1910, když led odplul.",
+      "visitTip": "Zastavte se u vody a představte si lodě, které se tu před ledem schovávaly.",
+      "chapterId": "vorari",
+      "sources": [{ "title": "Holešovický přístav (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Hole%C5%A1ovick%C3%BD_p%C5%99%C3%ADstav" }],
+      "verified": false
+    },
+    {
+      "id": "libensky-most",
+      "hook": "Bývá označován za jediný kubistický most na světě.",
+      "teaser": "Most, který se nepodobá žádnému jinému.",
+      "riddle": {
+        "question": "V jakém stylu navrhl Pavel Janák Libeňský most?",
+        "options": ["V gotickém", "V barokním", "V kubistickém"],
+        "answer": 2
+      },
+      "context": "Navrhl ho Pavel Janák. Jeho oblouk z prostého betonu, bez jediného prutu výztuže, má největší rozpětí svého druhu v Evropě.",
+      "visitTip": "Podívejte se na oblouk zespodu i z dálky a zkuste najít hrany, které jinde nepotkáte.",
+      "chapterId": "mosty",
+      "sources": [{ "title": "Libeňský most (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Libe%C5%88sk%C3%BD_most" }],
+      "verified": false
+    },
+    {
+      "id": "komora-troja",
+      "hook": "Lodě tu jedou umělým průplavem, ne řekou.",
+      "teaser": "Lodě tu míjejí řeku a jedou kanálem.",
+      "riddle": {
+        "question": "Kolik veřejných mostů vede přes kanál kolem Císařského ostrova?",
+        "options": ["Sedm", "Jediný", "Žádný, přechází se po lodích"],
+        "answer": 1
+      },
+      "context": "Kanál podél Císařského ostrova dlouhý asi tři kilometry se ve své době jmenoval Vltavský průplav. Přejít se dá jediným veřejným mostem, takže si ho zapamatujte.",
+      "visitTip": "Přejděte kanál po jediném veřejném mostě.",
+      "chapterId": "vorari",
+      "sources": [{ "title": "Zdymadlo Troja-Podbaba (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Zdymadlo_Troja-Podbaba" }],
+      "verified": false
+    },
+    {
+      "id": "cisarsky-ostrov",
+      "hook": "Největší pražský ostrov: asi 66 hektarů, zhruba 90 fotbalových hřišť.",
+      "teaser": "Největší ostrov, nejméně romantická práce.",
+      "riddle": {
+        "question": "Co dnes zabírá velkou část Císařského ostrova?",
+        "options": ["Dostihová dráha", "Zámecký park", "Ústřední čistírna odpadních vod"],
+        "answer": 2
+      },
+      "context": "Velkou část ostrova dnes zabírá ústřední pražská čistírna odpadních vod. Největší ostrov, nejméně romantická práce.",
+      "visitTip": "Držte se břehu a dívejte se na vodu, ne doprostřed ostrova.",
+      "chapterId": "ostrovy",
+      "sources": [{ "title": "Císařský ostrov (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/C%C3%ADsa%C5%99sk%C3%BD_ostrov" }],
+      "verified": false
+    },
+    {
+      "id": "trojska-lavka",
+      "hook": "Než ji postavili, převážel tu přívoz a v zimě ho nahradil pontonový most.",
+      "teaser": "Dřív se tu přes řeku jezdilo, ne chodilo.",
+      "riddle": {
+        "question": "Čím se tu v zimě nahrazoval přívoz?",
+        "options": ["Pontonovým mostem", "Ledovou dráhou", "Lanovkou"],
+        "answer": 0
+      },
+      "context": "Lávka spojuje Troju s Císařským ostrovem. Přívozník by vám dnes záviděl: přes řeku jste přešli suchou nohou.",
+      "visitTip": "Zastavte se uprostřed lávky a podívejte se po proudu i proti němu.",
+      "chapterId": "mosty",
+      "sources": [{ "title": "Trojská lávka (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Trojsk%C3%A1_l%C3%A1vka" }],
+      "verified": false
+    },
+    {
+      "id": "troja",
+      "hook": "Celá čtvrť se jmenuje podle antických výjevů na zámku. Dřív to byl Zadní Ovenec.",
+      "teaser": "Název čtvrti má původ ve výzdobě jednoho domu.",
+      "riddle": {
+        "question": "Proč se celá čtvrť jmenuje podle Tróje?",
+        "options": ["Podle hospody U Trojského koně", "Podle tří vesnic, které tu splynuly", "Podle antických výjevů na zámku"],
+        "answer": 2
+      },
+      "context": "Letní sídlo nechal v letech 1679 až 1685 postavit hrabě Václav Vojtěch ze Šternberka. Vnější schodiště zdobí sochy bratří Heermannů z Drážďan. Oblast se předtím jmenovala Zadní Ovenec.",
+      "visitTip": "Zámek spravuje Galerie hlavního města Prahy. Podívejte se na schodiště ze zahrady, ne zevnitř.",
+      "chapterId": "sidla",
+      "sources": [{ "title": "Troja (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Troja_(z%C3%A1mek)" }],
+      "verified": false
+    },
+    {
+      "id": "sedlec",
+      "hook": "Skály nad řekou, kam to táhne lezce i vzácné brouky.",
+      "teaser": "Skály, kde se potkávají lezci a ti, kdo se dívají pod kameny.",
+      "riddle": {
+        "question": "Co kromě lezců najdete na Sedleckých skalách?",
+        "options": ["Vzácné stepní houby a brouky", "Kolonii tučňáků", "Stádo kamzíků"],
+        "answer": 0
+      },
+      "context": "Skály byly kdysi koridorem, kudy táhla zvěř, a jsou tu i pravěké nálezy a ohniště. Dnes tu rostou vzácné stepní houby a žijí vzácní brouci.",
+      "visitTip": "Rozhlédněte se po stěnách: kdo tu šplhá a kdo se schovává pod kameny?",
+      "sources": [{ "title": "Sedlecké skály (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Sedleck%C3%A9_sk%C3%A1ly" }],
+      "verified": false
+    },
+    {
+      "id": "podmorani",
+      "hook": "Dřív se mu říkalo Lysolajský přívoz.",
+      "teaser": "Přívoz, který si změnil jméno.",
+      "riddle": {
+        "question": "Jak se přívozu v Podbabě říkalo dřív?",
+        "options": ["Přívoz U Tří kormoránů", "Vorařský trajekt", "Lysolajský přívoz"],
+        "answer": 2
+      },
+      "context": "Přes Vltavu tu převáží přívoz, který je doložen už roku 1888 a znovu roku 1911. Dřív se mu říkalo Lysolajský přívoz.",
+      "visitTip": "Nechte se převézt na druhý břeh a podívejte se na zdejší krajinu z hladiny.",
+      "chapterId": "vorari",
+      "sources": [{ "title": "Přívoz Podbaba – Podhoří (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/P%C5%99%C3%ADvoz_Podbaba_%E2%80%93_Podho%C5%99%C3%AD" }],
+      "verified": false
+    },
+    {
+      "id": "roztoky",
+      "hook": "Zámek, kterému po roce 1948 hrozila demolice, dnes ukrývá muzeum.",
+      "teaser": "Konec etapy ve zámku, který málem zmizel.",
+      "riddle": {
+        "question": "Co hrozilo zámku v Roztokách po roce 1948?",
+        "options": ["Přestavba na hotel", "Demoliční výměr", "Přesun do Prahy"],
+        "answer": 1
+      },
+      "context": "Původně to byla vodní tvrz. Po roce 1948 dostal zchátralý zámek demoliční výměr. Přežil a dnes v něm sídlí Středočeské muzeum. Tady končí první etapa.",
+      "visitTip": "Obejděte zámek dokola a zkuste si představit vodu, která tu kdysi tvrz obklopovala.",
+      "chapterId": "sidla",
+      "sources": [{ "title": "Roztoky (zámek) (Wikipedie)", "url": "https://cs.wikipedia.org/wiki/Roztoky_(z%C3%A1mek)" }],
+      "verified": false
+    }
+  ]
+}
