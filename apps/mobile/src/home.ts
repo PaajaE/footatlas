@@ -59,6 +59,11 @@ export function sumLastDays(daily: readonly DailyDistance[], todayKey: string, d
   return daily.filter((d) => d.day >= first && d.day <= todayKey).reduce((sum, d) => sum + d.distanceM, 0);
 }
 
+/** Je `day` v posledních `days` dnech včetně dneška? */
+export function isWithinLastDays(day: string, todayKey: string, days: number): boolean {
+  return day >= shiftDay(todayKey, -(days - 1)) && day <= todayKey;
+}
+
 function parseDay(day: string): Date {
   return new Date(Number(day.slice(0, 4)), Number(day.slice(5, 7)) - 1, Number(day.slice(8, 10)));
 }
@@ -100,4 +105,10 @@ export function reachQuip(choice: ReachChoice, placeNames: readonly string[]): s
   if (choice === 2000) return "Akorát na odpoledne s výhledem.";
   if (choice === 4000 && placeNames.some((n) => n.toLowerCase().startsWith("přívoz"))) return "Drobné na převozníka mít nemusíte.";
   return undefined;
+}
+
+/** „4 z 5“, „3 ze 6“: předložka „ze“ před číslovkami, které začínají souhláskovou skupinou (dvou, tří, čtyř, šesti, sedmi …). */
+export function zOf(done: number, total: number): string {
+  const ze = [2, 3, 4, 6, 7, 12, 13, 14, 16, 17].includes(total);
+  return `${done} ${ze ? "ze" : "z"} ${total}`;
 }

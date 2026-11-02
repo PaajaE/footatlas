@@ -84,3 +84,21 @@ describe("reachQuip", () => {
     expect(reachQuip(4000, ["Přívoz v Podbabě"])).toContain("převozníka");
   });
 });
+
+import { zOf } from "./home";
+describe("zOf", () => {
+  it("z / ze podle čísla", () => {
+    expect(zOf(4, 5)).toBe("4 z 5");
+    expect(zOf(3, 6)).toBe("3 ze 6");
+    expect(zOf(1, 4)).toBe("1 ze 4");
+  });
+});
+
+import { isWithinLastDays } from "./home";
+describe("isWithinLastDays", () => {
+  it("hranice týdne", () => {
+    expect(isWithinLastDays("2026-10-27", "2026-11-02", 7)).toBe(true);
+    expect(isWithinLastDays("2026-10-26", "2026-11-02", 7)).toBe(false);
+    expect(isWithinLastDays("2026-11-03", "2026-11-02", 7)).toBe(false);
+  });
+});
