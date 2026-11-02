@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>FootAtlas aplikace</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
@@ -40,36 +41,36 @@ button{font-family:inherit}
 .pill{position:absolute;top:8px;height:56px;width:25%;transition:left .38s cubic-bezier(.2,.8,.2,1)}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #2B2118; font-family: 'Work Sans', sans-serif;">
+<div class="{{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #2B2118; font-family: 'Work Sans', sans-serif;">
 
   <sc-if value="{{v.navrat}}" hint-placeholder-val="{{true}}">
     <div class="scr {{c.navrat}}" style="z-index: {{z.navrat}};">
-      <dc-import name="Main" embedded="{{yes}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+      <dc-import name="Main" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
     </div>
   </sc-if>
   <sc-if value="{{v.domu}}" hint-placeholder-val="{{false}}">
     <div class="scr {{c.domu}}" style="z-index: {{z.domu}};">
-      <dc-import name="Domu" embedded="{{yes}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+      <dc-import name="Domu" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
     </div>
   </sc-if>
   <sc-if value="{{v.vyprava}}" hint-placeholder-val="{{false}}">
     <div class="scr {{c.vyprava}}" style="z-index: {{z.vyprava}};">
-      <dc-import name="Vyprava" embedded="{{yes}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+      <dc-import name="Vyprava" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
     </div>
   </sc-if>
   <sc-if value="{{v.objevovat}}" hint-placeholder-val="{{false}}">
     <div class="scr {{c.objevovat}}" style="z-index: {{z.objevovat}};">
-      <dc-import name="Objevovat" embedded="{{yes}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+      <dc-import name="Objevovat" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
     </div>
   </sc-if>
   <sc-if value="{{v.kronika}}" hint-placeholder-val="{{false}}">
     <div class="scr {{c.kronika}}" style="z-index: {{z.kronika}};">
-      <dc-import name="Kronika" embedded="{{yes}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+      <dc-import name="Kronika" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
     </div>
   </sc-if>
   <sc-if value="{{v.hadanka}}" hint-placeholder-val="{{false}}">
     <div class="scr {{c.hadanka}}" style="z-index: {{z.hadanka}};">
-      <dc-import name="Hadanka" embedded="{{yes}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
+      <dc-import name="Hadanka" embedded="{{yes}}" vzhled="{{vzhled}}" on-go="{{go}}" hint-size="390px,844px"></dc-import>
     </div>
   </sc-if>
 
@@ -91,7 +92,7 @@ button{font-family:inherit}
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["návrat","domů"],"default":"návrat"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"start":{"editor":"enum","options":["návrat","domů"],"default":"návrat"},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -143,7 +144,8 @@ class Component extends DCLogic {
     });
     const navTab = this.TABS.indexOf(screen);
     return {
-      v, c, z, yes: true,
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
+      v, c, z, yes: true, vzhled: this.props.vzhled ?? 'den',
       go: (t, how) => this.go(t, how),
       showNav: navTab >= 0,
       pillLeft: (Math.max(0, navTab) * 25) + '%',

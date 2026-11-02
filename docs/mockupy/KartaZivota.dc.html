@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Karta života</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
@@ -30,7 +31,7 @@ button{font-family:inherit}
 @keyframes kztw{0%,100%{opacity:.2}50%{opacity:.9}}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 18px 20px 22px; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column; gap: 14px; overflow: hidden;">
+<div class="{{themeClass}}" style="width: 390px; height: 844px; box-sizing: border-box; padding: 18px 20px 22px; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column; gap: 14px; overflow: hidden;">
   <div style="display: flex; justify-content: space-between; align-items: baseline;">
     <span style="font-family: 'IM Fell English SC', serif; font-size: 18px; letter-spacing: 1px; color: #7F5718;">FootAtlas</span>
     <span style="font-size: 12px; color: #75644E;">Health Connect · od března 2019</span>
@@ -106,7 +107,7 @@ button{font-family:inherit}
   <span class="kz-line kz-l5" style="font-size: 12px; color: #75644E; text-align: center;">Data zůstávají ve vašem telefonu. Kroky nikam neodcházejí, jen vy.</span>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { km: 0 }; }
   componentDidMount() {
@@ -122,6 +123,7 @@ class Component extends DCLogic {
   renderVals() {
     const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
       km: fmt(this.state.km),
       steps: (this.state.km / 750).toFixed(1).replace('.', ',') + ' mil.'
     };

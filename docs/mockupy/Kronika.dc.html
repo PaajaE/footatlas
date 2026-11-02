@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Kronika</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
@@ -39,7 +40,7 @@ button{font-family:inherit}
 @keyframes bar{0%{transform:scaleY(0)}100%{transform:scaleY(1)}}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif;">
+<div class="{{themeClass}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif;">
   <div class="scroll" style="flex: 1; min-height: 0; box-sizing: border-box; padding: 16px 20px {{padBottom}}; display: flex; flex-direction: column; gap: 16px;">
 
     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
@@ -299,7 +300,7 @@ button{font-family:inherit}
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"embedded":{"editor":null},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"embedded":{"editor":null},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -400,6 +401,7 @@ class Component extends DCLogic {
     const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     const labels = ['Deník', 'Cesta', 'Rok', 'Sbírky'];
     return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
       lifeKm: fmt(this.state.km),
       lifeSteps: (this.state.km / 750).toFixed(1).replace('.', ',') + ' mil.',
       factList: [{ text: this.facts[this.state.fact] }],

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Pečeti a razítka</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
@@ -20,7 +21,7 @@ body{margin:0}
 button{font-family:inherit}
 </style>
 </helmet>
-<div style="width: 900px; height: 844px; box-sizing: border-box; padding: 32px 40px; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column; gap: 20px;">
+<div class="{{themeClass}}" style="width: 900px; height: 844px; box-sizing: border-box; padding: 32px 40px; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column; gap: 20px;">
   <div style="display: flex; justify-content: space-between; align-items: flex-end;">
     <div style="display: flex; flex-direction: column; gap: 2px;">
       <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Vizuální jazyk odměn</span>
@@ -189,12 +190,13 @@ button{font-family:inherit}
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":900,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"$preview":{"width":900,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { on: true }; }
   componentWillUnmount() { clearTimeout(this.to); }
   renderVals() {
     return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
       on: this.state.on,
       replay: () => { clearTimeout(this.to); this.setState({ on: false }); this.to = setTimeout(() => this.setState({ on: true }), 60); }
     };

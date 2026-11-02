@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Návrat: Inkoust</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
@@ -61,7 +62,7 @@ body{margin:0}
 button{font-family:inherit}
 </style>
 </helmet>
-<div class="{{rootClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif;">
+<div class="{{rootClass}} {{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif;">
 
   <div style="position: absolute; left: 0; top: 0; width: 390px; height: 118px; box-sizing: border-box; padding: 20px 20px 0; display: flex; flex-direction: column; gap: 2px; z-index: 2; background: #EFE4CB;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -367,7 +368,7 @@ button{font-family:inherit}
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"tempo":{"editor":"enum","options":["klidné","výchozí","rychlé"],"default":"výchozí"},"omezitPohyb":{"editor":"boolean","default":false},"embedded":{"editor":null},"onGo":{"editor":null},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"tempo":{"editor":"enum","options":["klidné","výchozí","rychlé"],"default":"výchozí"},"omezitPohyb":{"editor":"boolean","default":false},"embedded":{"editor":null},"onGo":{"editor":null},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -432,6 +433,7 @@ class Component extends DCLogic {
     const i = this.state.i;
     const last = i >= this.cards.length - 1;
     return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
       rootClass: [tClass, this.props.omezitPohyb ? 'reduced' : '', this.state.skipped ? 'skip' : ''].join(' '),
       on: this.state.on,
       done: this.state.done && !this.state.storyOpen,

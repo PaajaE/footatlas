@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Pohlednice z etapy</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
@@ -25,7 +26,7 @@ button{font-family:inherit}
 @keyframes toast{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 24px 20px; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column; gap: 18px;">
+<div class="{{themeClass}}" style="width: 390px; height: 844px; box-sizing: border-box; padding: 24px 20px; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column; gap: 18px;">
   <div style="display: flex; flex-direction: column; gap: 2px;">
     <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Etapa dokončena</span>
     <span style="font-family: 'IM Fell English', serif; font-size: 38px; line-height: 42px;">Etapa I · Praha</span>
@@ -98,11 +99,12 @@ button{font-family:inherit}
   <a href="Privoz.dc.html" style="min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #9B2C22; text-decoration: none;">Pokračovat na etapu II</a>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) { super(props); this.state = { flipped: false, shared: false, saved: false }; }
   renderVals() {
     return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
       cardClass: this.state.flipped ? 'card flipped' : 'card',
       shared: this.state.shared,
       saveLabel: this.state.saved ? 'V Kronice' : 'Uložit do Kroniky',

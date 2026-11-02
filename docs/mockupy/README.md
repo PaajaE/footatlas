@@ -36,12 +36,17 @@ Pondělí 2. listopadu 2026 ráno. Výprava Vltavská stezka běží od soboty 2
 
 Obrazovky lze otevřít samostatně (mají vlastní spodní lištu) i vložené do `Aplikace.dc.html` (vlastnost `embedded`).
 
+## Noční pergamen
+
+Tmavý vzhled je volba v nastavení, výchozí je den. Každá obrazovka má vlastnost `vzhled` (`den` / `noc`, v Tweaks „Vzhled“); při `noc` dostane kořen třídu `.noc` a společný `noc.css` přebarví paletu: papír tmavne, ušlá trasa, razítka a poloha žhnou rumělkou, voda jemně svítí, tmavé karty (zeměkoule v Kronice, karta života) se naopak rozsvítí do pergamenu. Rámy `*-noc.dc.html` jen vkládají denní obrazovku s `vzhled="noc"`, takže se nemusí udržovat zvlášť.
+
+`noc.css` vybírá prvky podle barvy v inline stylu nebo atributu SVG (hex i `rgb()` zápis). Je to záměrně jen pro prototyp; v aplikaci se tmavý vzhled řeší tokeny tématu (`apps/mobile/src/theme/tokens.ts`).
+
 ## Úkoly před použitím
 
 - Všechna fakta, čísla a vzdálenosti v rámech jsou návrh. Seznam k ověření: [`docs/obsah-vltavska-podklady.md`](../obsah-vltavska-podklady.md), sekce „Úkoly k ověření“.
 - Statistiky, rok den po dni a životní cesta jsou ukázková data.
 - Kresba atlasu (čtvrti, lesy, dominanty) je stylizovaná podle trasy, v aplikaci ji nakreslí mapový styl ze skutečných dat.
-- Tmavý vzhled (volba v nastavení) zatím nemá rámy v novém stylu.
 
 ## Archiv: první verze (`v1/`)
 

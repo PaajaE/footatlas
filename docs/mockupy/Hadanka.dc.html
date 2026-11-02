@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Hádanka a příchod</title>
 <script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
 </head>
 <body>
 <x-dc>
@@ -25,7 +26,7 @@ button{font-family:inherit}
 @keyframes toast{0%{opacity:0;transform:translateY(-20px)}100%{opacity:1;transform:translateY(0)}}
 </style>
 </helmet>
-<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column;">
+<div class="{{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column;">
   <sc-if value="{{emb}}" hint-placeholder-val="{{false}}">
     <button onClick="{{back}}" aria-label="Zpět" style="position: absolute; right: 12px; top: 12px; z-index: 5; width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(43,33,24,0.82); cursor: pointer; display: flex; align-items: center; justify-content: center;">
       <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3 L15 15 M15 3 L3 15" stroke="#FBF5E8" stroke-width="1.8" stroke-linecap="round"></path></svg>
@@ -130,7 +131,7 @@ button{font-family:inherit}
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"embedded":{"editor":null},"onGo":{"editor":null},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"embedded":{"editor":null},"onGo":{"editor":null},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -144,6 +145,7 @@ class Component extends DCLogic {
   renderVals() {
     const pick = this.state.pick;
     return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
       isLocked: this.state.phase === 'locked',
       isArrived: this.state.phase === 'arrived',
       hasPick: pick !== null,
