@@ -141,7 +141,7 @@ describe.each(Object.values(themes))("atlas $id", (theme) => {
       expect(l.layout!["text-font"]).toEqual(ATLAS_LABEL_FONT);
       expect(JSON.stringify(l.layout!["text-field"])).toContain("name:cs");
     }
-    expect(ATLAS_LABEL_FONT[0]).toBe("IM Fell English Italic");
+    expect(ATLAS_LABEL_FONT).toEqual(["IM Fell English Italic"]); // jedno písmo: glyfy se v aplikaci hledají po písmech
     expect(style.layers.find((l) => l.id === "water-label")!.layout!["symbol-placement"]).toBe("line");
   });
 

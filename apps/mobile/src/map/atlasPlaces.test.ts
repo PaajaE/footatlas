@@ -1,3 +1,7 @@
+import { readFileSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import expedition from "@footatlas/content/data/vltavska-stezka/expedition.json";
+import { ATLAS_PATTERNS } from "@footatlas/map-style";
 import { describe, expect, it } from "vitest";
 import type { AppPlace } from "../data/vltavska";
 import { distanceLabel, drawingFor, imageKey, placeProps, placeState, scaleBar } from "./atlasPlaces";
@@ -83,5 +87,35 @@ describe("údaje výpravy", () => {
     expect(nextFerry(ps, 100)?.id).toBe("p1");
     expect(nextFerry(ps, 600)?.id).toBe("p2");
     expect(nextFerry(ps, 1000)).toBeNull();
+  });
+});
+
+describe("obrázky pro mapu existují", () => {
+  const dir = (sub: string) => fileURLToPath(new URL(`../../assets/map/${sub}/`, import.meta.url));
+  const stops = (expedition as { places: Array<{ id: string; kind: string }> }).places.filter((p) => p.kind === "stop").map((p) => p.id);
+
+  it.each(["day", "night"])("pečeti, medailony, razítka, štítek a kresby (%s)", (mode) => {
+    const files = new Set(readdirSync(dir("medallions")));
+    const keys = [
+      ...stops.flatMap((id) => [`reached-${id}`, `next-${id}`]),
+      "locked", "stamp-reached", "stamp-locked", "pill", "drawing-boat", "drawing-castle", "drawing-bridge",
+    ];
+    for (const k of keys) expect(files.has(`${mode}-${k}@3x.png`), k).toBe(true);
+    // každý klíč, který `imageKey` může vrátit, je mezi nimi
+    for (const kind of ["stop", "discovery"] as const)
+      for (const st of ["reached", "next", "locked"] as const) {
+        const k = imageKey({ id: stops[0]!, kind }, st);
+        if (kind === "stop" || st !== "next") expect(files.has(`${mode}-${k}@3x.png`), k).toBe(true);
+      }
+  });
+
+  it.each(["day", "night"])("vzory výplní stylu (%s)", (mode) => {
+    const files = new Set(readdirSync(dir("patterns")));
+    for (const p of ATLAS_PATTERNS) expect(files.has(`${mode}-${p}@3x.png`), p).toBe(true);
+  });
+
+  it("zastávky mají vlastní seznam souborů v medallionFiles.ts (generovaný)", () => {
+    const src = readFileSync(fileURLToPath(new URL("./medallionFiles.ts", import.meta.url)), "utf8");
+    for (const id of stops) expect(src).toContain(`"day-reached-${id}"`);
   });
 });

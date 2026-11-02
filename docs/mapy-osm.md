@@ -93,3 +93,7 @@ Zastávky mají medailony s fotkou (rozhodnutí 0011, `tools/maps/make-medallion
 3. Písma (PBF) a styl (JSON) hostovat vedle; styl generovat z `packages/map-style` při sestavení.
 4. Pro Česko jako celek zvolit zoom 12–14 jako základ (238–875 MB) a podrobnější koridory (zoom 15) stahovat podle výprav.
 5. Mapy.com zůstává volitelným druhým podkladem přes `apps/api` (rozhodnutí 0001).
+
+## Ilustrovaný atlas (rozhodnutí 0020)
+Styl `buildAtlasStyle` (skica + kolorovaná vrstva v masce kolem ušlé trasy, pečeti, popisky IM Fell) ověřený v MapLibre GL JS: `node tools/maps/render-atlas.mjs` (data z koridoru nebo přímo z buildu Protomaps přes Range). Výsledky, den a noc: [`docs/mapa-atlas/`](mapa-atlas/) (`vyprava`, `vyprava-detail`, `praha`, `prehled`; v repu JPEG). Porovnání s prototypem: celkový dojem (okrové šrafované bloky, stromové vzory, akvarelová řeka, rumělková stopa, kurzívní popisky, pečeti) sedí; liší se tvary (bloky jsou skutečné OSM polygony, ne ručně kreslené), nepravidelný okraj řeky a natočení vzorů.
+

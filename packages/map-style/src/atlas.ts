@@ -24,8 +24,12 @@ export type AtlasPattern = (typeof ATLAS_PATTERNS)[number];
 /** Název obrázku ve stylu: `day-blk-ink`, `night-tree-sketch`, … */
 export const patternName = (theme: MapTheme, pattern: AtlasPattern): string => `${theme.mode}-${pattern}`;
 
-/** Písma popisků: kurzíva IM Fell (glyfy z `tools/maps/make-glyphs.py`), rezerva pro znaky, které v ní chybí. */
-export const ATLAS_LABEL_FONT = ["IM Fell English Italic", "Noto Sans Italic"];
+/**
+ * Písmo popisků: kurzíva IM Fell (glyfy z `tools/maps/make-glyphs.py`; obsahuje všechna česká písmena a typografické
+ * uvozovky a pomlčky). Záměrně jediné písmo v sadě: s více písmy by se glyfy žádaly pod názvem „A,B“ a soubory
+ * v úložišti aplikace jsou po jednotlivých písmech.
+ */
+export const ATLAS_LABEL_FONT = ["IM Fell English Italic"];
 
 const NAME = ["coalesce", ["get", "name:cs"], ["get", "name"]];
 const kindIn = (...kinds: string[]) => ["in", ["get", "kind"], ["literal", kinds]];
@@ -264,7 +268,7 @@ export function placeLayers(theme: MapTheme): StyleLayer[] {
         "icon-image": ["concat", "drawing-", ["get", "drawing"]],
         "icon-size": ["interpolate", ["linear"], ["zoom"], 11.5, 0.5, 15, 0.85],
         "icon-offset": ["literal", [0, -34]],
-        "icon-allow-overlap": false,
+        "icon-allow-overlap": true,
         "symbol-sort-key": ["get", "rank"],
       },
       { "icon-opacity": 0.85 },
