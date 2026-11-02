@@ -58,3 +58,20 @@ Legenda: ✅ silný háček · 🟡 použitelné · ⚠️ pozor, sporné nebo n
 - Weby muzeí a správců: Muzeum hl. m. Prahy (Výtoň), GHMP (Troja), Středočeské muzeum Roztoky, NPÚ Veltrusy a Nelahozeves (Lobkowicz).
 - Wikimedia Commons – staré fotografie a pohlednice pro „Tehdy a dnes“ (kontrolovat licenci).
 - ČHMÚ – hydrologická data pro „Řeka teď“ a ověření průtoků u soutoku.
+
+## Úkoly k ověření (texty použité v prototypu)
+
+Prototyp na plátně „FootAtlas prototyp Inkoust“ používá tyto texty bez poznámek o ověření. Před vydáním je nutné každý potvrdit dvěma nezávislými zdroji a zapsat datum:
+
+- [ ] Ostrov Štvanice: jméno po štvanicích zvěře.
+- [ ] Holešovický přístav: ochranný a zimní přístav 1892–1895.
+- [ ] Libeňský most: „jediný kubistický most na světě“ (názor architekta, podat jako „bývá označován“), oblouk z prostého betonu bez výztuže, největší rozpětí v Evropě.
+- [ ] Plavební komora Troja: Vltavský průplav asi 3 km, jediný veřejně přístupný most přes kanál.
+- [ ] Císařský ostrov: asi 66 ha, ústřední čistírna odpadních vod.
+- [ ] Trojská lávka: dřív přívoz, v zimě pontonový most.
+- [ ] Trojský zámek: název Troja podle antických výjevů, dříve Zadní Ovenec; 1679–1685, Václav Vojtěch ze Šternberka; sochy Heermannů; správa GHMP.
+- [ ] Přívoz Podbaba–Podhoří: doložen 1888, dříve Lysolajský přívoz, linka P2.
+- [ ] Levý Hradec: volba Vojtěcha biskupem 982.
+- [ ] Licence fotek (u Trojského zámku chybí autor).
+- [ ] Kresba atlasu: polohy čtvrtí, lesů a dominant podle skutečných dat.
+- [ ] Statistiky v Kronice jsou ukázkové; napojit na data.
