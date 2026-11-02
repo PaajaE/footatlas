@@ -9,9 +9,18 @@ import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ChronicleProvider } from "../db/ChronicleProvider";
 import { ExpeditionProvider } from "../state/ExpeditionProvider";
-import { ThemeProvider, useTheme } from "../theme/ThemeProvider";
+import { ThemeProvider, useTheme, useThemeReady } from "../theme/ThemeProvider";
 
 SplashScreen.preventAutoHideAsync();
+
+/** Skryje splash screen, až jsou písma i uložená volba vzhledu; jinak by při tmavé volbě blikl světlý. */
+function SplashGate({ fontsDone }: { fontsDone: boolean }) {
+  const themeReady = useThemeReady();
+  useEffect(() => {
+    if (fontsDone && themeReady) SplashScreen.hideAsync();
+  }, [fontsDone, themeReady]);
+  return null;
+}
 
 function Shell() {
   const theme = useTheme();
@@ -40,16 +49,13 @@ export default function RootLayout() {
     WorkSans_600SemiBold,
   });
 
-  useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
-
   // Při chybě načtení písem aplikace běží se systémovým písmem, ne s prázdnou obrazovkou.
   if (!loaded && !error) return null;
 
   return (
     <SafeAreaProvider>
       <ThemeProvider>
+        <SplashGate fontsDone={loaded || !!error} />
         <ExpeditionProvider>
           <ChronicleProvider>
             <Shell />
