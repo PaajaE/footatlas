@@ -8,4 +8,5 @@ Mobilní aplikace, která proměňuje skutečný pohyb (kroky, vzdálenost) ve v
 - [Návrh: kronika v SQLite](docs/kronika-sqlite.md)
 - [Návrh prožitku: Atlas, který kreslíte nohama](docs/navrh-prozitek.md)
 - [Podklady k obsahu Vltavské stezky (neověřeno)](docs/obsah-vltavska-podklady.md)
+- [Předání práce: stav a úkoly](docs/predani.md)
 - [Mockupy obrazovek](docs/mockupy/README.md)
