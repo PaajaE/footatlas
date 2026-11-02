@@ -1,4 +1,5 @@
-import { View } from "react-native";
+import { useRouter } from "expo-router";
+import { Pressable, View } from "react-native";
 import { vltavska } from "../../data/vltavska";
 import { formatDistance } from "../../format";
 import { chapterProgress, roman, stageProgress, stageStateLabel } from "../../kronika/collections";
@@ -17,6 +18,7 @@ export function CollectionsView({
   nextStop: { remainingM: number } | null;
 }) {
   const { colors } = useTheme();
+  const router = useRouter();
   if (!active) {
     return (
       <Card style={{ gap: 4 }}>
@@ -37,7 +39,14 @@ export function CollectionsView({
           const p = stageProgress(s, walkedM);
           const st = stageStateLabel(p);
           return (
-            <View key={s.index} style={{ width: "48%", flexGrow: 1, padding: 10, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, gap: 6 }}>
+            <Pressable
+              key={s.index}
+              disabled={st.state !== "done"}
+              accessibilityRole={st.state === "done" ? "button" : undefined}
+              accessibilityHint={st.state === "done" ? "Otevře pohlednici z etapy" : undefined}
+              onPress={() => router.push({ pathname: "/pohlednice", params: { stage: String(s.index) } })}
+              style={{ width: "48%", flexGrow: 1, padding: 10, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, gap: 6 }}
+            >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 {st.state === "done" ? <Seal size={22} /> : null}
                 <T variant="label" style={{ fontSize: 14 }}>
@@ -48,7 +57,8 @@ export function CollectionsView({
                 <View style={{ width: `${p * 100}%`, height: 6, backgroundColor: colors.accent }} />
               </View>
               <T variant="small">{st.label}</T>
-            </View>
+              {st.state === "done" && <T variant="small" accent>Pohlednice z etapy</T>}
+            </Pressable>
           );
         })}
       </View>

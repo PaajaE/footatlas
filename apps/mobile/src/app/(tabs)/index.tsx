@@ -2,6 +2,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback } from "react";
 import { changeSentence, summarizeChange } from "@footatlas/core";
 import { Chapters, NextStopCard, RecentlyDiscovered, SinceLastCard, StageProgress, StatTiles, WhereToday } from "../../components/HomeSections";
+import { ReturnCard } from "../../components/ReturnCard";
 import { LastUpdated } from "../../components/LastUpdated";
 import { ScreenHeader } from "../../components/ScreenHeader";
 import { LabeledCard } from "../../components/LabeledCard";
@@ -9,6 +10,7 @@ import { Button, Screen, T } from "../../components/ui";
 import { vltavska } from "../../data/vltavska";
 import { formatDayLong, formatKm } from "../../format";
 import { fromHealthSource } from "../../health/names";
+import { shouldShowReturn } from "../../navrat";
 import { useExpedition } from "../../state/ExpeditionProvider";
 
 export default function Home() {
@@ -47,11 +49,13 @@ export default function Home() {
     );
   }
 
-  const summary = summarizeChange(
-    state,
-    ex.demo.enabled ? ex.demo.seenM : (ex.session?.lastSeenWalkedM ?? 0),
-    (id) => vltavska.placesById.get(id)?.name ?? id,
-  );
+  const previousM = ex.demo.enabled ? ex.demo.seenM : (ex.session?.lastSeenWalkedM ?? 0);
+  const summary = summarizeChange(state, previousM, (id) => vltavska.placesById.get(id)?.name ?? id);
+  const showReturn = shouldShowReturn({
+    deltaM: summary.deltaM,
+    newPlaceCount: state.newlyReached.length,
+    newStageCount: state.newlyCompletedStages.length,
+  });
 
   // Příběhy nově odemčených míst k listování; jen místa, která příběh mají.
   const storyIds = state.newlyReached.filter((p) => vltavska.placesById.get(p.id)?.hook !== undefined).map((p) => p.id);
@@ -64,7 +68,11 @@ export default function Home() {
       <StageProgress />
       <LastUpdated />
       <StatTiles />
-      <SinceLastCard sentence={changeSentence(summary)} storyIds={storyIds} />
+      {showReturn ? (
+        <ReturnCard fromM={previousM} toM={state.walkedM} sentence={changeSentence(summary)} />
+      ) : (
+        <SinceLastCard sentence={changeSentence(summary)} storyIds={storyIds} />
+      )}
       {!state.completed && <NextStopCard />}
       <WhereToday />
       <RecentlyDiscovered />
