@@ -13,6 +13,7 @@ import { creditForPhoto, creditLine } from "../../data/credits";
 import { placePhoto } from "../../data/photos";
 import { vltavska, type AppPlace } from "../../data/vltavska";
 import { formatDayLong, formatDistance } from "../../format";
+import { isFerry } from "../../privoz";
 import { approachFraction, dayFromKey, formatDayNumeric, neighbours, sumLastDays, tileDistance, zOf } from "../../home";
 import { sealKm, toRoman } from "../../seal";
 import { useExpedition } from "../../state/ExpeditionProvider";
@@ -245,7 +246,18 @@ export default function PlaceDetail() {
             </Defs>
             <Rect x={0} y={0} width="100%" height="100%" fill="url(#bar-fade)" />
           </Svg>
-          {/* „Poslat jako pohlednici“ přijde v balíku D; do té doby jen pokračování na další místo. */}
+          {reached && (
+            <View style={{ gap: 10, marginBottom: 10 }}>
+              {isFerry(place) && (
+                <Button kind="secondary" label="Převezli jste se na druhý břeh" onPress={() => router.push({ pathname: "/privoz", params: { id: place.id } })} />
+              )}
+              <Button
+                kind="secondary"
+                label="Poslat jako pohlednici"
+                onPress={() => router.push({ pathname: "/pohlednice", params: { stage: String(stage.index), place: place.id } })}
+              />
+            </View>
+          )}
           <Button label={next.kind === "stop" ? "Další zastávka" : "Další místo"} onPress={() => open(next)} />
         </View>
       )}

@@ -137,3 +137,19 @@ export async function saveLifeCardSeen(): Promise<void> {
     // příště se karta může ukázat znovu
   }
 }
+
+const POSTCARDS_KEY = "footatlas.postcards.v1";
+
+/** Pohlednice uložené do Kroniky: pole indexů etap (od 0). Jen v telefonu. */
+export async function loadPostcards(): Promise<number[]> {
+  const v = await readJson(POSTCARDS_KEY);
+  return Array.isArray(v) ? v.filter((n): n is number => Number.isInteger(n) && n >= 0) : [];
+}
+
+export async function savePostcards(stages: number[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(POSTCARDS_KEY, JSON.stringify(stages));
+  } catch {
+    // uložení se nepovedlo, platí jen do zavření aplikace
+  }
+}

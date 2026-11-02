@@ -6,7 +6,9 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ArrivalHost } from "../components/ArrivalHost";
 import { ChronicleProvider } from "../db/ChronicleProvider";
 import { ExpeditionProvider } from "../state/ExpeditionProvider";
 import { ThemeProvider, useTheme, useThemeReady } from "../theme/ThemeProvider";
@@ -25,7 +27,7 @@ function SplashGate({ fontsDone }: { fontsDone: boolean }) {
 function Shell() {
   const theme = useTheme();
   return (
-    <>
+    <View style={{ flex: 1 }}>
       <StatusBar style={theme.name === "dark" ? "light" : "dark"} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.bg } }}>
         <Stack.Screen name="(tabs)" />
@@ -35,9 +37,13 @@ function Shell() {
         <Stack.Screen name="nastaveni" />
         <Stack.Screen name="objevy" />
         <Stack.Screen name="karta-zivota" />
+        <Stack.Screen name="navrat" options={{ animation: "fade" }} />
+        <Stack.Screen name="pohlednice" />
+        <Stack.Screen name="privoz" />
         <Stack.Screen name="dev" options={{ presentation: "modal" }} />
       </Stack>
-    </>
+      <ArrivalHost />
+    </View>
   );
 }
 
