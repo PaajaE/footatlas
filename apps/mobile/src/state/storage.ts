@@ -68,6 +68,24 @@ export async function loadCalibrationStart(): Promise<string | null> {
   return typeof v === "string" && !Number.isNaN(Date.parse(v)) ? v : null;
 }
 
+const THEME_KEY = "footatlas.theme.v1";
+
+export type StoredSchemeChoice = "light" | "dark" | "auto";
+
+/** Zvolený vzhled; výchozí je světlý. */
+export async function loadThemeChoice(): Promise<StoredSchemeChoice> {
+  const v = await readJson(THEME_KEY);
+  return v === "dark" || v === "auto" || v === "light" ? v : "light";
+}
+
+export async function saveThemeChoice(c: StoredSchemeChoice): Promise<void> {
+  try {
+    await AsyncStorage.setItem(THEME_KEY, JSON.stringify(c));
+  } catch {
+    // vzhled se nepodařilo uložit, platí jen do zavření aplikace
+  }
+}
+
 export async function saveCalibrationStart(iso: string | null): Promise<void> {
   if (iso === null) await AsyncStorage.removeItem(CALIBRATION_KEY);
   else await AsyncStorage.setItem(CALIBRATION_KEY, JSON.stringify(iso));

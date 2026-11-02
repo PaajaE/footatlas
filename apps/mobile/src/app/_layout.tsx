@@ -23,6 +23,7 @@ function Shell() {
         <Stack.Screen name="zastavka/[id]" />
         <Stack.Screen name="delka-kroku" />
         <Stack.Screen name="zdroje" />
+        <Stack.Screen name="nastaveni" />
         <Stack.Screen name="dev" options={{ presentation: "modal" }} />
       </Stack>
     </>
