@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../theme/ThemeProvider";
 
@@ -36,7 +36,17 @@ export function T({
 }
 
 /** Obrazovka s okrajem podle bezpečných oblastí a pozadím z tématu. */
-export function Screen({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) {
+export function Screen({
+  children,
+  scroll = true,
+  refreshing = false,
+  onRefresh,
+}: {
+  children: React.ReactNode;
+  scroll?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => void;
+}) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const pad: ViewStyle = { paddingTop: 24, paddingHorizontal: 20 };
@@ -46,14 +56,33 @@ export function Screen({ children, scroll = true }: { children: React.ReactNode;
   if (!scroll) return <View style={outer}><View style={[styles.fill, pad]}>{children}</View></View>;
   return (
     <View style={outer}>
-      <ScrollBody pad={pad}>{children}</ScrollBody>
+      <ScrollBody pad={pad} refreshing={refreshing} onRefresh={onRefresh}>{children}</ScrollBody>
     </View>
   );
 }
 
-function ScrollBody({ children, pad }: { children: React.ReactNode; pad: ViewStyle }) {
+function ScrollBody({
+  children,
+  pad,
+  refreshing,
+  onRefresh,
+}: {
+  children: React.ReactNode;
+  pad: ViewStyle;
+  refreshing: boolean;
+  onRefresh?: () => void;
+}) {
+  const { colors } = useTheme();
   return (
-    <ScrollView contentContainerStyle={[pad, { paddingBottom: 32, gap: 18 }]} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={[pad, { paddingBottom: 32, gap: 18 }]}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} colors={[colors.accent]} />
+        ) : undefined
+      }
+    >
       {children}
     </ScrollView>
   );

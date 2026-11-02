@@ -151,7 +151,7 @@ class Component extends DCLogic {{
 """
 
 def foto(mid):
-    return f"background-image:url('assets/foto-{mid}.jpg')"
+    return f"background-image:url('../assets/foto-{mid}.jpg')"
 
 # ---------------------------------------------------------------- mapy
 
@@ -165,7 +165,7 @@ def marker(t, m, x, y, big=False, label=None, side='right'):
         if m['id'] in FOTO:
             gray = '' if (done or nxt) else ' style="filter:grayscale(1)"'
             out += (f'<circle cx="{x}" cy="{y}" r="{r + 2}" fill="{c["surface"]}" stroke="{ring}" stroke-width="{2.6 if nxt else 1.8}"/>'
-                    f'<image href="assets/foto-{m["id"]}.jpg" x="{x - r + 1}" y="{y - r + 1}" width="{2 * r - 2}" height="{2 * r - 2}" '
+                    f'<image href="../assets/foto-{m["id"]}.jpg" x="{x - r + 1}" y="{y - r + 1}" width="{2 * r - 2}" height="{2 * r - 2}" '
                     f'clip-path="url(#kruh)" preserveAspectRatio="xMidYMid slice"{gray}/>')
         else:
             out += (f'<circle cx="{x}" cy="{y}" r="{r - 4}" fill="{c["surface"]}" stroke="{ring}" stroke-width="1.8"/>'
@@ -199,7 +199,7 @@ def rose(t, cx, cy, s=1.0):
 def mapblock(t, view, extra, style='', cls='', attr=True):
     v = mapy['views'][view]; w, h = v['w'], v['h']
     a = '<span class="attr">© OpenStreetMap</span>' if attr else ''
-    return (f'<div class="map {cls}" style="width:{w}px;height:{h}px;{style}"><img src="assets/mapa-{view}{SUFFIX[t]}.jpg" alt="">'
+    return (f'<div class="map {cls}" style="width:{w}px;height:{h}px;{style}"><img src="../assets/mapa-{view}{SUFFIX[t]}.jpg" alt="">'
             f'<svg viewBox="0 0 {w} {h}" aria-hidden="true">{extra}</svg>{a}</div>')
 
 def P(view, mid):
@@ -445,7 +445,7 @@ def objevovat(t):
         ('mesic', 'Cesta na Měsíc', 'Zdarma', '384 400 km · na roky', 'Symbolická cesta', 'milníky'),
     ]
     rows = ''.join(f'''<div class="card" style="display:flex;overflow:hidden;height:86px">
-      <div style="width:104px;flex:none;background-size:cover;background-position:center;background-image:url('assets/foto-{f}.jpg')"></div>
+      <div style="width:104px;flex:none;background-size:cover;background-position:center;background-image:url('../assets/foto-{f}.jpg')"></div>
       <div style="flex:1;min-width:0;padding:8px 12px;display:flex;flex-direction:column;gap:2px">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><span class="fell" style="font-size:20px;line-height:1.05">{ti}</span><span style="font-size:11px;font-weight:600;color:{"var(--free)" if p == "Zdarma" else "var(--accent)"}">{p}</span></div>
         <span class="muted" style="font-size:12.5px">{d}</span>
@@ -463,7 +463,7 @@ def objevovat(t):
     <span class="sc" style="font-size:15px">Právě procházíte</span>
     <a href="{href('Vyprava', t)}" class="card" style="display:flex;overflow:hidden;text-decoration:none;color:inherit">
       <div style="flex:1;min-width:0;display:flex;flex-direction:column">
-        <div style="height:92px;background-size:cover;background-position:center 30%;background-image:url('assets/foto-veltrusy.jpg')"></div>
+        <div style="height:92px;background-size:cover;background-position:center 30%;background-image:url('../assets/foto-veltrusy.jpg')"></div>
         <div style="padding:8px 12px;display:flex;flex-direction:column;gap:1px">
           <span class="fell" style="font-size:22px;line-height:1">{data['vyprava']}</span>
           <span class="muted num" style="font-size:12.5px">{km(USLO)} z {km(DELKA, 0)} km · etapa {ETAPA + 1} ze 4</span>
@@ -488,6 +488,6 @@ SCREENS = [('Main', karta, ('den', 'noc')), ('Domu', domu, ('den', 'noc')), ('Vy
 if __name__ == '__main__':
     for name, fn, temata in SCREENS:
         for t in temata:
-            (OUT / f'{name}{SUFFIX[t]}.dc.html').write_text(fn(t))
+            (OUT / 'v1' / f'{name}{SUFFIX[t]}.dc.html').write_text(fn(t))
             print(f'{name}{SUFFIX[t]}')
     print(f'objeveno {len(objeveno)}, před vámi {len(pred)}, další zastávka {DALSI["nazev"]} za {km(DALSI["km"] - USLO)} km')

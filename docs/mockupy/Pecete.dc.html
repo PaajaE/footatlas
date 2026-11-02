@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Pečeti a razítka</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=Work+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.drop{animation:drop .6s cubic-bezier(.2,1.5,.4,1) both}
+.d1{animation-delay:.1s}.d2{animation-delay:.45s}.d3{animation-delay:.8s}.d4{animation-delay:1.15s}.d5{animation-delay:1.5s}
+@keyframes drop{0%{opacity:0;transform:scale(2.4) rotate(-30deg)}55%{opacity:1;transform:scale(.88) rotate(-4deg)}100%{opacity:1;transform:scale(1) rotate(-8deg)}}
+.pulse{animation:pulse 2.4s ease-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes pulse{0%{opacity:.9;transform:scale(.85)}100%{opacity:0;transform:scale(1.35)}}
+button{font-family:inherit}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="width: 900px; height: 844px; box-sizing: border-box; padding: 32px 40px; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif; display: flex; flex-direction: column; gap: 20px;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Vizuální jazyk odměn</span>
+      <h1 style="margin: 0; font-family: 'IM Fell English', serif; font-weight: 400; font-size: 40px; line-height: 44px;">Pečeti a razítka</h1>
+    </div>
+    <button onClick="{{replay}}" style="min-height: 44px; padding: 0 18px; border-radius: 14px; border: none; background: #9B2C22; color: #FBF5E8; font-size: 15px; font-weight: 600; cursor: pointer;">Orazítkovat znovu</button>
+  </div>
+
+  <sc-if value="{{on}}" hint-placeholder-val="{{true}}">
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Zastávka · dosaženo</span>
+      <svg class="drop d1" width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Vosková pečeť Vyšehradu s fotografií">
+        <defs>
+          <radialGradient id="waxA" cx="40%" cy="35%" r="70%"><stop offset="0%" stop-color="#C2463A"></stop><stop offset="60%" stop-color="#9B2C22"></stop><stop offset="100%" stop-color="#6A1A13"></stop></radialGradient>
+          <filter id="waxEdgeA" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+          <clipPath id="photoA"><circle cx="66" cy="66" r="38"></circle></clipPath>
+          <path id="ringA" d="M66 66 m-49 0 a49 49 0 1 1 98 0 a49 49 0 1 1 -98 0"></path>
+        </defs>
+        <circle cx="66" cy="68" r="58" fill="#5A1610" opacity="0.35" filter="url(#waxEdgeA)"></circle>
+        <circle cx="66" cy="66" r="58" fill="url(#waxA)" filter="url(#waxEdgeA)"></circle>
+        <circle cx="66" cy="66" r="42" fill="none" stroke="#5A1610" stroke-width="3" opacity="0.6"></circle>
+        <circle cx="66" cy="66" r="44" fill="none" stroke="#E7A08F" stroke-width="1" opacity="0.6"></circle>
+        <image href="assets/foto-vysehrad.jpg" x="28" y="28" width="76" height="76" preserveAspectRatio="xMidYMid slice" clip-path="url(#photoA)"></image>
+        <text font-family="'IM Fell English SC', serif" font-size="9" letter-spacing="1.6" fill="#F6D9CF"><textPath href="#ringA" startOffset="2%">Vyšehrad · km 0,2 · 24. 10. 2026 ·</textPath></text>
+      </svg>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Vyšehrad</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Vosk v barvě rumělky, fotka místa, kolem název, kilometr a den dosažení.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Zastávka · další na řadě</span>
+      <svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Další zastávka Trojský zámek, zatím zamčená">
+        <defs>
+          <clipPath id="photoB"><circle cx="66" cy="66" r="40"></circle></clipPath>
+          <filter id="grayB"><feColorMatrix type="saturate" values="0.05"></feColorMatrix></filter>
+        </defs>
+        <circle class="pulse" cx="66" cy="66" r="54" fill="none" stroke="#75644E" stroke-width="1.5"></circle>
+        <circle cx="66" cy="66" r="48" fill="#EFE4CB" stroke="#75644E" stroke-width="1.4" stroke-dasharray="3 3"></circle>
+        <image href="assets/foto-troja.jpg" x="26" y="26" width="80" height="80" preserveAspectRatio="xMidYMid slice" clip-path="url(#photoB)" filter="url(#grayB)" opacity="0.7"></image>
+        <rect x="40" y="96" width="52" height="20" rx="10" fill="#2B2118"></rect>
+        <text x="66" y="110" text-anchor="middle" font-family="'Work Sans', sans-serif" font-size="11" font-weight="600" fill="#FBF5E8">40 m</text>
+      </svg>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Trojský zámek</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Šedá fotka, tužkový kroužek, který dýchá. Štítek ukazuje metry, ne „0,0 km“.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Zastávka · zamčeno</span>
+      <svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Zamčená zastávka, zatím jen tužková skica">
+        <defs>
+          <pattern id="hatchC" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#B5A68D" stroke-width="0.8"></line></pattern>
+        </defs>
+        <circle cx="66" cy="66" r="48" fill="url(#hatchC)" stroke="#75644E" stroke-width="1.2"></circle>
+        <circle cx="66" cy="66" r="52" fill="none" stroke="#75644E" stroke-width="0.6"></circle>
+        <text x="66" y="80" text-anchor="middle" font-family="'IM Fell English', serif" font-size="44" fill="#75644E">?</text>
+      </svg>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Zámek Roztoky</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Dál než 5 km: jen skica a otazník. Fotka se ukáže, až bude zastávka další na řadě.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Malý objev · dosaženo</span>
+      <svg class="drop d2" width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Inkoustové razítko Výtoň, kilometr 0,7">
+        <defs>
+          <filter id="grungeD" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n"></feTurbulence><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 1.9" result="m"></feColorMatrix><feComposite in="SourceGraphic" in2="m" operator="in"></feComposite></filter>
+          <path id="ringD" d="M66 66 m-40 0 a40 40 0 1 1 80 0 a40 40 0 1 1 -80 0"></path>
+        </defs>
+        <g filter="url(#grungeD)" fill="none" stroke="#9B2C22">
+          <circle cx="66" cy="66" r="54" stroke-width="3.5"></circle>
+          <circle cx="66" cy="66" r="48" stroke-width="1.2"></circle>
+          <circle cx="66" cy="66" r="30" stroke-width="1.2"></circle>
+          <text font-family="'IM Fell English SC', serif" font-size="11" letter-spacing="2" fill="#9B2C22" stroke="none"><textPath href="#ringD" startOffset="3%">Výtoň · Vltavská stezka ·</textPath></text>
+          <text x="66" y="66" text-anchor="middle" font-family="'IM Fell English', serif" font-size="17" fill="#9B2C22" stroke="none">km 0,7</text>
+          <text x="66" y="80" text-anchor="middle" font-family="'IM Fell English SC', serif" font-size="9" letter-spacing="1" fill="#9B2C22" stroke="none">30. 10. 2026</text>
+        </g>
+      </svg>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Výtoň</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Inkoustové razítko s „otřepaným“ okrajem jako na poště. Kilometr a den jsou osobní.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Velikosti na mapě</span>
+      <div style="height: 132px; display: flex; align-items: center; justify-content: center; gap: 22px;">
+        <div class="drop d3" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <span style="position: relative; display: block; width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; border: 1.6px solid #9B2C22; background: rgba(155,44,34,0.12); box-shadow: inset 0 0 0 2px #F8F1E1, inset 0 0 0 2.8px #9B2C22;"></span>
+          <span style="font-size: 11px; color: #5E4A32;">přehled</span>
+        </div>
+        <div class="drop d4" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <span style="position: relative; display: block; width: 26px; height: 26px; border-radius: 50%; box-sizing: border-box; border: 2.4px solid #9B2C22; background: rgba(155,44,34,0.12); box-shadow: inset 0 0 0 3px #F8F1E1, inset 0 0 0 4.2px #9B2C22;"></span>
+          <span style="font-size: 11px; color: #5E4A32;">trasa</span>
+        </div>
+        <div class="drop d5" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <span style="position: relative; display: block; width: 40px; height: 40px; border-radius: 50%; box-sizing: border-box; border: 3.4px solid #9B2C22; background: rgba(155,44,34,0.12); box-shadow: inset 0 0 0 4px #F8F1E1, inset 0 0 0 5.6px #9B2C22;"></span>
+          <span style="font-size: 11px; color: #5E4A32;">detail</span>
+        </div>
+      </div>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Na mapě</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Na mapě razítko bez textu, roste s přiblížením. Text až v detailu a v Kronice.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Malý objev · zamčeno</span>
+      <svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Zamčený malý objev s hádankou">
+        <circle cx="66" cy="66" r="50" fill="none" stroke="#75644E" stroke-width="1.4" stroke-dasharray="2 4" stroke-linecap="round"></circle>
+        <text x="66" y="62" text-anchor="middle" font-family="'IM Fell English', serif" font-size="30" fill="#75644E">?</text>
+        <text x="66" y="84" text-anchor="middle" font-family="'Work Sans', sans-serif" font-size="12" font-weight="600" fill="#2B2118">1,9 km</text>
+      </svg>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Sedlecké skály</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Tečkovaný tužkový kruh. Po klepnutí hádanka, ne popis.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Kapitola · 2 z 5</span>
+      <svg class="drop d3" width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Kapitola Voraři, odemčena 2 z 5 míst">
+        <defs><path id="ringG" d="M66 66 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0"></path></defs>
+        <circle cx="66" cy="66" r="58" fill="#F4E6C6" stroke="#7F5718" stroke-width="1.2"></circle>
+        <path d="M66 10 A56 56 0 0 1 119.3 48.7" fill="none" stroke="#9B2C22" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M120.6 55 A56 56 0 0 1 100.5 110.2" fill="none" stroke="#9B2C22" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M94.5 114 A56 56 0 0 1 37.5 114" fill="none" stroke="#D8C9A9" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M31.5 110.2 A56 56 0 0 1 11.4 55" fill="none" stroke="#D8C9A9" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M12.7 48.7 A56 56 0 0 1 66 10" fill="none" stroke="#D8C9A9" stroke-width="5" stroke-linecap="round"></path>
+        <text font-family="'IM Fell English SC', serif" font-size="11" letter-spacing="2" fill="#7F5718"><textPath href="#ringG" startOffset="8%">Kapitola · Voraři · Vltavská stezka</textPath></text>
+        <g stroke="#2B2118" stroke-width="1.6" stroke-linecap="round" fill="none">
+          <path d="M42 74 L90 74 M44 80 L88 80 M46 68 L86 68"></path>
+          <path d="M50 64 L50 84 M60 64 L60 84 M70 64 L70 84 M80 64 L80 84"></path>
+          <path d="M66 68 L66 46 M66 46 L80 56"></path>
+        </g>
+      </svg>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Voraři</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Nitka přes více míst. Oblouky ukazují postup, dokončená kapitola přidá kresbu na okraj atlasu.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+      <span style="align-self: flex-start; font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Konec etapy</span>
+      <svg class="drop d4" width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="Pečeť první etapy Praha">
+        <defs>
+          <radialGradient id="waxH" cx="40%" cy="35%" r="70%"><stop offset="0%" stop-color="#C2463A"></stop><stop offset="60%" stop-color="#9B2C22"></stop><stop offset="100%" stop-color="#6A1A13"></stop></radialGradient>
+          <filter id="waxEdgeH" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="21" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+          <path id="ringH" d="M66 66 m-40 0 a40 40 0 1 1 80 0 a40 40 0 1 1 -80 0"></path>
+        </defs>
+        <circle cx="66" cy="68" r="58" fill="#5A1610" opacity="0.35" filter="url(#waxEdgeH)"></circle>
+        <circle cx="66" cy="66" r="58" fill="url(#waxH)" filter="url(#waxEdgeH)"></circle>
+        <circle cx="66" cy="66" r="46" fill="none" stroke="#5A1610" stroke-width="2.5" opacity="0.55"></circle>
+        <text font-family="'IM Fell English SC', serif" font-size="10" letter-spacing="2" fill="#F6D9CF"><textPath href="#ringH" startOffset="4%">Etapa první · Praha · 6 dní ·</textPath></text>
+        <text x="66" y="80" text-anchor="middle" font-family="'IM Fell English', serif" font-size="40" fill="#F6D9CF">I</text>
+      </svg>
+      <span style="font-family: 'IM Fell English', serif; font-size: 20px;">Etapa I · Praha</span>
+      <span style="font-size: 13px; line-height: 18px; color: #5E4A32; text-align: center;">Velká pečeť na pohlednici etapy a na okraji listu atlasu.</span>
+    </div>
+
+    <div style="background: #F8F1E1; border: 1px solid #D8C9A9; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Pohyb a haptika</span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 10px; font-size: 13px; line-height: 18px;">
+        <span style="color: #5E4A32;">Dopad razítka</span><span>600 ms, přestřel, haptika „light“</span>
+        <span style="color: #5E4A32;">Kruh kolem</span><span>700 ms, rozplyne se</span>
+        <span style="color: #5E4A32;">Rozestup</span><span>min. 250 ms mezi razítky</span>
+        <span style="color: #5E4A32;">Další zastávka</span><span>dýchání 2,4 s, bez haptiky</span>
+        <span style="color: #5E4A32;">Omezit pohyb</span><span>jen prolnutí 400 ms</span>
+        <span style="color: #5E4A32;">Zvuk</span><span>vypnutý, volitelně „razítko“</span>
+      </div>
+    </div>
+
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"$preview":{"width":900,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { on: true }; }
+  componentWillUnmount() { clearTimeout(this.to); }
+  renderVals() {
+    return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
+      on: this.state.on,
+      replay: () => { clearTimeout(this.to); this.setState({ on: false }); this.to = setTimeout(() => this.setState({ on: true }), 60); }
+    };
+  }
+}
+</script>
+</body>
+</html>

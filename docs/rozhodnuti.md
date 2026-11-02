@@ -118,3 +118,32 @@ Datum: 31. 10. 2026 · Stav: přijato, nasazeno; stahování ověřeno proti pro
 - Důvod: velké binárky nepatří do gitu (každá verze zůstane v historii navždy) a ani do APK (při více výpravách by rostlo); R2 nemá poplatky za odchozí data a Worker dává kontrolu nad kešováním.
 - První spuštění potřebuje připojení (26 MB); do té doby a při selhání se ukazuje náhled trasy se zprávou a tlačítkem „Zkusit znovu“. Písma map (0,6 MB) zůstávají v APK.
 - **Stav 31. 10. 2026:** Worker `footatlas-api` je nasazený na `https://footatlas-api.ecerpavel.workers.dev` (vazba `CONTENT` → `footatlas-content`), adresa je v `app.json` (`extra.apiBaseUrl`). Ověřeno: `/health`, HEAD, `Range`, 404 pro chybějící klíč i pokus o průchod cestou, SHA-256 staženého souboru shodný s originálem; release APK 1.3.1 (5) po `pm clear` stáhl mapu z produkce a vykreslil ji. Neověřeno: reálný telefon a iOS, vlastní doména místo `workers.dev`.
+
+## 0014 Světlý vzhled výchozí, vzdálenosti lidsky, Nastavení
+Datum: 2. 11. 2026 · Stav: přijato, ověřeno testy a typecheckem; na telefonu NEOVĚŘENO
+
+- Výchozí vzhled je světlý pergamen pro všechny (`app.json` `userInterfaceStyle: "light"`); volba Světlý / Tmavý / Podle systému se ukládá v AsyncStorage (`ThemeProvider`, `storage.ts`).
+- Zbývající vzdálenost k místu: `formatDistance` (`apps/mobile/src/format.ts`): pod 15 m „Jste tady“, pod 1 km metry po 10 m a „asi N kroků“ z osobní délky kroku, do 10 km na desetiny, dál celé km. „0,0 km“ se už nezobrazí.
+- Nová obrazovka `/nastaveni` (vzhled, délka kroku, zdroje a licence, vývoj jen v `__DEV__`), na Domů ji otevírá ozubené kolo.
+- Známé: zvolený tmavý vzhled se po spuštění na okamžik ukáže světlý, než se volba načte.
+
+## 0015 Živá obnova v popředí
+Datum: 2. 11. 2026 · Stav: přijato, ověřeno testy; chování na zařízení NEOVĚŘENO
+
+- Vzdálenost výpravy se čte znovu při návratu aplikace do popředí (nejdřív 15 s po posledním čtení), každou minutu, dokud je aplikace aktivní a výprava běží, a stažením prstem na Domů. Na pozadí se nečte nic. Čtení se nepřekrývají; změny výpravy (start, pauza, délka kroku) se při běžícím čtení zařadí za něj (`ExpeditionProvider`, `refreshPolicy.ts`).
+- Kolečko obnovy jen při stažení prstem, automatická čtení běží potichu. Domů ukazuje „Aktualizováno před N min“ a po 2 minutách vysvětlení, že zdroj zapisuje kroky s prodlevou.
+
+## 0016 Příběhy míst odděleně od geometrie
+Datum: 2. 11. 2026 · Stav: přijato; texty NEOVĚŘENÉ (`verified: false`)
+
+- Obsah míst (háček, upoutávka, hádanka se třemi možnostmi, kontext, tip „Až tam půjdete“, kapitola, zdroje) je v `packages/content/data/vltavska-stezka/obsah.json` se schématem `story.ts`; `expedition.json` nese jen polohy a vzdálenosti. Důvod: text a trasa se mění nezávisle.
+- Hotovo 14 míst 1. etapy a 5 kapitol. Detail místa: odemčené ukáže háček, kontext, tip, den dosažení a postup kapitoly; zamčené upoutávku, hádanku a vzdálenost. Karta „Koncept obsahu“ zmizela; neověřenost se eviduje v datech, ne v UI.
+- Před vydáním: ověřit vše dle `docs/obsah-vltavska-podklady.md` (úkoly k ověření), doplnit zbývající etapy.
+
+## 0017 Pěší trasa po souši
+Datum: 2. 11. 2026 · Stav: přijato; v terénu NEOVĚŘENO
+
+- Trasa Vltavské stezky už nevede středem řeky: pěší routing OSRM nad OpenStreetMap (ODbL) přes vybrané body na břehu, zjednodušeno (`tools/route/build-walking-route.mjs`, `DRY=1` jen report). 62,25 km, 4 etapy končící v Roztokách, Kralupech, Vraňanech a v Mělníku (16,7 / 17,0 / 17,8 / 10,8 km).
+- Místa na druhém břehu se nenavštěvují, jen promítají („výhled přes řeku“); 9 míst je dál než 500 m od trasy (nejvíc Klecany 3 km).
+- Trasa se od staré čáry vzdálí nejvýš 1,5 km, mapový koridor stačí.
+- Rizika: přívozy (Podbaba, Libčice, Lužec) jezdí sezónně; úsek Červený mlýn → Vraňany je nejvíc zakřivený (1,8× vzdušné vzdálenosti), projít na mapě. Hustota: jediná mezera nad 4 km (Výhled na Říp → Vepřek, 4,4 km), doplnit objev.

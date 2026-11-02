@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Přívoz</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="noc.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=Work+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit}
+.walkL{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#9B2C22;border:2.5px solid #FBF5E8;box-shadow:0 1px 3px rgba(43,33,24,.45);offset-path:path('M30 410 C60 340 90 280 118 236');offset-rotate:0deg;offset-anchor:50% 50%;animation:walkL 1.3s ease-in both}
+@keyframes walkL{0%{offset-distance:0%;opacity:1}99%{offset-distance:100%;opacity:1}100%{offset-distance:100%;opacity:0}}
+.boat{position:absolute;left:0;top:0;width:44px;height:26px;offset-path:path('M118 236 L262 220');offset-rotate:0deg;offset-anchor:50% 60%;animation:cross 2.4s cubic-bezier(.45,0,.4,1) 1.3s both}
+@keyframes cross{0%{offset-distance:0%;opacity:0}6%{opacity:1}94%{opacity:1}100%{offset-distance:100%;opacity:0}}
+.bob{animation:bob 1.1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(2px) rotate(2deg)}}
+.walkR{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#9B2C22;border:2.5px solid #FBF5E8;box-shadow:0 1px 3px rgba(43,33,24,.45);offset-path:path('M262 220 C290 180 320 120 350 20');offset-rotate:0deg;offset-anchor:50% 50%;animation:walkR 1.6s ease-out 3.7s both}
+@keyframes walkR{0%{offset-distance:0%;opacity:0}5%{opacity:1}100%{offset-distance:62%;opacity:1}}
+.inkR{stroke-dasharray:100;animation:inkR 1.6s ease-out 3.7s both}
+@keyframes inkR{0%{stroke-dashoffset:100}100%{stroke-dashoffset:38}}
+.spread{transform-box:fill-box;transform-origin:center;animation:spread 1.8s ease-out 3.6s both}
+@keyframes spread{0%{transform:scale(0)}100%{transform:scale(1)}}
+.ferry{stroke-dasharray:3 4;animation:ferry 2.4s linear 1.3s both}
+@keyframes ferry{0%{opacity:.4}100%{opacity:1}}
+.stamp{animation:drop .6s cubic-bezier(.2,1.5,.4,1) 3.8s both}
+@keyframes drop{0%{opacity:0;transform:scale(2.6) rotate(-34deg)}55%{opacity:1;transform:scale(.88) rotate(-4deg)}100%{opacity:1;transform:scale(1) rotate(-10deg)}}
+.rise{animation:rise .5s ease both}
+.r1{animation-delay:4.3s}.r2{animation-delay:4.6s}.r3{animation-delay:4.9s}
+@keyframes rise{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:none}}
+</style>
+</helmet>
+<div class="{{themeClass}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #EFE4CB; color: #2B2118; font-family: 'Work Sans', sans-serif;">
+  <div style="position: absolute; left: 0; top: 0; width: 390px; box-sizing: border-box; padding: 20px 20px 0; display: flex; flex-direction: column; gap: 2px; z-index: 2;">
+    <span style="font-family: 'IM Fell English SC', serif; font-size: 15px; letter-spacing: 0.6px; color: #7F5718;">Na trase · km 15,9</span>
+    <span style="font-family: 'IM Fell English', serif; font-size: 30px; line-height: 34px;">Přes řeku přívozem</span>
+  </div>
+
+  <sc-if value="{{on}}" hint-placeholder-val="{{true}}">
+  <div style="position: absolute; left: 0; top: 96px; width: 390px; height: 420px; overflow: hidden;">
+    <svg width="390" height="420" viewBox="0 0 390 420" aria-hidden="true" style="position: absolute; left: 0; top: 0;">
+      <defs>
+        <filter id="pwc" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="5" result="n"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="14" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+        </filter>
+        <pattern id="pblkS" width="9" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><rect x="1" y="1" width="6" height="5" fill="none" stroke="#9A8C74" stroke-width="0.5"></rect></pattern>
+        <pattern id="pblkI" width="9" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)"><rect x="0" y="0" width="9" height="8" fill="#EBD5AE"></rect><rect x="1" y="1" width="6" height="5" fill="#D6A877" stroke="#8C5E3A" stroke-width="0.5"></rect></pattern>
+        <pattern id="ptreS" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="3.5" r="2.2" fill="none" stroke="#9A8C74" stroke-width="0.6"></circle><path d="M4 5.7 L4 7.4" stroke="#9A8C74" stroke-width="0.6"></path></pattern>
+        <pattern id="ptreI" width="8" height="8" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="8" height="8" fill="#C9D3A0"></rect><circle cx="4" cy="3.5" r="2.5" fill="#6F9455" stroke="#3F5E32" stroke-width="0.5"></circle><path d="M4 6 L4 7.6" stroke="#5E4A32" stroke-width="0.7"></path></pattern>
+        <mask id="pleft" maskUnits="userSpaceOnUse" x="0" y="0" width="390" height="420">
+          <rect x="0" y="0" width="390" height="420" fill="#000"></rect>
+          <path d="M30 410 C60 340 90 280 118 236" stroke="#fff" stroke-width="150" stroke-linecap="round" fill="none" filter="url(#pwc)"></path>
+        </mask>
+        <mask id="pright" maskUnits="userSpaceOnUse" x="0" y="0" width="390" height="420">
+          <rect x="0" y="0" width="390" height="420" fill="#000"></rect>
+          <circle class="spread" cx="262" cy="220" r="150" fill="#fff" filter="url(#pwc)"></circle>
+        </mask>
+      </defs>
+
+      <rect x="0" y="0" width="390" height="420" fill="#EFE4CB"></rect>
+      <path d="M0 0 L118 0 L142 110 L112 190 L70 250 L0 300 Z" fill="url(#pblkS)" stroke="#9A8C74" stroke-width="0.6"></path>
+      <path d="M0 320 L60 300 L90 340 L60 420 L0 420 Z" fill="url(#ptreS)" stroke="#9A8C74" stroke-width="0.6"></path>
+      <path d="M270 0 L390 0 L390 150 L320 170 L282 120 Z" fill="url(#pblkS)" stroke="#9A8C74" stroke-width="0.6"></path>
+      <path d="M300 200 L390 180 L390 420 L330 420 L290 300 Z" fill="url(#ptreS)" stroke="#9A8C74" stroke-width="0.6"></path>
+      <path d="M210 -10 C200 140 180 280 170 430" fill="none" stroke="#8A7C66" stroke-width="112" stroke-linecap="butt"></path>
+      <path d="M210 -10 C200 140 180 280 170 430" fill="none" stroke="#EFE4CB" stroke-width="110" stroke-linecap="butt"></path>
+
+      <g mask="url(#pleft)">
+        <rect x="0" y="0" width="390" height="420" fill="#F4E6C6"></rect>
+        <path d="M0 0 L118 0 L142 110 L112 190 L70 250 L0 300 Z" fill="url(#pblkI)" stroke="#8C5E3A" stroke-width="0.7"></path>
+        <path d="M0 320 L60 300 L90 340 L60 420 L0 420 Z" fill="url(#ptreI)" stroke="#3F5E32" stroke-width="0.7"></path>
+        <path d="M210 -10 C200 140 180 280 170 430" fill="none" stroke="#8FB7B4" stroke-width="110" filter="url(#pwc)"></path>
+      </g>
+      <g mask="url(#pright)">
+        <rect x="0" y="0" width="390" height="420" fill="#F4E6C6"></rect>
+        <path d="M270 0 L390 0 L390 150 L320 170 L282 120 Z" fill="url(#pblkI)" stroke="#8C5E3A" stroke-width="0.7"></path>
+        <path d="M300 200 L390 180 L390 420 L330 420 L290 300 Z" fill="url(#ptreI)" stroke="#3F5E32" stroke-width="0.7"></path>
+        <path d="M210 -10 C200 140 180 280 170 430" fill="none" stroke="#8FB7B4" stroke-width="110" filter="url(#pwc)"></path>
+      </g>
+
+      <g stroke="#4E7F80" stroke-width="0.9" fill="none" opacity="0.7">
+        <path d="M170 120 q6 -3 12 0 q6 3 12 0"></path><path d="M200 300 q6 -3 12 0 q6 3 12 0"></path><path d="M160 360 q6 -3 12 0 q6 3 12 0"></path><path d="M220 80 q6 -3 12 0 q6 3 12 0"></path>
+      </g>
+
+      <path d="M262 220 C290 180 320 120 350 20" fill="none" stroke="#75644E" stroke-width="1.4" stroke-dasharray="2 4" stroke-linecap="round"></path>
+      <path d="M30 410 C60 340 90 280 118 236" fill="none" stroke="#9B2C22" stroke-width="3.4" stroke-linecap="round"></path>
+      <path class="inkR" pathLength="100" d="M262 220 C290 180 320 120 350 20" fill="none" stroke="#9B2C22" stroke-width="3.4" stroke-linecap="round"></path>
+      <path class="ferry" d="M118 236 L262 220" fill="none" stroke="#2B2118" stroke-width="1.4"></path>
+
+      <g stroke="#3A2A1C" stroke-width="1" fill="#E9D3A6">
+        <rect x="106" y="230" width="16" height="10" rx="1"></rect>
+        <rect x="258" y="214" width="16" height="10" rx="1"></rect>
+      </g>
+
+      <g font-family="'IM Fell English', serif" font-style="italic" font-size="13" fill="#3A2A1C">
+        <text x="20" y="130">Podbaba</text>
+        <text x="300" y="250">Podhoří</text>
+        <text x="306" y="60">Bohnice</text>
+        <text x="186" y="170" transform="rotate(-84 186 170)" fill="#4E7F80" font-size="14">Vltava</text>
+      </g>
+      <g font-family="'IM Fell English SC', serif" font-size="10" fill="#3A2A1C">
+        <text x="70" y="262">přístaviště</text>
+        <text x="270" y="210">přístaviště</text>
+      </g>
+    </svg>
+
+    <div class="walkL"></div>
+    <div class="boat">
+      <svg class="bob" width="44" height="26" viewBox="0 0 44 26" aria-hidden="true">
+        <path d="M0 20 q4 -2 8 0 M36 20 q4 -2 8 0" stroke="#4E7F80" stroke-width="1" fill="none"></path>
+        <path d="M6 14 L38 14 L33 21 L11 21 Z" fill="#8C5E3A" stroke="#3A2A1C" stroke-width="1"></path>
+        <path d="M14 14 L14 8 L30 8 L30 14" fill="#F8F1E1" stroke="#3A2A1C" stroke-width="1"></path>
+        <circle cx="22" cy="6" r="4.5" fill="#9B2C22" stroke="#FBF5E8" stroke-width="2"></circle>
+      </svg>
+    </div>
+    <div class="walkR"></div>
+    <div class="stamp" style="position: absolute; left: 270px; top: 232px; width: 54px; height: 54px; border-radius: 50%; box-sizing: border-box; border: 2.5px solid #9B2C22; box-shadow: inset 0 0 0 4px #EFE4CB, inset 0 0 0 5.5px #9B2C22; background: rgba(155,44,34,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #9B2C22;">
+      <span style="font-family: 'IM Fell English SC', serif; font-size: 8px; letter-spacing: 1px;">Přívoz</span>
+      <span style="font-family: 'IM Fell English', serif; font-size: 18px; line-height: 18px;">P2</span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; top: 520px; width: 390px; box-sizing: border-box; padding: 0 20px; display: flex; flex-direction: column; gap: 10px;">
+    <span class="rise r1" style="font-family: 'IM Fell English', serif; font-size: 26px; line-height: 30px;">Převezli jste se na druhý břeh</span>
+    <p class="rise r2" style="margin: 0; font-family: 'IM Fell English', serif; font-style: italic; font-size: 20px; line-height: 27px;">„Přívoz tu jezdil už v roce 1888. Dřív se mu říkalo Lysolajský.“</p>
+    <p class="rise r3" style="margin: 0; font-size: 14px; line-height: 20px; color: #5E4A32;">Dnes je to linka P2 pražské integrované dopravy. Na druhém břehu začíná Podhoří pod svahy Bohnic. Lodní lístek platí i pro vás, virtuální poutníky.</p>
+    <div class="rise r3" style="display: flex; gap: 10px; margin-top: 4px;">
+      <div style="flex: 1; padding: 10px 12px; border-radius: 14px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Přívozy</span>
+        <span style="font-size: 14px;">1 ze 3 na trase</span>
+      </div>
+      <div style="flex: 1; padding: 10px 12px; border-radius: 14px; background: #F8F1E1; border: 1px solid #D8C9A9; display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-family: 'IM Fell English SC', serif; font-size: 13px; letter-spacing: 0.6px; color: #7F5718;">Další břeh</span>
+        <span style="font-size: 14px;">Letky za 15 km</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 24px; display: flex; gap: 10px;">
+    <button onClick="{{replay}}" style="flex: 1; min-height: 48px; border-radius: 14px; border: 1.5px solid #D8C9A9; background: transparent; color: #2B2118; font-size: 15px; font-weight: 600; cursor: pointer;">Přehrát znovu</button>
+    <a href="Main.dc.html" style="flex: 1.4; min-height: 48px; border-radius: 14px; background: #9B2C22; color: #FBF5E8; font-size: 15px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center;">Pokračovat</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"vzhled":{"editor":"enum","options":["den","noc"],"default":"den"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { on: true }; }
+  componentWillUnmount() { clearTimeout(this.to); }
+  renderVals() {
+    return {
+      themeClass: this.props.vzhled === 'noc' ? 'noc' : '',
+      on: this.state.on,
+      replay: () => { clearTimeout(this.to); this.setState({ on: false }); this.to = setTimeout(() => this.setState({ on: true }), 60); }
+    };
+  }
+}
+</script>
+</body>
+</html>

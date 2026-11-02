@@ -50,11 +50,11 @@ describe("pilotní výprava Vltavská stezka", () => {
     expect(r.stops).toBe(10);
     expect(r.discoveries).toBe(28);
     expect(r.avgGapM).toBeLessThan(2_000);
-    // Levý Hradec -> Řez je 4,3 km, limit je 4 km. Doplnit objev, pak tento řádek odstranit.
-    expect(r.issues).toEqual(["Největší mezera mezi místy je 4.3 km, limit je 4 km."]);
+    // Výhled na Říp -> Vepřek je 4,4 km, limit je 4 km. Doplnit objev, pak tento řádek odstranit.
+    expect(r.issues).toEqual(["Největší mezera mezi místy je 4.4 km, limit je 4 km."]);
   });
 
-  it("po konci druhé etapy je další zastávka Nelahozeves", () => {
+  it("po konci druhé etapy (Kralupy) je další zastávka Zámek Nelahozeves", () => {
     const e = parsed.data!;
     const plan = buildPlan({
       totalM: e.totalM,
@@ -62,6 +62,7 @@ describe("pilotní výprava Vltavská stezka", () => {
       places: e.places.map((p) => ({ id: p.id, kind: p.kind, atM: p.unlockAtM })),
     });
     const kralupy = e.places.find((p) => p.id === "kralupy")!.unlockAtM;
+    expect(e.stageEndsM![1]).toBe(kralupy);
     const s = computeState(plan, kralupy + 200, { previousWalkedM: kralupy - 3_000 });
     expect(s.stagesCompleted).toBe(2);
     expect(s.newlyCompletedStages.map((x) => x.index)).toEqual([1]);
@@ -70,14 +71,28 @@ describe("pilotní výprava Vltavská stezka", () => {
     expect(s.toNextStopM!).toBeLessThan(4_000);
   });
 
-  // Mockupy používají 35,6 km a "2. etapa dokončena", ale Kralupy leží v km 35,8 (podle skutečné geometrie).
-  it("v km 35,6 druhá etapa ještě není dokončena (mockupy s tím nesouhlasí)", () => {
+  // Etapa se dokončí až na konci, ne dřív: těsně před koncem každé etapy je dokončeno o jednu méně.
+  it("etapa není dokončena těsně před svým koncem", () => {
     const e = parsed.data!;
     const plan = buildPlan({
       totalM: e.totalM,
       stageEndsM: e.stageEndsM,
       places: e.places.map((p) => ({ id: p.id, kind: p.kind, atM: p.unlockAtM })),
     });
-    expect(computeState(plan, 35_600).stagesCompleted).toBe(1);
+    e.stageEndsM!.forEach((end, i) => {
+      expect(computeState(plan, end - 100).stagesCompleted).toBe(i);
+      expect(computeState(plan, end).stagesCompleted).toBe(i + 1);
+    });
+  });
+
+  it("trasa je pěší po souši: délka 60 až 90 km a čtyři etapy 10 až 20 km", () => {
+    const e = parsed.data!;
+    expect(e.totalM).toBeGreaterThan(60_000);
+    expect(e.totalM).toBeLessThan(90_000);
+    e.stageEndsM!.forEach((end, i) => {
+      const len = end - (i ? e.stageEndsM![i - 1]! : 0);
+      expect(len).toBeGreaterThan(10_000);
+      expect(len).toBeLessThan(20_000);
+    });
   });
 });
