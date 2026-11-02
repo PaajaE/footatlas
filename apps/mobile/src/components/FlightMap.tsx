@@ -19,7 +19,7 @@ import {
   youLayers,
 } from "@footatlas/map-style";
 import { positionAt } from "@footatlas/core";
-import { sectionBounds } from "../navrat";
+import { flightZoom, sectionBounds } from "../navrat";
 import { placeProps } from "../map/atlasPlaces";
 import { MEDALLIONS } from "../map/medallionFiles";
 import { PATTERNS } from "../map/patternFiles";
@@ -40,7 +40,7 @@ const EMPTY = { type: "FeatureCollection" as const, features: [] };
 /** Vybarvení (maska) se přepočítává po dílech úseku; polygonová unie je drahá, plynulý růst by telefon zdržoval. */
 const MASK_STEPS = 6;
 /** Přiblížení kamery za letu (zhruba čtvrť; prototyp letí na ~1,9× měřítko listu). */
-const FLIGHT_ZOOM = 14;
+const FLIGHT_ZOOM_DEFAULT = 14;
 /** Dojezd kamery na další polohu; o málo delší než krok hodin (50 ms), aby se pohyb nezastavoval mezi kroky. */
 const FOLLOW_MS = 70;
 
@@ -77,10 +77,11 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
   const mode = mapTheme.mode;
   const style = useMemo(() => buildAtlasStyle({ theme: mapTheme, tilesUrl: assets.tilesUrl, glyphs: assets.glyphs }), [mapTheme, assets]);
   const camera = useRef<CameraRef>(null);
+  const flightZ = useMemo(() => flightZoom(toM - fromM, durationMs), [fromM, toM, durationMs]);
   const coords = useMemo(() => route.map((p) => [p.lon, p.lat] as [number, number]), [route]);
   const start = useMemo(() => positionAt(route, cumulative, fromM), [route, cumulative, fromM]);
   const bounds = useMemo(() => sectionBounds(route, cumulative, fromM, toM), [route, cumulative, fromM, toM]);
-  const [view, setView] = useState<{ zoom: number; lat: number }>({ zoom: FLIGHT_ZOOM, lat: start.lat });
+  const [view, setView] = useState<{ zoom: number; lat: number }>({ zoom: FLIGHT_ZOOM_DEFAULT, lat: start.lat });
 
   // Poloha značky a kamery: jemný krok (1/600 úseku), aby se plynule hýbaly se stejnými hodinami (krok ≈ 50 ms).
   // Místa a maska se přepočítávají zřídka (drahé): místa po 1/40 úseku, maska po šestinách.
@@ -145,13 +146,13 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
       cam.fitBounds(bounds, { padding: { top: 40, right: 28, bottom: 40, left: 28 }, duration: 0 });
       return;
     }
-    cam.jumpTo({ center: [start.lon, start.lat], zoom: FLIGHT_ZOOM });
-  }, [runKey, start, bounds, reduceMotion]);
+    cam.jumpTo({ center: [start.lon, start.lat], zoom: flightZ });
+  }, [runKey, start, bounds, reduceMotion, flightZ]);
 
   useEffect(() => {
     if (finished || reduceMotion) return;
-    camera.current?.easeTo({ center: [you.lon, you.lat], zoom: FLIGHT_ZOOM, duration: FOLLOW_MS, easing: "linear" });
-  }, [you, finished, reduceMotion]);
+    camera.current?.easeTo({ center: [you.lon, you.lat], zoom: flightZ, duration: FOLLOW_MS, easing: "linear" });
+  }, [you, finished, reduceMotion, flightZ]);
 
   // Konec letu (doběhl, nebo se přeskočil): ukázat celý úsek.
   useEffect(() => {
@@ -185,7 +186,7 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
         onRegionDidChange={(e) => setView({ zoom: e.nativeEvent.zoom, lat: e.nativeEvent.center[1]! })}
       >
         <Images images={images} />
-        <Camera ref={camera} initialViewState={{ center: [start.lon, start.lat], zoom: FLIGHT_ZOOM }} />
+        <Camera ref={camera} initialViewState={{ center: [start.lon, start.lat], zoom: flightZ }} />
         <GeoJSONSource id={REVEAL_INNER} data={masks.inner}>
           {toLayers(revealLayers(mapTheme), REVEAL_INNER, { beforeId: ATLAS_SKETCH_START })}
         </GeoJSONSource>
