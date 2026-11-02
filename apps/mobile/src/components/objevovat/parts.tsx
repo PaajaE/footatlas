@@ -10,7 +10,7 @@ import type { UpcomingExpedition } from "../../kronika/upcoming";
 import { UPCOMING_TYPE_LABEL } from "../../kronika/upcoming";
 
 /** Náhled trasy rozjeté výpravy: čára z bodů trasy, ušlá část rumělkově, zbytek tečkovaně. */
-export function RouteBanner({ walkedM, height = 170 }: { walkedM: number; height?: number }) {
+export function RouteBanner({ walkedM, height = 150 }: { walkedM: number; height?: number }) {
   const { colors } = useTheme();
   const W = 350;
   const built = useMemo(() => {

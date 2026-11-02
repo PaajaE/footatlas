@@ -16,12 +16,13 @@ export function earthShare(totalM: number): number {
 }
 
 /** „35 % cesty kolem Země“, pod 1 % „méně než 1 % cesty kolem Země“, od 100 % „2,3× kolem Země“. */
-export function earthShareLabel(totalM: number): string {
+export function earthShareLabel(totalM: number, short = false): string {
   const f = earthShare(totalM);
+  const tail = short ? "kolem Země" : "cesty kolem Země";
   if (f >= 1) return `${(Math.floor(f * 10) / 10).toFixed(1).replace(".", ",")}×${NBSP}kolem${NBSP}Země`;
   const pct = Math.round(f * 100);
-  if (pct < 1) return `méně než 1${NBSP}%${NBSP}cesty kolem Země`;
-  return `${pct}${NBSP}%${NBSP}cesty kolem Země`;
+  if (pct < 1) return `méně než 1${NBSP}%${NBSP}${tail}`;
+  return `${pct}${NBSP}%${NBSP}${tail}`;
 }
 
 /** Celé číslo s pevnými mezerami po tisících: 14 200. */
@@ -168,10 +169,10 @@ export function longestDaySentence(longestM: number, route?: { name: string; tot
   if (!(longestM > 0)) return null;
   const day = formatKmBig(longestM);
   if (!route || !(route.totalM > 0)) return `Váš nejdelší den měřil ${day}.`;
-  if (longestM >= route.totalM) return `Váš nejdelší den, ${day}, by stačil na celou trasu ${route.name}.`;
+  if (longestM >= route.totalM) return `Váš nejdelší den, ${day}, by stačil na celou výpravu ${route.name}.`;
   const pct = Math.round((longestM / route.totalM) * 100);
   if (pct < 1) return `Váš nejdelší den měřil ${day}.`;
-  return `Váš nejdelší den, ${day}, je ${pct}${NBSP}% trasy ${route.name}.`;
+  return `Váš nejdelší den, ${day}, je ${pct}${NBSP}% délky výpravy ${route.name}.`;
 }
 
 // ---------- životní cesta ----------

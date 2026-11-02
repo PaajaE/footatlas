@@ -20,6 +20,8 @@ export function useInk() {
     label: other.ochre,
     /** Oranžová stopa oblouku; stejná na obou kartách. */
     arc: darkTheme.colors.accent,
+    /** Text pilulky na oranžovém podkladě: na krémové kartě tmavší rumělka kvůli kontrastu. */
+    pill: name === "dark" ? lightTheme.colors.accent : "#F0A487",
   };
 }
 

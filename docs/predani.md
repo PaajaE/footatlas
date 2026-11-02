@@ -39,6 +39,7 @@ Po testu APK 1.4.0 na telefonu majitel produktu chtěl výrazně lepší prožit
 | 0015 | Živá obnova: návrat do popředí (min. 15 s odstup), každou minutu v popředí, stažení prstem; na pozadí nic; „Aktualizováno před N min“ | `src/state/ExpeditionProvider.tsx`, `src/state/refreshPolicy.ts` (+test), `src/components/LastUpdated.tsx`, `src/components/ui.tsx` |
 | 0016 | Příběhy míst odděleně od geometrie: háček, upoutávka, hádanka (3 možnosti), kontext, tip „Až tam půjdete“, kapitola, zdroje. 14 míst 1. etapy, 5 kapitol. Nový detail místa | `packages/content/src/story.ts` (+test), `packages/content/data/vltavska-stezka/obsah.json`, `apps/mobile/src/data/vltavska.ts`, `apps/mobile/src/app/zastavka/[id].tsx` |
 | 0018 | Tipy k hádankám, „Projít je“ (příběhy objevů), Domů (hádanka, Kam dnes dojdu?, Nedávno objeveno, Kapitoly), Objevovat, deník v Kronice | `src/riddle.ts` (+test), `src/components/Riddle.tsx`, `src/components/HomeSections.tsx`, `src/app/objevy.tsx`, `src/state/useTips.ts` |
+| 0021 | Kronika (zeměkoule, Deník / Cesta / Rok / Sbírky), Objevovat (připravované výpravy, „Chci ji“, banner životní cesty), Karta života; čistá logika s testy (balík C) | `src/kronika/*` (+testy), `src/components/kronika/*`, `src/components/objevovat/*`, `src/app/(tabs)/kronika.tsx`, `objevovat.tsx`, `src/app/karta-zivota.tsx` |
 | 0017 | Pěší trasa po souši (OSRM nad OSM), 62,25 km, 4 etapy (Roztoky, Kralupy, Vraňany, Mělník) | `tools/route/build-walking-route.mjs` (+README), `packages/content/data/vltavska-stezka/route.json`, `expedition.json`, `pilot.test.ts` |
 
 Cesty v tabulce jsou relativně k `apps/mobile/` u aplikace.
@@ -58,15 +59,15 @@ Priorita: **P0** hned, **P1** jádro prožitku, **P2** potom. Číslování fáz
 4. **Mapa po změně trasy:** zkontrolovat, že ušlý úsek a poloha na mapě v aplikaci odpovídají nové `route.json`. Trasa je do 1,5 km od staré, koridor 5 km stačí, ale ověřit vizuálně.
 
 ### P1: okamžiky z prototypu do aplikace (fáze 2–3)
-Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádanka s tipem), část č. 10 (Domů bez výřezu atlasu) a č. 11 (jen deník po dnech). Zbývá zbytek těchto bodů.
+Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádanka s tipem), část č. 10 (Domů bez výřezu atlasu) a č. 11 (jen deník po dnech). Balík C (rozhodnutí 0021) dodal č. 11, 12 a 20 níže; zbývá zbytek těchto bodů.
 5. **Návrat „Inkoust“ (M1):** po otevření, když přibylo ≥ 300 m nebo místo: kamera MapLibre letí po ušlém úseku, razítka dopadají, počítadlo; přeskočitelné; respektovat „Omezit pohyb“. Vzor `docs/mockupy/Main.dc.html`. Data: `state.newlyReached`, `session.lastSeenWalkedM`, `markSeen`.
 6. **Příběhy objevů (M2):** celoobrazovkové listování nově odemčenými místy (háček, kontext, den dosažení, „co přibylo na mapě“). Vzor: příběhová část v `Main.dc.html`.
 7. **Hádanka s tipem (M3):** u zamčeného místa tři možnosti, tip se uloží (SQLite nebo AsyncStorage) a vyhodnotí po odemčení. Data už jsou v `obsah.json` (`riddle.options`, `riddle.answer`). Vzor `Hadanka.dc.html`.
 8. **Příchod naživo (M4):** když živá obnova odemkne místo při otevřené aplikaci, ukázat dopad pečeti a hlášku „Právě jste došli k …“ (+ haptika). Navázat na `refreshFor` v `ExpeditionProvider` (porovnat `reached` před a po).
 9. **Styl mapy skica / inkoust (fáze 3):** v `packages/map-style` dvě vrstvy: tužková skica všude, kolorovaný styl jen v masce kolem ušlé části trasy. Pečeti a razítka podle `Pecete.dc.html` (medailony dnes v `apps/mobile/assets/map/medallions`, generuje `tools/maps/make-medallions.py`).
 10. **Domů podle mockupu:** výřez atlasu nahoře, „Kam dnes dojdu?“ (1 / 2 / 4 km / konec etapy), nedávno objeveno, kapitoly. Vzor `Domu.dc.html`.
-11. **Kronika podle mockupu:** zeměkoule s ušlou částí obvodu, střídavé postřehy, Deník jako časová osa, Životní cesta, Rok den po dni, Sbírky. Vzor `Kronika.dc.html`. Data: `ChronicleProvider`, `expedition_event`.
-12. **Karta života** po prvním načtení historie (onboarding). Vzor `KartaZivota.dc.html`.
+11. ~~**Kronika podle mockupu:** zeměkoule s ušlou částí obvodu, střídavé postřehy, Deník jako časová osa, Životní cesta, Rok den po dni, Sbírky. Vzor `Kronika.dc.html`. Data: `ChronicleProvider`, `expedition_event`.~~ Hotovo (0021), na zařízení neověřeno; zbývá pečeť ze sdílené komponenty a animace (otáčení zeměkoule, kreslení oblouku).
+12. ~~**Karta života** po prvním načtení historie (onboarding).~~ Hotovo (0021); chybí „Sdílet kartu jako obrázek“ (skryto) a ověření na zařízení.
 
 ### P1: obsah
 13. **Ověřit fakta** podle seznamu v `docs/obsah-vltavska-podklady.md` (dva nezávislé zdroje, datum), pak nastavit `verified: true`. Dělá člověk; agent může připravit druhé zdroje.
@@ -78,7 +79,7 @@ Hotovo v rozhodnutí 0018: č. 6 (příběhy objevů, bez fotek), č. 7 (hádank
 17. **Přívoz jako scéna** na trase (vzor `Privoz.dc.html`); trasa má přívozy v Podbabě, Libčicích a Lužci (jezdí sezónně).
 18. **Tmavý vzhled v novém stylu:** noční pergamen podle `*-noc.dc.html`, ale přes tokeny tématu, ne přes `noc.css`.
 19. **Pozadí, widget, upozornění** (až po vyladění aplikace, viz návrh příloha A): Health Connect `READ_HEALTH_DATA_IN_BACKGROUND` + periodická úloha, HealthKit background delivery, widget, lokální upozornění na události (výchozí vypnuto).
-20. **Objevovat:** knihovna výprav podle `Objevovat.dc.html` (připravované výpravy jsou jen ukázka, délky ověřit).
+20. ~~**Objevovat:** knihovna výprav~~ Hotovo (0021) s koncepty `verified: false` v `src/kronika/upcoming.ts`; **ověřit délky a popisy** Po Labi do Děčína, Krkonošská hřebenovka, Pěšky na Měsíc před vydáním.
 
 ## 5. Na co si dát pozor
 

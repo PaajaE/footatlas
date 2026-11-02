@@ -41,8 +41,8 @@ export function LifeHero({ totalM, steps, facts, onPress }: { totalM: number; st
             {steps !== null ? ` · asi ${formatStepCount(steps)} kroků` : ""}
           </T>
           <View style={{ marginTop: 6, alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: `${ink.arc}2E` }}>
-            <T variant="small" style={{ fontFamily: fonts.bodySemi, color: ink.arc }}>
-              {earthShareLabel(totalM)}
+            <T variant="small" style={{ fontFamily: fonts.bodySemi, color: ink.pill }}>
+              {earthShareLabel(totalM, true)}
             </T>
           </View>
         </View>

@@ -28,6 +28,9 @@ describe("obvod Země", () => {
     expect(earthShare(14_200_000)).toBeCloseTo(14_200 / EARTH_CIRCUMFERENCE_KM, 6);
     expect(nb(earthShareLabel(14_200_000))).toBe("35 % cesty kolem Země");
   });
+  it("krátký tvar pro pilulku", () => {
+    expect(nb(earthShareLabel(14_200_000, true))).toBe("35 % kolem Země");
+  });
   it("pod 1 % se nepíše 0 %", () => {
     expect(nb(earthShareLabel(60_000))).toBe("méně než 1 % cesty kolem Země");
   });
@@ -131,9 +134,9 @@ describe("věty srovnání", () => {
   });
   it("nejdelší den ve vztahu k trase", () => {
     expect(nb(longestDaySentence(14_200, { name: "Vltavská stezka", totalM: 62_254 }))).toBe(
-      "Váš nejdelší den, 14,2 km, je 23 % trasy Vltavská stezka.".replace("14,2 km", "14,2 km"),
+      "Váš nejdelší den, 14,2 km, je 23 % délky výpravy Vltavská stezka.",
     );
-    expect(longestDaySentence(70_000, { name: "X", totalM: 62_254 })).toContain("celou trasu X");
+    expect(longestDaySentence(70_000, { name: "X", totalM: 62_254 })).toContain("celou výpravu X");
     expect(longestDaySentence(0)).toBeNull();
     expect(nb(longestDaySentence(8_000))).toBe("Váš nejdelší den měřil 8,0 km.");
   });
