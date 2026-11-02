@@ -1,246 +1,321 @@
-# Návrh: z počítadla kilometrů živá výprava
+# Návrh prožitku: Atlas, který kreslíte nohama
 
-Verze 1 · 2. 11. 2026 · Vychází z větve `dev/android-verifikace` (APK 1.4.0) a z testu na telefonu (4 screenshoty: Domů, Trojský zámek, Císařský ostrov, Výprava).
+Verze 2 · 2. 11. 2026 · Vychází z `dev/android-verifikace` (APK 1.4.0), testu na telefonu a zpětné vazby „pořád slabé, chci wow“.
 
-Tento dokument je **návrh**, ne rozhodnutí. Na konci je pořadí prací a otázky k rozhodnutí.
+Rozhodnuto (2. 11. 2026): **delší pěší trasa** po souši · **světlý vzhled výchozí**, tmavý jako volba · **metry i kroky** u krátkých vzdáleností · **obsah sbíráme z webu, člověk ověřuje** (podklady: [obsah-vltavska-podklady.md](obsah-vltavska-podklady.md)) · **widget a upozornění až po vyladění aplikace**.
 
----
-
-## 1. Co se na telefonu stalo (zpětná vazba bez obalu)
-
-Uživatel ráno otevřel aplikaci po 9,1 km chůze. Aplikace mu ukázala:
-
-| Co viděl | Proč je to špatně |
-|---|---|
-| Tmavou obrazovku se statickým textem „Od posledně jste ušli 9,1 km. Přibylo 6 malých objevů.“ | Největší odměna celé aplikace (návrat po chůzi) je jedna věta v šedé kartě. Žádný pohyb, žádné jméno objevu, nic k rozkliknutí. Šest objevů se „stalo“, ale uživatel se nedozví, co to bylo. |
-| „Další zastávka · 0,0 km“ a v seznamu „Trojský zámek 0,0 km“ | Zastávka je ve skutečnosti pár desítek metrů před ním (km 12,545, ušlo se ~12,5). Formát s jedním desetinným místem kilometru zaokrouhlí 40 m na nulu. |
-| Detail zastávky: „Zatím zamčeno · Odemkne se za 0,0 km.“ | Rozpor: nula a přitom zamčeno. Pod 1 km se musí ukazovat metry a kroky. |
-| Odemčený Císařský ostrov: „Největší pražský ostrov.“ + „Toto místo jste už minuli.“ + „Koncept obsahu…“ | Odemčení nic nepřineslo. Odměna je prázdná, navíc přiznává, že je to ukázkový text. Konkurence (Walk the Distance) je kritizována přesně za tohle a my jsme si slíbili opak (spec 2.3, bod 3). |
-| Mapa: trasa vede středem Vltavy | Je to tok řeky z OSM (`route.json`), ne cesta. Na mapě to vypadá, že člověk plave. U „chodící“ aplikace to boří iluzi. |
-| Aplikace nechaná otevřená se nezmění | Vzdálenost se čte jen při startu aplikace (`ExpeditionProvider`, `useEffect` při načtení). Žádný návrat z pozadí, žádný interval, žádné „stáhni a obnov“. |
-| Tmavý vzhled | Téma se řídí systémem (`ThemeProvider`, `choice: "auto"`). Pergamenový světlý styl je přitom to, co aplikaci dává charakter. |
-| Mapová stránka | Tu se líbí. Medailony, ušlý úsek, „Celá trasa“. Je to nejlepší obrazovka a návrh na ní staví. |
-
-### Hlubší problém
-
-Aplikace dnes **sděluje stav**, ale **neprožívá cestu s uživatelem**. Spec slibuje „Každé otevření aplikace něco dá“ (princip 4) a „Při odemčení krátká animace na mapě, malý příběh“ (9.2). Ani jedno v aplikaci není. Domů je výpis, ne uvítání. Čísla jsou správně, ale nic se *neděje*.
-
-Tři chybějící vrstvy:
-
-1. **Okamžik** – návrat do aplikace má být malá událost: „podívej, kam jsi došel“.
-2. **Obsah** – každé místo musí stát za to, aby ho člověk otevřel. Jeden překvapivý fakt je víc než tři věty encyklopedie.
-3. **Živost** – aplikace má reagovat na to, že člověk chodí, i když ji nechá otevřenou, a (později) dát vědět, když dojde někam důležitého.
+Tento dokument je plán UX/UI. Nic z něj zatím není naprogramované.
 
 ---
 
-## 2. Co si vzít od konkurence
+## 0. Proč verze 1 působila slabě
 
-Neopisujeme; bereme mechaniky, které fungují, a vynecháváme ty, které odporují našim principům (žádné série, žebříčky, nátlak).
+Verze 1 opravovala chyby a přidávala funkce. Správně, ale „wow“ z toho nevznikne. Wow vzniká ze tří věcí, které tam chyběly:
 
-| Aplikace | Co dělá dobře | Co si vezmeme | Čemu se vyhneme |
-|---|---|---|---|
-| **The Conqueror** | Pohlednice u milníků s textem o okolí trasy; pohled ze Street View na aktuální pozici; strom zasazený za každých 20 % trasy. Uživatelé to popisují jako hlavní důvod, proč pokračovat. | **Pohlednice z etapy** (už ve spec 9.4, chybí v aplikaci). **„Pohled z místa“**: velká fotka toho, kde právě jsem. Symbolický „dárek“ za čtvrtiny trasy. | Vše placené, fyzické medaile jako jediná odměna. |
-| **Pikmin Bloom** (Niantic) | Chůze jako tichý společník; pohlednice přinesené z „cest“; **lifelog** – denní deník, kam se vrací; mapa se postupně stává osobním deníkem. | **Denní záznam v Kronice** („úterý: 6,2 km, Karlův most, Štvanice“). Mapa zaplněná *mými* daty (datum u každého medailonu). | Měna, obchod, sbírání pro sbírání. |
-| **Walk the World / World Walking** | Pas s razítky, poštovní karty. Kritika: dlouhá trasa, na mapě se nic neděje. | **Razítka v pasu** jako vizuální forma odemčených míst. Hustota míst (už máme lepší než oni). | Prázdná mapa, chybějící důvod se vracet. |
-| **Walk the Distance** | Skutečné trasy, synchronizace zdravotních dat. Kritika: zastávka = obrázek + odkaz na Wikipedii. | Nic navíc; je to příklad, čím **nesmíme** být. | Prázdné zastávky (to máme teď!). |
-| **Apple Fitness / Google Fit** | Animace dovršení (kroužky se dotočí), **widgety** na ploše, týdenní shrnutí. | **Animace postupu při otevření**, **widget** „do Trojského zámku 1,2 km“, týdenní shrnutí. | Denní cíle a tlak na sérii. |
-| **Strava / Komoot** | Komoot: trasa po skutečných cestách, „highlights“ s tipy. Strava: krásné sdílecí obrázky. | Trasa **po cestách, ne vodou**. Sdílecí karta (pohlednice) jako obrázek. | Sociální síť, výkon. |
-| **Duolingo** (jen jako protipříklad) | Velmi účinné notifikace. | Pečlivé načasování a personalizace upozornění. | Pocit viny, série, „sova vás pozoruje“. |
+1. **Jedna velká myšlenka**, kterou člověk pozná na první pohled a převypráví kamarádovi.
+2. **Podpisové okamžiky** – pár momentů vyladěných do posledního detailu (pohyb, zvuk, haptika, text), ne deset průměrných obrazovek.
+3. **Obsah, u kterého člověk řekne „to jsem nevěděl“** – a hned to chce někomu říct.
 
-Zdroje: [The Conqueror review (HomeTechHacker)](https://hometechhacker.com/the-conqueror-virtual-challenges-review-motivation-medals-and-miles/), [Is The Conqueror legit](https://abusonadustyroad.com/is-the-conqueror-virtual-challenge-legit-10-things-to-know-and-understand), [Best virtual challenges](https://abusonadustyroad.com/best-virtual-challenges-and-why-we-love-them), [Virtual walking challenge apps](https://walking-startup.uk/blog/virtual-walking-challenge-apps), [Design critique: Pikmin Bloom](https://ixd.prattsi.org/2026/02/design-critique-pikmin-bloom-iphone-app/), [Pikmin Bloom launch](https://indigo-pearl.prezly.com/niantic-and-nintendo-launch-pikmin-bloom-an-app-that-brings-a-little-joy-to-your-everyday-journeys-on-foot-p3jm6x), [Pikmin Bloom (Engadget)](https://www.engadget.com/pikmin-bloom-has-been-helping-me-meet-my-outdoor-walking-goals-for-years-000025214.html), [Health Connect: čtení dat](https://developer.android.com/health-and-fitness/guides/health-connect/develop/read-data). Hodnocení konkurence vychází z veřejných recenzí, ne z vlastního testu placených částí.
-
-**Shrnutí:** Nikdo z konkurence nemá dohromady (a) živý návrat po chůzi, (b) opravdu zajímavý obsah každého místa a (c) mapu, která je deníkem. To je naše místo.
+Všechno níže slouží těmto třem bodům.
 
 ---
 
-## 3. Vize prožitku v jedné scéně
+## 1. Velká myšlenka: rozkreslený atlas
 
-> Ráno otevřu aplikaci. Na světlém pergamenu se mapa krátce přiblíží k místu, kde jsem byl naposledy, a moje tečka **dojde po trase** k Trojskému zámku. Po cestě se postupně rozsvítí tři medailony. Nahoře: „Od pátku jste ušli 9,1 km. Prošli jste Prahou od Štvanice až do Troji.“
->
-> Pod tím karta „**Co jste potkali**“: Plavební komora Troja, Císařský ostrov, Trojská lávka… Klepnu a listuju jako příběhem: velká fotka, jedna věta, **jeden fakt, který jsem nevěděl**, „došli jste sem ve čtvrtek 30. října“.
->
-> Na konci: „Trojský zámek je **40 metrů** před vámi (asi 55 kroků). Až ho dojdete, uvidíte, proč má schodiště plné bojujících obrů.“
->
-> Nechám aplikaci otevřenou a jdu ven. Když se vrátím a odemknu telefon, čísla se samy posunou a zámek se odemkne přímo před očima.
+> **Aplikace je starý ručně kreslený atlas, který zatím není hotový. Dokreslujete ho chůzí.**
+
+- Před vámi je krajina jen **načrtnutá tužkou** – tenké linky, světlý pergamen, místa jako prázdné kroužky s otazníkem.
+- Kudy jste prošli, tam se krajina **vybarví inkoustem a akvarelem**: řeka zmodrá, lesy zezelenají, vaše stopa je sytá rudá čára, místa dostanou ilustrovanou **pečeť**.
+- Na konci výpravy máte **celý list atlasu**, kreslený vaší cestou, s daty u každého místa. Ten jde stáhnout, sdílet a (později, placeně) **vytisknout jako plakát**.
+
+Proč to funguje:
+- Navazuje na to, co se líbí už teď (mapová stránka, pergamen, medailony).
+- Postup je **vidět bez čísel**: kus atlasu je hotový, kus ne. Pocit „dokončit obrázek“ je silnější motivace než procenta, a přitom netlačí (žádné termíny).
+- Je to **originální**: Conqueror má Street View, Pikmin Bloom květiny na mapě, Walk the World pas. Atlas, který se dokresluje chůzí, nemá nikdo.
+- Má obchodní konec: tištěný atlas a plakát jsou ve spec 11.2 už teď.
+
+**Technicky proveditelné** (bez kódu teď, jen ověření směru): MapLibre umí dvě vrstvy stylu – „skica“ (šedé linky, bez výplní) a „kolorovaná“ (dnešní pergamenový styl). Kolorovaná vrstva se zobrazí jen v koridoru kolem ušlé části trasy (maska z bufferu ušlého úseku). Animace „vpíjení inkoustu“ = postupné zvětšování masky podél trasy. Pečeti jsou předkreslené obrázky jako dnešní medailony.
 
 ---
 
-## 4. Návrhy změn
+## 2. Šest podpisových okamžiků
 
-Každý návrh má prioritu: **P0** = opravit hned (chyby, které podkopávají důvěru), **P1** = jádro nového prožitku, **P2** = rozšíření, **P3** = později.
+### M1 · Návrat: „Inkoust“ (otevření aplikace po chůzi)
 
-### 4.1 P0 – Opravy, které nepočkají
+Nahrazuje šedou kartu „Od posledně jste ušli 9,1 km“.
 
-**A. Vzdálenosti, které dávají smysl**
+1. Obrazovka se otevře na atlasu v místě, kde jste byli **naposledy**. Nad ním jedna řádka: *„Od pátku 9,1 km. Podívejte, kudy jste šli.“*
+2. Kamera plynule **letí po trase** (4–6 s), za ní se krajina vybarvuje inkoustem. Číslo kilometrů nahoře roste.
+3. Když kamera mine místo, **dopadne pečeť**: krátké „razítko“ (zvětšení a dosednutí, 250 ms), jemná haptika, název se na chvíli rozsvítí.
+4. Na konci kamera zastaví na vaší tečce. Dole vyjede karta: *„Cestou jste potkali 6 míst“* s řadou pečetí a tlačítkem **Projít je**.
 
-- Pod 1 km ukazovat **metry** zaokrouhlené na 10 m („40 m“, „350 m“), nad 1 km kilometry s jedním desetinným místem, nad 10 km celé kilometry.
-- Pod 1 km přidat **kroky** z osobní délky kroku: „350 m · asi 470 kroků“. Kroky jsou pro krátké vzdálenosti srozumitelnější než metry a máme kalibraci (rozhodnutí 0006).
-- Nikdy nezobrazit „0,0 km“. Pod 15 m: „**Jste tady**“ (a místo už je fakticky na dosah – viz odemčení níže).
-- Jedna funkce `formatDistance(m, { stepLengthM })` v `format.ts`, používaná všude (Domů, Výprava, detail, seznam „Na dalších 5 km“). Dnes je formátování rozkopírované na 5 místech (i ruční `toFixed(1)` ve `vyprava.tsx`).
-- Detail zamčeného místa: „Odemkne se za 40 m (asi 55 kroků)“. Text „Toto místo jste už minuli“ nahradit datem: „Došli jste sem ve čtvrtek 30. října“ (data už máme v `expedition_event`).
+Pravidla: klepnutím kdykoli přeskočit · přehrává se jen tehdy, když přibylo ≥ 300 m nebo nějaké místo · při „Omezit pohyb“ v systému jen prolnutí · nikdy dvakrát pro stejný úsek.
 
-**B. Světlý vzhled jako výchozí pro všechny**
+### M2 · Projít objevy: příběhy z cesty
 
-- `ThemeProvider`: výchozí volba `"light"` místo `"auto"`; `app.json`: `userInterfaceStyle: "light"`.
-- Tmavý režim zůstává jako volba v nastavení (Světlý / Tmavý / Podle systému), výchozí světlý. Mapa už den/noc přepínat umí.
+Celoobrazovkové karty, listování do strany, vlastním tempem (bez časovače):
 
-**C. Trasa po souši, ne Vltavou**
+```
+┌───────────────────────────────┐
+│ ● ● ○ ○ ○ ○        3 z 6    ✕ │
+│ ┌───────────────────────────┐ │
+│ │      [velká fotografie    │ │
+│ │       nebo stará rytina]  │ │
+│ └───────────────────────────┘ │
+│ MALÝ OBJEV · KM 0,7           │
+│ Výtoň                         │
+│                               │
+│ ❝ Clo se tu platilo sekerou.  │
+│   Z každého voru celníci      │
+│   vytnuli dvanáctinu klád –   │
+│   odtud jméno Výtoň. ❞        │
+│                               │
+│ Celnice z 16. století je      │
+│ poslední stavbou zmizelého    │
+│ Podskalí. Dnes v ní je        │
+│ muzeum vorařství.             │
+│                               │
+│ Došli jste sem ve čtvrtek     │
+│ 30. října · kapitola Voraři 2/5│
+│                               │
+│ [ Na mapě ]   [ Další › ]     │
+└───────────────────────────────┘
+```
 
-- Nahradit tok řeky **pěší trasou po nábřežích, stezkách a cyklostezkách** (A2 / Vltavská cyklostezka v Praze, dále podél břehu, přívozy Podbaba–Podhoří a Libčice–Letky jako přechody).
-- První pokus (pěší routing OSRM nad OSM přes 27 průchozích míst, provedený a zahozený při psaní tohoto návrhu): **~89 km** místo 62 km, odchylky míst od trasy většinou do 50 m, ale s objížďkami (Vraňany–Lužec–Mělník přes 14 km). Po ručním doladění průchozích bodů a přívozů lze čekat **zhruba 70–80 km**. Úkoly:
-  - skript `tools/route/` (průchozí body + pěší routing + zjednodušení + nové `unlockAtM`),
-  - nové konce etap (asi 5 etap místo 4, aby etapa zůstala 15–20 km, spec 7.1),
-  - dotáhnout hustotu míst (spec 7.2) – delší trasa potřebuje 4–6 nových malých objevů,
-  - ověřit, že koridor mapy (`vltava-koridor5`) pokrývá novou trasu,
-  - aktualizovat `pilot.test.ts` (délka, počty, známá mezera).
-- Alternativa, pokud chceme zachovat 62 km: kreslit trasu jako „podél řeky“ odsazenou na břeh. Nedoporučuji – je to kosmetika a typ trasy by lhal.
+- **Háček** (velkým písmem, uvozovky) je to, co si člověk zapamatuje. Teprve pod ním kontext.
+- Datum dosažení dělá z faktu **osobní vzpomínku** („tohle jsem objevil ve čtvrtek“).
+- Poslední karta = *„Co vás čeká“*: další místo a jeho hádanka (M3).
 
-**D. Aktualizace bez restartu**
+### M3 · Hádanka u cesty (zvědavost místo povinnosti)
 
-- Obnovit data při **návratu aplikace do popředí** (`AppState` → `active`), při **přepnutí na záložku** Domů/Výprava a gestem **stáhnout dolů** (`RefreshControl`).
-- Když je aplikace v popředí, obnovovat **každých 60 s** (jen agregovaný součet za interval od posledního čtení; levné). Nic neběží, když je obrazovka zhasnutá.
-- Poctivě vysvětlit zpoždění: Health Connect sám kroky nepočítá, zapisuje je tam Google Fit / Samsung Health / hodinky, často po dávkách (minuty až desítky minut). V aplikaci drobně: „Aktualizováno před 2 min · zdroj zapisuje s prodlevou“.
+Každé zamčené místo má **otázku**, ne jen název. Ukazuje se v „Na dalších 5 km“ i u další zastávky:
 
-### 4.2 P1 – Jádro nového prožitku
+> **Trojský zámek · 40 m (asi 55 kroků)**
+> *Proč se celá čtvrť jmenuje podle Tróje, když se původně jmenovala Zadní Ovenec?*
 
-**E. „Cesta od minula“ – uvítání po návratu** (nahrazuje šedou kartu)
+- Volitelně si můžete **tipnout** ze tří odpovědí. Žádné body, žádné skóre, jen při odemčení: *„Tipovali jste správně“* nebo *„Tohle překvapí: …“*. Tip zvyšuje zvědavost a fakt si člověk líp zapamatuje.
+- Je to hlavní nástroj „důvodu jít ven“, aniž by aplikace cokoli vyžadovala: *jdu ven, protože chci vědět odpověď*.
 
-Když od posledního zobrazení přibylo ≥ 100 m nebo nějaké místo:
+### M4 · Příchod naživo
 
-1. **Animovaný postup** (1,5–2,5 s, přeskočitelný klepnutím): pruh etap se doplní z minulé hodnoty na novou, číslo kilometrů naroste, na malé mapě (nebo na náhledu `RouteSketch`) tečka dojde po trase a medailony po cestě se postupně rozsvítí. Respektovat „Omezit animace“ v systému.
-2. **Lidská věta místo statistiky**: „Od pátku jste ušli 9,1 km. Prošli jste Prahou od Štvanice až do Troji.“ (Úsek pojmenovat podle prvního a posledního místa, případně etapy.)
-3. **Karta „Co jste potkali“**: řada medailonů / dlaždic s názvy nově odemčených míst. Klepnutí otevře **příběhový prohlížeč** (F).
-4. **Co dál**: „Trojský zámek je 40 m před vámi“ s náhledem slibu („…uvidíte, proč má schodiště plné bojujících obrů“) – teaser, ne celý fakt.
-5. Při dokončení etapy místo věty **pohlednice etapy** (H).
+Když je aplikace otevřená a přijdou data, která odemknou místo:
+- pečeť dopadne přímo na mapě, telefon jemně zavibruje, nahoře *„Právě jste došli k Trojskému zámku“* a rovnou odpověď na hádanku.
+- Toto je odpověď na „když nechám aplikaci spuštěnou, změnu se nedozvím“: obnova při návratu do popředí, každou minutu v popředí, stažením dolů. (Zdroj dat – Google Fit, Samsung Health, hodinky – zapisuje s prodlevou; aplikace to poctivě ukazuje: „aktualizováno před 2 min“.)
 
-Stav „viděno“ (`markSeen`) se posune až po zhlédnutí, jako dnes.
+### M5 · Přívoz (událost na trase)
 
-**F. Příběhový prohlížeč objevů**
+Delší pěší trasa přechází řeku přívozy (Podbaba–Podhoří, Libčice–Letky) a lávkami. Přechod je **malá scéna**: mapa se přiblíží, lodička přepluje řeku, karta *„Převezli jste se přívozem P2. Přívoz tu býval už v roce 1888.“* Řeka tím přestane být jen pozadím a stane se součástí cesty.
 
-- Celoobrazovkové listování nově odemčenými místy (styl „stories“, ale bez časovače – vlastním tempem): fotka nebo ilustrace přes horní polovinu, typ a kilometr, název, **překvapivý fakt** zvýrazněný, 2–3 věty, „došli jste sem ve čtvrtek“, odkaz „Ukázat na mapě“.
-- Tečky postupu nahoře („3 z 6“), poslední karta = „Co vás čeká“.
-- Stejný prohlížeč slouží i z Kroniky („projít všechna místa výpravy“) – opakované čtení je v pořádku.
+### M6 · Pohlednice z etapy a list atlasu z výpravy
 
-**G. Obsah míst, který stojí za odemčení**
+- Konec etapy: **pohlednice** – líc: ilustrace nebo fotka úseku s ručně psaným názvem; rub: vaše razítka, data („24.–30. října, 6 dní, 18,6 km, 12 míst“), krátký text složený z vašich objevů. Otočení pohlednice gestem. Sdílet jako obrázek.
+- Konec výpravy: **list atlasu** celé trasy, vybarvený, s pečetěmi a daty. Stažení ve vysokém rozlišení, později tisk.
 
-Šablona (spec 7.3) se má naplnit *teď*, ne „před vydáním“. Navrhuji upravit důraz:
+---
 
-- **Háček (fakt)** – jedna věta, kvůli které člověk řekne „aha“. Povinné i u malých objevů.
-- **Kontext** – 2–3 věty, jak to souvisí s řekou a s cestou (proč je to tady).
-- **„Až tam budete“** – co by člověk na místě skutečně uviděl (pro ty, kdo jednou půjdou fyzicky).
-- **Teaser** – půl věty pro náhled před odemčením („…proč tu vory platily clo“).
-- Fotka s licencí, 2 zdroje, datum ověření (beze změny).
+## 3. Interakce: aplikace se ptá, ukazuje a nabízí
 
-Ukázky směru (k ověření dvěma zdroji před vydáním):
+Bez nátlaku, ale ne pasivní:
 
-| Místo | Dnes | Návrh háčku |
+| Interakce | Jak vypadá | Proč |
 |---|---|---|
-| Karlův most | „Kamenný most ze 14. století.“ | Základní kámen se podle tradice pokládal 9. 7. 1357 v 5:31 – čísla 1-3-5-7-9-7-5-3-1 tvoří palindrom. Až do roku 1841 to byl jediný most přes Vltavu v Praze. |
-| Trojský zámek | „Barokní letohrádek s francouzskou zahradou.“ | Vnější schodiště zdobí souboj olympských bohů s giganty – obři padají do hlubin pod schody. Stavěl ho pro Šternberky Jean Baptiste Mathey (1679–1685). |
-| Levý Hradec | „Hradiště, kde podle tradice stál první kostel v Čechách.“ | Právě tady byl v roce 982 zvolen pražským biskupem Vojtěch – pozdější svatý Vojtěch. |
-| Soutok v Mělníku | „Vltava se tu vlévá do Labe.“ | Vltava přináší do soutoku víc vody než Labe – hydrologicky je tedy „hlavní“ řekou ona, jen jméno zůstalo Labi. |
-| Výtoň | „Bývalá celnice…“ | Clo se platilo ze dřeva plaveného po řece; budova celnice je dnes nejstarší dochovanou stavbou Podskalí. |
-| Nelahozeves / Dvořák | „Skladatel se tu narodil roku 1841.“ | Dvořák se narodil v rodině řezníka a hostinského; vlaky na trati za domem ho fascinovaly celý život. |
+| **Kam dnes dojdu?** | Na Domů posuvník nebo tah prstem po trase: „1 km · 2 km · 5 km“. Atlas ukáže, co by se odemklo: *„3 km = Trojský zámek a Sedlecké skály“.* | Cíl z vlastní zvědavosti, ne denní kvóta. |
+| **Hádanky** (M3) | Tip ze tří odpovědí. | Zvědavost, zapamatování. |
+| **Odbočky** | U vybraných míst volba: *„Odbočit na Levý Hradec (+0,8 km)?“* Odbočka přidá místo navíc, hlavní trasa zůstane. Rozhoduje se kdykoli předem. | Pocit volby a vlastní cesty. |
+| **Kapitoly** | Nitky přes více míst: *Voraři* (Výtoň → náplavka → … → Libčice), *Šlechtická sídla* (Troja, Roztoky, Nelahozeves, Veltrusy), *Mosty a lávky*, *Ostrovy*, *Pověsti*. Dokončená kapitola = ilustrace na okraj atlasu. | Sbírka bez chamtivosti, propojuje místa v příběh. |
+| **Poslech cestou** (P2) | U zastávek 60–90 s audio vyprávění. *„Pusťte si Trojský zámek na dnešní procházku.“* | Při skutečné chůzi se dívat do telefonu nechcete; poslouchat ano. Výrazné odlišení od všech konkurentů. |
+| **Řeka teď** (P2) | U míst u řeky živý údaj: průtok a hladina z nejbližšího vodočtu ČHMÚ, teplota, západ slunce. *„Vltava u Vraňan teď teče 98 m³/s.“* | Spojení virtuální cesty se skutečným místem právě teď. Nutno ověřit licenci dat ČHMÚ. |
+| **Tehdy a dnes** (P2) | U vybraných míst posuvník stará fotografie / dnešek (Wikimedia Commons, archivy s volnou licencí). Podskalí s vory, Výtoň před sto lety. | Silné „wow“ za malou cenu. |
 
-Také **tematické kapitoly** (spec 7.4, úroveň 2) jako nitky přes více míst: *Voroplavba* (Výtoň → náplavka → Libčice → …), *Šlechtická sídla na řece* (Troja → Roztoky → Nelahozeves → Veltrusy), *Řeka a povodně* (2002: Veltrusy, Lužní les, tůně). Odemčení třetího místa kapitoly = malý milník.
+---
 
-Prakticky: obsah je úzké hrdlo (spec 7.6). Navrhuji pro Vltavskou stezku „redakční sprint“: nejdřív háček + teaser pro všech 38 míst (krátké, rychle ověřitelné), plné texty postupně.
+## 4. Obrazovky (UI)
 
-**H. Pohlednice z etapy a z cíle**
+Vizuální směr: **světlý pergamen jako výchozí** (dnešní světlé tokeny), písmo IM Fell pro názvy, Work Sans pro text. Tmavý režim v nastavení (Světlý · Tmavý · Podle systému). Méně karet s rámečkem, víc práce s atlasem, ilustracemi a typografií.
 
-- Na konci etapy: obrazovka pohlednice – ilustrace/fotka úseku, mapa etapy, „18,6 km, 12 míst, 6 dní (od 24. do 30. října)“, razítko etapy. Uložení do Kroniky, **sdílení jako obrázek**.
-- Na konci výpravy: velká pohlednice + celková mapa s daty u medailonů = „deník cesty“.
+### 4.1 Domů = atlas, ne výpis
 
-**I. Domovská obrazovka jako „tady jsem“**
+```
+┌───────────────────────────────┐
+│ Pondělí 2. listopadu     ⚙︎   │
+│                               │
+│ ┌───────────────────────────┐ │
+│ │  [ATLAS: vybarvená část,  │ │
+│ │   moje tečka, pečeti,     │ │
+│ │   před mnou tužková       │ │
+│ │   skica]                  │ │
+│ └───────────────────────────┘ │
+│ Vltavská stezka · 12,5 z 78 km│
+│ ▬▬▬▬▬▬▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭▭ │
+│                               │
+│ DALŠÍ ZASTÁVKA                │
+│ Trojský zámek                 │
+│ 40 m · asi 55 kroků           │
+│ ❓ Proč se čtvrť jmenuje      │
+│   podle Tróje?   [Tipnout]    │
+│                               │
+│ NA DALŠÍCH 5 KM · 3 místa     │
+│ ○ Sedlecké skály   1,9 km  ❓  │
+│ ○ Přívoz Podbaba   3,4 km  ⛴  │
+│                               │
+│ NEDÁVNO OBJEVENO              │
+│ ◉ Trojská lávka · čt          │
+│ ◉ Císařský ostrov · čt        │
+│                               │
+│ [ Kam dnes dojdu? ]           │
+└───────────────────────────────┘
+```
 
-Pořadí shora:
+- Atlas nahoře je živý náhled (po klepnutí přechod na záložku Výprava).
+- Když je co ukázat, nad tím vším se přehraje M1.
+- Délka kroku, zdroje a licence, vzhled → ⚙︎ Nastavení (hlavička dnes přetéká).
 
-1. **Kde jsem** – malá živá mapa (statická ikona MapLibre / náhled) s mou tečkou a nejbližšími medailony, ne jen nadpis.
-2. **Uvítání / Cesta od minula** (E) – jen když je co ukázat; jinak dnešní řádek „Dnes zatím 2,4 km“.
-3. **Další cíl** s metry a kroky, teaserem a pruhem „ze 3,2 km zbývá 0,4 km“ (pruh mezi minulou a další zastávkou je hmatatelnější než pruh celé trasy).
-4. **Na dalších 5 km** – zamčená místa s teaserem a ikonou zámku, odemčená by se tu neměla objevit.
-5. **Nedávno objeveno** – posledních pár míst s datem (vstup do příběhového prohlížeče).
+### 4.2 Výprava (mapa)
 
-Odkazy „Délka kroku“ a „Zdroje a licence“ přesunout do nastavení (ikona ozubeného kola), hlavička je dnes přeplněná.
+Zůstává hlavní obrazovkou, mění se styl na **skica / inkoust**. Spodní panel jako dnes, navíc hádanka další zastávky a ikony kapitol. Medailony dosažených míst ukazují datum.
 
-**J. Mikro-interakce**
+### 4.3 Detail místa
 
-- Odemčení místa v reálném čase (aplikace otevřená, data přijdou): medailon „pečeť“ animace + jemná haptika, karta „Právě jste došli k …“.
-- Lehká haptika při dokončení etapy, žádné zvuky ve výchozím stavu.
-- Kreslení ušlé trasy na mapě animací od minulé pozice při otevření záložky Výprava.
+Pořadí: fotografie přes celou šířku → typ a km → název → **háček** → kontext → *„Až tam jednou půjdete“* (co uvidíte naživo, otevírací doba, jak se tam dostat) → kapitola → zdroje a licence (sbalené). U zamčeného místa: rozmazaná fotka, hádanka, vzdálenost v metrech a krocích. Text „Koncept obsahu“ se v aplikaci nezobrazuje; neověřený obsah se do vydání nedostane.
 
-### 4.3 P2 – Živost mimo aplikaci
+### 4.4 Kronika = deník
 
-**K. Aktualizace na pozadí (s ohledem na baterii)**
+- **Atlas všech výprav** (dokončené listy).
+- **Deník po dnech**: *„Úterý 28. října · 6,2 km · Karlův most, Štvanice“* s miniaturami pečetí (inspirace Pikmin Bloom lifelog).
+- Statistiky (už jsou) jako druhá úroveň.
+- Sbírka pohlednic a kapitol.
 
-| Platforma | Mechanismus | Frekvence | Poznámka |
-|---|---|---|---|
-| Android | `expo-background-task` (WorkManager) + oprávnění `READ_HEALTH_DATA_IN_BACKGROUND` | 1× za 30–60 min, systém sám slučuje a respektuje úsporný režim | Funkce nemusí být na zařízení k dispozici – zkontrolovat `FEATURE_READ_HEALTH_DATA_IN_BACKGROUND`, jinak jen popředí. Oprávnění vyžádat až s upozorněními (L), ne při startu. |
-| iOS | HealthKit **background delivery** (`HKObserverQuery`, frekvence hourly) + BGAppRefresh | systém budí při nových datech | Vyžaduje entitlement background delivery; dnes je v `app.json` `background: false`. |
+### 4.5 Objevovat
 
-Úloha na pozadí dělá jen: přečte součet od posledního čtení, spočte nové události (`journeyEvents`), uloží je, případně aktualizuje widget a pošle lokální upozornění. Žádná poloha, žádný GPS, žádná síť. Spotřeba je zanedbatelná.
+Do vydání druhé výpravy: jedna karta *„Připravujeme: …“* s náhledem skicy trasy a tlačítkem „Chci vědět, až bude“ (jen lokální poznámka). Prázdná stránka „Knihovna se připravuje“ pryč.
 
-**L. Upozornění (návrh plánu, implementace později)**
+### 4.6 Jazyk vzdáleností (rozhodnuto)
 
-Principy ze spec (10): jen na události, jen po výslovném souhlasu, nabídnout až po první dokončené etapě (9.4), výchozí stav vypnuto. Upozornění jsou **lokální** (počítaná na zařízení z úlohy na pozadí), ne serverový push – nepotřebujeme účet ani server a zdravotní data neopouštějí telefon.
+- ≥ 10 km: celé km („23 km“) · 1–10 km: jedno desetinné místo („3,4 km“) · < 1 km: metry po 10 m **a kroky** („40 m · asi 55 kroků“) · < 15 m: **„Jste tady“**. Nikdy „0,0 km“.
+- Kroky z osobní délky kroku (rozhodnutí 0006), vždy s „asi“.
+- Jedno pravidlo pro všechny obrazovky.
 
-Typy (každý zvlášť zapínatelný):
+### 4.7 Pohyb, haptika, zvuk
 
-| Typ | Příklad | Strop |
+| Prvek | Trvání | Pozn. |
 |---|---|---|
-| Dosažená zastávka | „Došli jste k Trojskému zámku. Víte, proč má schodiště plné obrů?“ | max 1 denně (sloučit: „Došli jste k Trojskému zámku a 2 dalším místům“) |
-| Dokončená etapa | „Etapa 1 je za vámi. Pohlednice z Prahy na vás čeká.“ | při události |
-| Blízko cíle | „Do Mělníka vám zbývá 1,2 km.“ | jednou za výpravu |
-| Týdenní shrnutí | neděle 18:00: „Tento týden 31 km, 9 nových míst.“ | 1× týdně |
-| Návrat po pauze | **ne** „chybíte nám“; jen pokud mezitím přibyl postup: „Mezitím jste došli až k Roztokům.“ | max 1 za 7 dní |
+| Let kamery M1 | 4–6 s, ease-in-out | přeskočitelný |
+| Vpíjení inkoustu | souběžně s letem | maska podél trasy |
+| Dopad pečeti | 250 ms, mírný přestřel | haptika „light“ |
+| Otočení pohlednice | 400 ms 3D | gesto i klepnutí |
+| Počítadlo km | 1 s | jen při změně |
 
-Pravidla: tiché hodiny 21–8, nikdy upozornění, které připomíná nečinnost nebo vyčítá, žádné odznaky na ikoně s čísly.
-
-Technicky: `expo-notifications` (lokální plánování), Android 13+ oprávnění `POST_NOTIFICATIONS` až v okamžiku, kdy uživatel upozornění zapne; kanály podle typu.
-
-**M. Widget a trvalá informace**
-
-- **Widget na plochu** (Android `react-native-android-widget` / iOS WidgetKit přes config plugin): „Vltavská stezka · 12,5 / 62 km · Trojský zámek za 40 m“ s miniaturou medailonu. Aktualizuje ho úloha na pozadí (K). Pro aplikaci bez tlaku je widget lepší než notifikace – informuje, ale nevyrušuje.
-- Později iOS Live Activity / Android probíhající upozornění „na procházce“ – jen jako volitelná věc, nevýchozí.
-
-### 4.4 P3 – Později
-
-- **Životní cesta** a karta života na Domů (spec 9.1) – první „wow“ po instalaci zatím úplně chybí.
-- **Pas s razítky**: každé místo = razítko v pasu výpravy, kompletní pas = pohlednice.
-- **„Pohled z místa“**: větší fotka/panoráma u zastávek (vlastní nebo Commons; Street View licenčně nepoužitelné).
-- **Roční přehled** v prosinci (spec 10).
-- Druhá výprava a záložka **Objevovat** (dnes prázdná stránka „Knihovna výprav se připravuje“ – do té doby ji raději skrýt nebo ukázat jednu „připravujeme“ výpravu s náhledem mapy).
+Zvuk ve výchozím stavu vypnutý (volitelné „škrábání pera“ a razítko). Vše respektuje „Omezit pohyb“.
 
 ---
 
-## 5. Pořadí prací
+## 5. Obsah: co z toho dělá wow
 
-| Krok | Obsah | Velikost | Výsledek pro uživatele |
-|---|---|---|---|
-| 1 | P0 A + B (metry/kroky, světlé téma) | malý | Žádná „0,0 km“, aplikace vypadá jako pergamen. |
-| 2 | P0 D (obnova v popředí, každých 60 s, stáhnout dolů, „aktualizováno před…“) | malý | Otevřená aplikace žije. |
-| 3 | G – háčky a teasery pro všech 38 míst + pole v datech (`hook`, `teaser`, `context`) + detail místa podle nové šablony | střední (hlavně obsah) | Odemčení něco dá. |
-| 4 | E + F (cesta od minula, příběhový prohlížeč) | střední | Návrat po chůzi je zážitek. |
-| 5 | C (pěší trasa, etapy, hustota, testy) | střední | Mapa nevede vodou. |
-| 6 | I + J (nová Domů, mikro-interakce, odemčení naživo) | střední | Domů = „tady jsem“. |
-| 7 | H (pohlednice etapy, sdílení obrázku) | střední | Milník, který stojí za sdílení. |
-| 8 | K + M (pozadí, widget) | velký, nativní | Postup vidím, aniž otevřu aplikaci. |
-| 9 | L (lokální upozornění s nastavením) | střední | Volitelná zpráva o události. |
+### 5.1 Šablona místa (upravená spec 7.3)
 
-Kroky 1–2 jsou na den práce a lze je vydat jako 1.4.1. Kroky 3–4 jsou tím, co z aplikace udělá „tu nejlepší chodící aplikaci“; doporučuji je dělat společně (prohlížeč bez obsahu nemá smysl).
+| Pole | Délka | Povinné |
+|---|---|---|
+| **Hádanka** (otázka před odemčením) | 1 věta | ano |
+| **Háček** (odpověď / překvapivý fakt) | 1–2 věty | ano |
+| Kontext | 2–3 věty | zastávky |
+| Až tam půjdete | 1–2 věty | zastávky |
+| Kapitola | odkaz | volitelně |
+| Fotka / stará fotka „tehdy“ | s licencí | zastávky |
+| Zdroje | 2 nezávislé | ano |
+| Ověřil, datum | | ano |
 
-### Jak poznáme, že to funguje
+### 5.2 Postup „sklizeň → ověření“ (rozhodnuto)
 
-- Po otevření s nově odemčenými místy uživatel otevře aspoň jedno z nich (cíl > 60 %).
-- Návrat den 3 a 7 (spec 14).
-- Při vlastním testu: „Co jsi se dnes dozvěděl?“ – uživatel umí odpovědět jedním faktem.
+1. **Sklizeň**: z české Wikipedie a dalších veřejných zdrojů se pro každé místo vytáhnou kandidáti na háček (už hotové pro 30 míst, viz [podklady](obsah-vltavska-podklady.md)).
+2. **Návrh**: hádanka + háček + kontext napsané lidsky, s odkazem na zdroj.
+3. **Ověření člověkem**: druhý nezávislý zdroj (Památkový katalog NPÚ, web muzea/obce, odborná literatura), datum ověření. Bez druhého zdroje se fakt nepoužije.
+4. **Vydání**: jen ověřená místa; ostatní zůstanou jako „malý objev“ s jednou ověřenou větou.
+
+Už sklizeň ukázala, proč je ověření nutné: slavné „palindromové“ datum Karlova mostu (9. 7. 1357, 5:31) podle Wikipedie možná stojí na roce 1358 z kroniky, který se přes 100 let čte jako 1357. **I tohle je skvělý háček**, jen se musí podat poctivě.
+
+### 5.3 Ochutnávka (k ověření)
+
+| Místo | Hádanka | Háček |
+|---|---|---|
+| Vyšehrad | Kde je Vltava v Praze nejhlubší? | Pod Vyšehradem: 42 m vysoká skála z ordovických břidlic tu padá přímo do řeky. |
+| Výtoň | Jak se platilo clo sekerou? | Celníci z každého voru vytnuli dvanáctinu klád, odtud jméno Výtoň. |
+| Karlův most | Proč možná neplatí nejslavnější datum mostu? | Palindrom 1357 9 7 5 31 se možná opírá o špatně přečtený rok. A „Karlův“ se mu říká teprve asi od roku 1870, předtím Kamenný most. |
+| Libeňský most | Co je na tomhle mostě jediné na světě? | Bývá označován za jediný kubistický most na světě a má největší rozpětí oblouku z prostého betonu v Evropě. |
+| Trojský zámek | Proč se čtvrť jmenuje podle Tróje? | Podle antických výjevů na zámku; předtím se místo jmenovalo Zadní Ovenec. |
+| Levý Hradec | Kde byl zvolen svatý Vojtěch? | Tady, 19. února 982, druhým pražským biskupem. |
+| Řež | Co tu vzniklo v březnu 1909? | První česká anarchistická kolonie. Do roka byla zadlužená. |
+| Veltrusy | Kde byl první vzorkový veletrh na světě? | V zámeckém parku, roku 1754, za účasti Marie Terezie. |
+| Lužec nad Vltavou | Která obec je celá na ostrově? | Lužec, od roku 1907, kdy kanál oddělil kus pevniny. Má jedinou ostrovní školu v zemi a jediný zdvihací železniční most v Česku. |
+| Kralupy | Odkud se vzalo jméno Kralupy? | Možná od „loupačů kůry“, pravděpodobněji od „těch, co loupí kury“. |
+
+Plný seznam se zdroji: [obsah-vltavska-podklady.md](obsah-vltavska-podklady.md).
+
+### 5.4 Místa bez příběhu nahradit
+
+„Polabská rovina“, „Říční tůně“, „Slepé rameno“, „Lužní les“ jsou dnes obecné popisky. Navrhuji je vyměnit za konkrétní místa s příběhem nebo spojit do kapitoly (*Řeka a povodně 2002*).
 
 ---
 
-## 6. K rozhodnutí
+## 6. Trasa (rozhodnuto: delší)
 
-1. **Trasa:** pěší trasa ~70–80 km s 5 etapami (doporučeno), nebo zachovat 62 km a jen ji kreslit u břehu?
-2. **Tmavý režim:** ponechat jako volbu v nastavení (doporučeno), nebo úplně odstranit?
-3. **Kroky vs. metry:** u krátkých vzdáleností ukazovat oboje (doporučeno), nebo jen kroky?
-4. **Obsah:** kdo píše a ověřuje háčky – vlastní redakce, nebo návrh od Claude + ruční ověření dvěma zdroji (rychlejší, ale ověření je nutné vždy)?
-5. **Pozadí a upozornění:** zařadit widget (M) před upozornění (L)? Doporučuji ano – menší zásah do soukromí i pozornosti.
+- Pěší trasa po nábřežích, stezkách a cyklostezkách, s přívozy jako událostmi (M5). Odhad **75–90 km**; první zkušební výpočet pěšího routingu vyšel na 89 km s objížďkami, po doladění průchozích bodů bude kratší.
+- **5 etap** po 15–20 km, každá končí zastávkou a pohlednicí. Pracovně: Praha historická (Vyšehrad → Troja) · Pražské skály (→ Roztoky) · Údolí Vltavy (→ Kralupy) · Zámky (→ Veltrusy) · Ke soutoku (→ Mělník).
+- Delší trasa potřebuje 6–10 nových míst; přednost mají místa s háčkem (přívozy, Hořínský zdvižný most, mělnické vinice a sgrafita, Klecany a pověst o zvonech).
+- Typ trasy zůstává „Vlastní virtuální trasa“, popis: „po stezkách podél Vltavy“.
+
+---
+
+## 7. Plán: nejdřív jedna dokonalá etapa
+
+Místo zlepšování všeho napůl: **etapa 1 (Praha) dotažená na 100 %** jako vzor, pak škálování.
+
+| Fáze | Obsah | Kdy je hotovo |
+|---|---|---|
+| **0 · Základ** | Světlý vzhled, jazyk vzdáleností, obnova v popředí a stažením, nastavení ⚙︎, pryč s „Koncept obsahu“ v UI | Žádná „0,0 km“, aplikace žije, když je otevřená. |
+| **1 · Obsah etapy 1** | 11 míst Prahy podle nové šablony, ověřené dvěma zdroji, fotky s licencí, 2 kapitoly (Voraři, Mosty) | Ověřovatel podepíše každé místo. |
+| **2 · Okamžiky** | M1 Inkoust, M2 Příběhy, M3 Hádanky, M4 Příchod naživo | Testovací osoba po návratu z procházky řekne nahlas aspoň jeden fakt. |
+| **3 · Atlas** | Styl skica / inkoust, pečeti, nová Domů | Na první pohled je vidět, kolik atlasu je „dokresleno“. |
+| **4 · Trasa** | Pěší trasa, 5 etap, přívozy (M5) | Mapa nikde nevede vodou. |
+| **5 · Odměny** | Pohlednice etapy, list atlasu, Kronika jako deník | Pohlednici chce testovací osoba sdílet. |
+| **6 · Rozšíření** | Zbývající etapy obsahu, „Kam dnes dojdu?“, odbočky, Tehdy a dnes | |
+| **7 · Poslech a Řeka teď** | Audio u zastávek, živé údaje ČHMÚ | |
+| **8 · Mimo aplikaci** (rozhodnuto: až po vyladění) | Aktualizace na pozadí šetrně k baterii, widget, lokální upozornění na události (viz příloha A) | |
+
+### Jak poznáme wow (test s 5 lidmi po fázi 2 a 3)
+
+- Po otevření s novými místy otevře **aspoň jedno** > 80 % lidí.
+- Den poté umí člověk **zopakovat jeden fakt** (bez nápovědy).
+- Spontánně ukáže aplikaci někomu dalšímu nebo sdílí pohlednici.
+- Nikdo neřekne „tlačí mě to“.
+
+---
+
+## 8. Co si bereme od konkurence (shrnutí)
+
+| Od | Bereme | Kde |
+|---|---|---|
+| The Conqueror | pohlednice u milníků, pohled na místo | M6, Tehdy a dnes |
+| Pikmin Bloom | mapa jako osobní deník, denní záznam | Atlas, Kronika |
+| Walk the World | pas s razítky | pečeti |
+| Apple / Google Fit | animace dovršení | M1, M4 |
+| Komoot | trasa po skutečných cestách | kap. 6 |
+| audio průvodci / podcasty | poslech při chůzi | Poslech cestou |
+| Walk the Distance (protipříklad) | prázdné zastávky = nikdy | kap. 5 |
+
+Zdroje: [The Conqueror review](https://hometechhacker.com/the-conqueror-virtual-challenges-review-motivation-medals-and-miles/), [Is The Conqueror legit](https://abusonadustyroad.com/is-the-conqueror-virtual-challenge-legit-10-things-to-know-and-understand), [Best virtual challenges](https://abusonadustyroad.com/best-virtual-challenges-and-why-we-love-them), [Virtual walking challenge apps](https://walking-startup.uk/blog/virtual-walking-challenge-apps), [Design critique: Pikmin Bloom](https://ixd.prattsi.org/2026/02/design-critique-pikmin-bloom-iphone-app/), [Pikmin Bloom (Engadget)](https://www.engadget.com/pikmin-bloom-has-been-helping-me-meet-my-outdoor-walking-goals-for-years-000025214.html).
+
+---
+
+## Příloha A · Pozadí, widget, upozornění (fáze 8, až po vyladění)
+
+- **Pozadí**: Android `READ_HEALTH_DATA_IN_BACKGROUND` + periodická úloha (30–60 min, systém slučuje, respektuje úsporný režim; funkce nemusí být na každém zařízení), iOS HealthKit background delivery. Úloha jen sečte vzdálenost, zapíše události, obnoví widget. Bez polohy a sítě. [Health Connect: čtení dat](https://developer.android.com/health-and-fitness/guides/health-connect/develop/read-data)
+- **Widget**: výřez atlasu s tečkou + „Trojský zámek za 40 m“ + hádanka. Informuje, neruší.
+- **Upozornění** (lokální, výchozí vypnuto, nabídka až po první etapě): dosažená zastávka s hádankou („Došli jste k Trojskému zámku. Uhodnete, proč se jmenuje podle Tróje?“), pohlednice etapy, týdenní shrnutí v neděli. Strop 1 denně, tiché hodiny 21–8, nikdy připomínání nečinnosti.
+
+## Příloha B · Chyby z testu (pro fázi 0)
+
+- „0,0 km“ a zároveň zamčeno: zbývalo < 50 m, formát na desetiny km.
+- Odemčené místo bez obsahu a s nápisem „Koncept obsahu“.
+- Data se čtou jen při spuštění aplikace.
+- Výchozí vzhled podle systému (tmavý).
+- Trasa = osa řeky.
