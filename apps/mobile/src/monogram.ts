@@ -36,14 +36,42 @@ export function placeMonogram(name: string): string {
   return firstLetter(use[0]!) + firstLetter(use[use.length - 1]!);
 }
 
-/** Celý seznam monogramů; když se dva shodují, u druhého a dalších se přidá pořadí („ZV“, „ZV²“). */
+/**
+ * Delší monogram pro rozlišení shody: první dvě písmena prvního slova a první písmeno posledního
+ * („Zdymadlo Hořín“ → „ZdH“ vedle „Zámek Hořín“ → „ZH“).
+ */
+function longMonogram(name: string): string | undefined {
+  const short = placeMonogram(name);
+  const all = words(name).filter((w) => !SKIP.has(w.toLocaleLowerCase("cs")));
+  const cut = all.findIndex((w, i) => i > 0 && QUALIFIER.has(w.toLocaleLowerCase("cs")));
+  const use = cut > 0 ? all.slice(0, cut) : all;
+  if (use.length < 2) return undefined;
+  const second = [...use[0]!].filter((ch) => /\p{L}/u.test(ch))[1];
+  if (!second) return undefined;
+  return short[0]! + second.toLocaleLowerCase("cs") + short.slice(1);
+}
+
+/**
+ * Celý seznam monogramů. Když se dva shodují, druhý dostane delší tvar („ZH“, „ZdH“); teprve když ani ten
+ * nestačí, přidá se pořadí („ZV“, „ZV²“).
+ */
 export function uniqueMonograms(names: readonly string[]): string[] {
-  const seen = new Map<string, number>();
+  const used = new Set<string>();
+  const count = new Map<string, number>();
   const SUP = ["", "", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
   return names.map((n) => {
     const m = placeMonogram(n);
-    const count = (seen.get(m) ?? 0) + 1;
-    seen.set(m, count);
-    return count === 1 ? m : `${m}${SUP[count] ?? count}`;
+    let out = m;
+    if (used.has(m)) {
+      const long = longMonogram(n);
+      if (long && !used.has(long)) out = long;
+      else {
+        const c = (count.get(m) ?? 1) + 1;
+        count.set(m, c);
+        out = `${m}${SUP[c] ?? c}`;
+      }
+    }
+    used.add(out);
+    return out;
   });
 }

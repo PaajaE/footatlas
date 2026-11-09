@@ -17,6 +17,7 @@ import { formatDayNumeric, pluralNewPlaces, tileDistance } from "../home";
 import {
   activeHalt,
   counterM,
+  dayHeading,
   easeInOut,
   flightAt,
   flightDurationMs,
@@ -74,7 +75,8 @@ export default function Return() {
   const holdZoom = Math.round(holdZoomAt(plan, t) * 20) / 20;
 
   const today = localDateKey(new Date());
-  const heading = returnHeading(sinceDay(ex.daySlices, fromM), today);
+  const since = sinceDay(ex.daySlices, fromM);
+  const heading = returnSource(zdroj) === "kronika" ? dayHeading(since, today) : returnHeading(since, today);
   const routeLabel = returnRouteLabel(vltavska.places, fromM, toM);
   const counter = tileDistance(counterM(deltaM, duration, flightMs));
   const frame = `List I · ${vltavska.name}`;

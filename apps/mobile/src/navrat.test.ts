@@ -5,6 +5,7 @@ import {
   FLIGHT_MAX_MS,
   FLIGHT_MIN_MS,
   counterM,
+  dayHeading,
   dayReplayParams,
   returnSource,
   seenAfter,
@@ -148,6 +149,15 @@ describe("nadpis a úsek", () => {
     expect(returnHeading("2026-10-30", today)).toBe("Od pátku jste ušli");
     expect(returnHeading("2026-10-28", today)).toBe("Od středy jste ušli");
     expect(returnHeading("2026-10-24", today)).toBe("Od 24. 10. jste ušli");
+  });
+  it("jeden den z Kroniky", () => {
+    const today = "2026-11-02"; // pondělí
+    expect(dayHeading(undefined, today)).toBe("Ten den jste ušli");
+    expect(dayHeading("2026-11-02", today)).toBe("Dnes jste ušli");
+    expect(dayHeading("2026-11-01", today)).toBe("Včera jste ušli");
+    expect(dayHeading("2026-10-30", today)).toBe("V pátek jste ušli");
+    expect(dayHeading("2026-10-28", today)).toBe("Ve středu jste ušli");
+    expect(dayHeading("2026-10-24", today)).toBe("24. 10. jste ušli");
   });
   it("den, kdy začal sbíraný úsek", () => {
     const slices = [

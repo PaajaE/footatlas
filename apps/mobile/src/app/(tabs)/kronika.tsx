@@ -36,12 +36,15 @@ export default function Chronicle() {
   const router = useRouter();
   const { ready, stats, days, lastReadAt, sync, syncNow } = useChronicle();
   const { active, walkedM, state, events, daySlices, stepLength } = useExpedition();
-  // `?tab=sbirky` otevře rovnou Sbírky (odkaz „Všechny kapitoly“ na Domů).
+  // `?tab=sbirky` otevře rovnou Sbírky (odkaz „Všechny kapitoly“ na Domů). Parametr se po použití smaže,
+  // aby další klepnutí na odkaz přepnulo záložku znovu, i když mezitím uživatel vybral jinou.
   const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState<Tab>(TABS.some((t) => t.key === tabParam) ? (tabParam as Tab) : "denik");
   useEffect(() => {
-    if (TABS.some((t) => t.key === tabParam)) setTab(tabParam as Tab);
-  }, [tabParam]);
+    if (!TABS.some((t) => t.key === tabParam)) return;
+    setTab(tabParam as Tab);
+    router.setParams({ tab: undefined });
+  }, [tabParam, router]);
   const empty = stats.daysWithRecord === 0;
   const busy = sync.kind === "syncing";
 

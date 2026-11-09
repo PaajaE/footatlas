@@ -34,13 +34,19 @@ describe("placeMonogram", () => {
 });
 
 describe("uniqueMonograms", () => {
-  it("shodné monogramy dostanou pořadí", () => {
-    expect(uniqueMonograms(["Zámek Veltrusy", "Zelený Vrch", "Vepřek"])).toEqual(["ZV", "ZV²", "Ve"]);
+  it("shodný monogram dostane delší tvar", () => {
+    expect(uniqueMonograms(["Zámek Hořín", "Zdymadlo Hořín", "Vepřek"])).toEqual(["ZH", "ZdH", "Ve"]);
+  });
+
+  it("když ani delší tvar nestačí, přidá se pořadí", () => {
+    expect(uniqueMonograms(["Zámek Veltrusy", "Zámek Vranov", "Zámek Velhartice"])).toEqual(["ZV", "ZáV", "ZV²"]);
   });
 
   it("místa Vltavské stezky mají monogram z písmen, nejvýš tři znaky", () => {
     const all = uniqueMonograms(vltavska.places.map((p) => p.name));
     expect(all).toHaveLength(vltavska.places.length);
-    for (const m of all) expect(m).toMatch(/^\p{L}\p{L}?[²³⁴⁵]?$/u);
+    for (const m of all) expect(m).toMatch(/^\p{L}\p{L}?\p{L}?[²³⁴⁵]?$/u);
+    expect(new Set(all).size).toBe(all.length);
+    expect(all.some((m) => /[²³⁴⁵]/u.test(m))).toBe(false);
   });
 });

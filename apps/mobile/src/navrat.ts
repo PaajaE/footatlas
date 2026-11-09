@@ -492,6 +492,18 @@ export function returnHeading(since: string | undefined, today: string): string 
   return `Od ${Number(since.slice(8, 10))}. ${Number(since.slice(5, 7))}. jste ušli`;
 }
 
+const WEEKDAYS_ON = ["V neděli", "V pondělí", "V úterý", "Ve středu", "Ve čtvrtek", "V pátek", "V sobotu"];
+
+/** Horní řádek přehrání jednoho dne z Kroniky: „Dnes / Včera / V pátek / 24. 10. jste ušli“. */
+export function dayHeading(day: string | undefined, today: string): string {
+  if (!day) return "Ten den jste ušli";
+  const back = dayDiff(today, day);
+  if (back <= 0) return "Dnes jste ušli";
+  if (back === 1) return "Včera jste ušli";
+  if (back <= 6) return `${WEEKDAYS_ON[parseDay(day).getDay()]} jste ušli`;
+  return `${Number(day.slice(8, 10))}. ${Number(day.slice(5, 7))}. jste ušli`;
+}
+
 /**
  * Úsek „A → B“: A je poslední místo, které jste měli před úsekem, B poslední nově odemčené;
  * bez nového místa B je to nejbližší další místo (směr, kterým jdete).
