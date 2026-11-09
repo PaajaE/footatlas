@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { changeSentence, summarizeChange } from "@footatlas/core";
+import { changeDetails, summarizeChange } from "@footatlas/core";
 import { Chapters, NextStopCard, RecentlyDiscovered, StageProgress, StatTiles } from "../../components/HomeSections";
 import { WhereToday } from "../../components/WhereToday";
 import { ReturnCard } from "../../components/ReturnCard";
@@ -59,7 +59,7 @@ export default function Home() {
       <StageProgress />
       <LastUpdated />
       <StatTiles />
-      {showReturn && <ReturnCard fromM={previousM} toM={state.walkedM} sentence={changeSentence(summary)} />}
+      {showReturn && <ReturnCard fromM={previousM} toM={state.walkedM} details={changeDetails(summary)} />}
       {!state.completed && <NextStopCard />}
       <WhereToday />
       <RecentlyDiscovered />

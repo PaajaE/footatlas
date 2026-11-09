@@ -41,12 +41,12 @@ export function HaltCard({ place, photo, stageIndex, expeditionName, dateLabel, 
   );
 
   const roman = stageIndex !== undefined ? toRoman(stageIndex + 1) : undefined;
-  const kindLabel = place ? (place.kind === "stop" ? "Zastávka" : "Malý objev") : `Etapa ${roman}`;
+  const kindLabel = place ? (place.kind === "stop" ? "Zastávka" : "Objev") : `Etapa ${roman}`;
   const meta = [kindLabel, place ? sealKm(place.atM) : undefined, place && roman ? `konec etapy ${roman}` : undefined]
     .filter(Boolean)
     .join(" · ");
   const title = place?.name ?? `Etapa ${roman} dokončena`;
-  const line = place ? firstSentence(place.hook) ?? firstSentence(place.text) : "Další list atlasu je hotový.";
+  const line = place ? firstSentence(place.hook) ?? firstSentence(place.text) : "Etapa je za vámi, pečeť dopadla.";
   const SEAL = 68;
 
   return (
@@ -54,7 +54,7 @@ export function HaltCard({ place, photo, stageIndex, expeditionName, dateLabel, 
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${meta}. ${title}. ${line ?? ""} Otevřít detail.`}
-        accessibilityHint="Pozastaví návrat"
+        accessibilityHint="Pozastaví přehrávání a otevře místo"
         onPress={onOpen}
         style={{
           backgroundColor: colors.surface,

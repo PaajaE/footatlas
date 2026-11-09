@@ -79,7 +79,13 @@ export default function Return() {
   const heading = returnSource(zdroj) === "kronika" ? dayHeading(since, today) : returnHeading(since, today);
   const routeLabel = returnRouteLabel(vltavska.places, fromM, toM);
   const counter = tileDistance(counterM(deltaM, duration, flightMs));
-  const frame = `List I · ${vltavska.name}`;
+  const stageNo = vltavska.plan.stages.findIndex((s) => toM <= s.endM);
+  const frame = `Etapa ${toRoman((stageNo < 0 ? vltavska.plan.stages.length - 1 : stageNo) + 1)} · ${vltavska.name}`;
+  // Kamera si z plánu bere polohu dopředu a pohyb nechá na mapě (FlightMap, SEG_MS).
+  const cameraAt = useCallback(
+    (ms: number) => ({ m: fromM + easeInOut(flightAt(plan, ms) / duration) * deltaM, holdZoom: holdZoomAt(plan, ms) }),
+    [plan, fromM, deltaM, duration],
+  );
 
   // Návrat z Domů se spotřebuje, až dojede do konce; přehrání dne z Kroniky ne (rozhodnutí 0024).
   useEffect(() => {
@@ -149,11 +155,11 @@ export default function Return() {
           </T>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={clock.finished ? "Zavřít návrat" : "Přeskočit vše"}
+            accessibilityLabel={clock.finished ? "Zavřít přehrávání" : "Přeskočit na konec"}
             onPress={clock.finished ? () => router.back() : clock.skip}
             style={{ minHeight: 44, minWidth: 44, justifyContent: "center", alignItems: "flex-end" }}
           >
-            <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>{clock.finished ? "Zavřít" : "Přeskočit vše"}</T>
+            <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>{clock.finished ? "Zavřít" : "Přeskočit"}</T>
           </Pressable>
         </View>
         <T style={{ fontFamily: fonts.displaySC, fontSize: 15, letterSpacing: 0.6, color: colors.ochre, marginTop: -8 }}>{heading}</T>
@@ -183,6 +189,9 @@ export default function Return() {
           runKey={clock.runKey}
           finished={flightDone}
           holdZoom={holdZoom}
+          elapsedMs={t}
+          cameraAt={cameraAt}
+          horizonM={next?.atM}
           reduceMotion={reduce}
           height={mapH}
           frame={frame}
@@ -262,10 +271,24 @@ export default function Return() {
         >
           <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: Math.max(insets.bottom, 20), gap: 14 }} showsVerticalScrollIndicator={false}>
             <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: colors.line }} />
-            <View style={{ gap: 2 }}>
-              <SectionLabel size={15}>Cestou jste potkali</SectionLabel>
-              <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
-            </View>
+            {places.length > 0 || !next ? (
+              <View style={{ gap: 2 }}>
+                <SectionLabel size={15}>Cestou jste odemkli</SectionLabel>
+                <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
+              </View>
+            ) : (
+              // Bez nového místa: neříkat „nic“, ukázat, co je na obzoru.
+              <View style={{ gap: 4 }}>
+                <SectionLabel size={15}>Na obzoru</SectionLabel>
+                <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{next.name}</T>
+                <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, color: colors.accent }}>
+                  {`ještě ${formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}`}
+                </T>
+                {(next.riddle?.question ?? next.teaser) && (
+                  <T style={{ fontFamily: fonts.displayItalic, fontSize: 17, lineHeight: 23, color: colors.fgSoft }}>{next.riddle?.question ?? next.teaser}</T>
+                )}
+              </View>
+            )}
             {places.length > 0 && (
               <View style={{ flexDirection: "row", flexWrap: "wrap", rowGap: 10 }}>
                 {places.slice(0, 10).map((p) => (
@@ -305,7 +328,7 @@ export default function Return() {
             {ferry && (
               <Button kind="secondary" label={`${ferry.name}: převezli jste se`} onPress={() => router.push({ pathname: "/privoz", params: { id: ferry.id } })} />
             )}
-            {next && (
+            {next && places.length > 0 && (
               <View style={{ borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12, gap: 4 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
                   <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.fg }}>{next.name}</T>
@@ -348,7 +371,7 @@ function clamp(n: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, n));
 }
 
-/** „6 nových míst“, „1 nové místo“; bez nového místa věta o úseku. */
+/** „6 nových míst“, „1 nové místo“; bez nového místa (a bez místa na obzoru, tedy na konci výpravy) „Cíl výpravy“. */
 function newPlacesTitle(n: number): string {
-  return n === 0 ? "Žádné nové místo" : pluralNewPlaces(n);
+  return n === 0 ? "Cíl výpravy" : pluralNewPlaces(n);
 }

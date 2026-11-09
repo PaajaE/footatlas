@@ -37,17 +37,28 @@ type Assets = { kind: "loading" } | { kind: "ready"; assets: MapAssets } | { kin
 const REVEAL_INNER_M = 380;
 const REVEAL_OUTER_M = 650;
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
+const line = (c: Array<[number, number]>) => ({ type: "Feature" as const, properties: {}, geometry: { type: "LineString" as const, coordinates: c } });
 /** Vybarvení (maska) se přepočítává po dílech úseku; polygonová unie je drahá, plynulý růst by telefon zdržoval. */
 const MASK_STEPS = 6;
 /** Přiblížení kamery za letu (zhruba čtvrť; prototyp letí na ~1,9× měřítko listu). */
 const FLIGHT_ZOOM_DEFAULT = 14;
-/** Dojezd kamery na další polohu; o málo delší než krok hodin (50 ms), aby se pohyb nezastavoval mezi kroky. */
+/** Dojezd kamery na další polohu, když není plán (`cameraAt`); o málo delší než krok hodin (50 ms). */
 const FOLLOW_MS = 70;
+/**
+ * Délka jednoho pohybu kamery při letu podle plánu. Kamera dostane pokyn jen jednou za úsek a plynulost (60 snímků
+ * za sekundu) si spočítá MapLibre sám; pokyn každých 50 ms se na telefonu nestíhal a mapa se sekala.
+ */
+const SEG_MS = 700;
+/** Hotová část úseku se překresluje po 1/300 (jen geometrie úseku, ne celé trasy). */
+const DONE_STEPS = 300;
+/** Místo na obzoru se do závěrečného záběru přidá, jen když je blíž než tohle za koncem úseku. */
+const HORIZON_MAX_M = 3_000;
 
 /**
- * Mapa návratu: stejný atlasový styl jako Výprava, ale kamera MapLibre plynule sleduje polohu letu (`walkedM`,
- * ease-in-out, u míst zastavuje podle plánu `returnPlan`) a po skončení (nebo přeskočení) ukáže celý úsek.
- * Místa se odemykají podle polohy letu.
+ * Mapa návratu: stejný atlasový styl jako Výprava. Kamera letí po úseku v pohybech po `SEG_MS` podle plánu
+ * (`cameraAt`: ease-in-out, u míst stojí podle `returnPlan`), značka „vy“ je za letu pevně uprostřed mapy (kamera je
+ * vždy na ní) a po skončení (nebo přeskočení) se ukáže celý úsek i s místem na obzoru. Místa se odemykají podle
+ * polohy letu. Data zdrojů se posílají do mapy, jen když se opravdu změní.
  */
 export function FlightMap(props: FlightMapProps) {
   const [state, setState] = useState<Assets>({ kind: "loading" });
@@ -72,7 +83,25 @@ export function FlightMap(props: FlightMapProps) {
   return <Live {...props} assets={state.assets} />;
 }
 
-function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runKey, finished, holdZoom = 0, reduceMotion, height, frame, assets }: FlightMapProps & { assets: MapAssets }) {
+function Live({
+  route,
+  cumulative,
+  places,
+  fromM,
+  toM,
+  walkedM,
+  durationMs,
+  runKey,
+  finished,
+  holdZoom = 0,
+  elapsedMs,
+  cameraAt,
+  horizonM,
+  reduceMotion,
+  height,
+  frame,
+  assets,
+}: FlightMapProps & { assets: MapAssets }) {
   const { name, colors } = useTheme();
   const mapTheme = themes[name === "dark" ? "parchment-night" : "parchment-day"];
   const mode = mapTheme.mode;
@@ -82,6 +111,11 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
   const coords = useMemo(() => route.map((p) => [p.lon, p.lat] as [number, number]), [route]);
   const start = useMemo(() => positionAt(route, cumulative, fromM), [route, cumulative, fromM]);
   const bounds = useMemo(() => sectionBounds(route, cumulative, fromM, toM), [route, cumulative, fromM, toM]);
+  // Závěrečný záběr: úsek a k němu místo na obzoru, aby bylo vidět „jsem tady, tamhle je cíl“.
+  const endBounds = useMemo(() => {
+    const reach = horizonM !== undefined && horizonM > toM && horizonM - toM <= HORIZON_MAX_M ? horizonM : toM;
+    return sectionBounds(route, cumulative, fromM, reach);
+  }, [route, cumulative, fromM, toM, horizonM]);
   const [view, setView] = useState<{ zoom: number; lat: number }>({ zoom: FLIGHT_ZOOM_DEFAULT, lat: start.lat });
 
   // Poloha značky a kamery: jemný krok (1/600 úseku), aby se plynule hýbaly se stejnými hodinami (krok ≈ 50 ms).
@@ -93,7 +127,20 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
   const here = fromM + q * span;
   const youM = fromM + qFine * span;
   const you = useMemo(() => positionAt(route, cumulative, youM), [route, cumulative, youM]);
-  const done = useMemo(() => [...coords.slice(0, Math.max(1, you.segment + 1)), [you.lon, you.lat] as [number, number]], [coords, you]);
+  // Ušlá trasa: část před úsekem se nemění; za letu se posílá jen geometrie úseku.
+  const doneM = fromM + (Math.round(frac * DONE_STEPS) / DONE_STEPS) * span;
+  const beforeData = useMemo(() => {
+    if (fromM <= 0) return EMPTY;
+    const a = positionAt(route, cumulative, fromM);
+    return line([...coords.slice(0, Math.max(1, a.segment + 1)), [a.lon, a.lat]]);
+  }, [route, cumulative, coords, fromM]);
+  const sectionData = useMemo(() => {
+    if (doneM <= fromM) return EMPTY;
+    const a = positionAt(route, cumulative, fromM);
+    const b = positionAt(route, cumulative, doneM);
+    return line([[a.lon, a.lat], ...coords.slice(a.segment + 1, b.segment + 1), [b.lon, b.lat]]);
+  }, [route, cumulative, coords, fromM, doneM]);
+  const restData = useMemo(() => line(coords), [coords]);
   const maskStep = Math.round(q * MASK_STEPS);
   const maskDone = useMemo(() => {
     const m = fromM + (maskStep / MASK_STEPS) * span;
@@ -150,21 +197,42 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
     cam.jumpTo({ center: [start.lon, start.lat], zoom: flightZ });
   }, [runKey, start, bounds, reduceMotion, flightZ]);
 
+  // Let podle plánu: jeden pokyn kameře na úsek SEG_MS, cílem je poloha na konci úseku. Při zastavení se poloha
+  // nemění a kamera jen mírně přiblíží. Skok („Dál“) nebo pauza se projeví nejpozději v dalším úseku.
+  const planned = cameraAt !== undefined && elapsedMs !== undefined;
+  const seg = planned ? Math.floor(elapsedMs / SEG_MS) : -1;
   useEffect(() => {
-    if (finished || reduceMotion) return;
-    // U zastavení kamera zpomalí (to dělá čas letu z plánu) a mírně se přiblíží; obojí ze stejných hodin.
+    if (!planned || finished || reduceMotion) return;
+    const endMs = (seg + 1) * SEG_MS;
+    const target = cameraAt(endMs);
+    const p = positionAt(route, cumulative, target.m);
+    camera.current?.easeTo({
+      center: [p.lon, p.lat],
+      zoom: flightZoom(toM - fromM, durationMs, target.holdZoom),
+      duration: Math.max(16, endMs - elapsedMs),
+      easing: "linear",
+    });
+  }, [seg, runKey, finished, reduceMotion]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Bez plánu (starší volání): kamera dojíždí za značkou v každém kroku hodin.
+  useEffect(() => {
+    if (planned || finished || reduceMotion) return;
     const zoom = flightZoom(toM - fromM, durationMs, holdZoom);
     camera.current?.easeTo({ center: [you.lon, you.lat], zoom, duration: FOLLOW_MS, easing: "linear" });
-  }, [you, finished, reduceMotion, holdZoom, fromM, toM, durationMs]);
+  }, [planned, you, finished, reduceMotion, holdZoom, fromM, toM, durationMs]);
 
-  // Konec letu (doběhl, nebo se přeskočil): ukázat celý úsek.
+  // Konec letu (doběhl, nebo se přeskočil): ukázat celý úsek a místo na obzoru.
   useEffect(() => {
     if (!finished || reduceMotion) return;
-    camera.current?.fitBounds(bounds, { padding: { top: 40, right: 28, bottom: 40, left: 28 }, duration: 900 });
-  }, [finished, bounds, reduceMotion]);
+    camera.current?.fitBounds(endBounds, { padding: { top: 70, right: 36, bottom: 40, left: 36 }, duration: 900 });
+  }, [finished, endBounds, reduceMotion]);
 
-  const line = (c: Array<[number, number]>) => ({ type: "Feature" as const, properties: {}, geometry: { type: "LineString" as const, coordinates: c } });
-  const point = { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [you.lon, you.lat] } };
+  // Za letu je značka pevně uprostřed obrazovky (kamera je na ní); v mapě se kreslí až po skončení.
+  const pinned = planned && !finished && !reduceMotion;
+  const pointData = useMemo(
+    () => (pinned ? EMPTY : { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [you.lon, you.lat] } }),
+    [pinned, you],
+  );
   const toLayers = (list: StyleLayer[], source: string, extra: Record<string, unknown> = {}) =>
     list
       .filter((l) => l.source === source)
@@ -196,19 +264,34 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
         <GeoJSONSource id={REVEAL_OUTER} data={masks.outer}>
           {toLayers(revealLayers(mapTheme), REVEAL_OUTER, { beforeId: ATLAS_SKETCH_START })}
         </GeoJSONSource>
-        <GeoJSONSource id="route-rest" data={line(coords)}>
+        <GeoJSONSource id="route-rest" data={restData}>
           {toLayers(routeLayers(mapTheme), "route-rest")}
         </GeoJSONSource>
-        <GeoJSONSource id="route-done" data={here > 0 ? line(done) : EMPTY}>
+        <GeoJSONSource id="route-before" data={beforeData}>
+          {toLayers(
+            routeLayers(mapTheme).map((l) => ({ ...l, id: `${l.id}-before` })),
+            "route-done",
+          )}
+        </GeoJSONSource>
+        <GeoJSONSource id="route-done" data={sectionData}>
           {toLayers(routeLayers(mapTheme), "route-done")}
         </GeoJSONSource>
         <GeoJSONSource id="places" data={placesData}>
           {toLayers(placeLayers(mapTheme), PLACES_SOURCE)}
         </GeoJSONSource>
-        <GeoJSONSource id={YOU_SOURCE} data={point}>
+        <GeoJSONSource id={YOU_SOURCE} data={pointData}>
           {toLayers(youLayers(mapTheme), YOU_SOURCE)}
         </GeoJSONSource>
       </Map>
+      {pinned && (
+        <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: height / 2 - 15, alignItems: "center" }}>
+          <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: mapTheme.route.done + "33", alignItems: "center", justifyContent: "center" }}>
+            <View
+              style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: mapTheme.route.done, borderWidth: 3, borderColor: mapTheme.atlas.paper }}
+            />
+          </View>
+        </View>
+      )}
       <AtlasFrame title={frame} zoom={view.zoom} lat={view.lat} />
       <View
         pointerEvents="none"

@@ -143,12 +143,12 @@ describe("počítadlo", () => {
 describe("nadpis a úsek", () => {
   it("od dne", () => {
     const today = "2026-11-02"; // pondělí
-    expect(returnHeading(undefined, today)).toBe("Od posledně jste ušli");
-    expect(returnHeading("2026-11-02", today)).toBe("Dnes jste ušli");
-    expect(returnHeading("2026-11-01", today)).toBe("Od včerejška jste ušli");
-    expect(returnHeading("2026-10-30", today)).toBe("Od pátku jste ušli");
-    expect(returnHeading("2026-10-28", today)).toBe("Od středy jste ušli");
-    expect(returnHeading("2026-10-24", today)).toBe("Od 24. 10. jste ušli");
+    expect(returnHeading(undefined, today)).toBe("Od posledně přibylo");
+    expect(returnHeading("2026-11-02", today)).toBe("Od posledně přibylo");
+    expect(returnHeading("2026-11-01", today)).toBe("Od včerejška přibylo");
+    expect(returnHeading("2026-10-30", today)).toBe("Od pátku přibylo");
+    expect(returnHeading("2026-10-28", today)).toBe("Od středy přibylo");
+    expect(returnHeading("2026-10-24", today)).toBe("Od 24. 10. přibylo");
   });
   it("jeden den z Kroniky", () => {
     const today = "2026-11-02"; // pondělí
@@ -251,7 +251,7 @@ describe("kdy se návrat spotřebuje (rozhodnutí 0024)", () => {
     for (let i = 0; i < 3; i++) seen = seenAfter(seen, 10_500, { kind: "leave" });
     expect(seen).toBe(4000);
     expect(cardShown(seen, 10_500)).toBe(true);
-    expect(returnHeading(sinceDay(slices, seen), "2026-11-09")).toBe("Od 24. 10. jste ušli");
+    expect(returnHeading(sinceDay(slices, seen), "2026-11-09")).toBe("Od 24. 10. přibylo");
     expect(returnRouteLabel([{ name: "A", atM: 2000 }, { name: "B", atM: 9000 }], seen, 10_500)).toBe("A → B");
     // Po přehrání zmizí.
     seen = seenAfter(seen, 10_500, { kind: "finish", source: "domu", toM: 10_500 });

@@ -480,16 +480,17 @@ export function sinceDay(slices: ReadonlyArray<{ day: string; distanceM: number 
 }
 
 /**
- * Horní řádek návratu: „Dnes jste ušli“, „Od včerejška jste ušli“, „Od pátku jste ušli“ (do týdne),
- * jinak „Od 24. 10. jste ušli“; bez známého dne „Od posledně jste ušli“.
+ * Horní řádek návratu: kolik přibylo od posledního přehrání („Od posledně přibylo“, „Od včerejška přibylo“,
+ * „Od pátku přibylo“ do týdne, jinak „Od 24. 10. přibylo“). Nikdy „Dnes jste ušli“: číslo není součet za celý den
+ * a vedle dlaždice „Dnes“ by si odporovalo (docs/nazvoslovi.md).
  */
 export function returnHeading(since: string | undefined, today: string): string {
-  if (!since) return "Od posledně jste ušli";
+  if (!since) return "Od posledně přibylo";
   const back = dayDiff(today, since);
-  if (back <= 0) return "Dnes jste ušli";
-  if (back === 1) return "Od včerejška jste ušli";
-  if (back <= 6) return `Od ${WEEKDAYS_FROM[parseDay(since).getDay()]} jste ušli`;
-  return `Od ${Number(since.slice(8, 10))}. ${Number(since.slice(5, 7))}. jste ušli`;
+  if (back <= 0) return "Od posledně přibylo";
+  if (back === 1) return "Od včerejška přibylo";
+  if (back <= 6) return `Od ${WEEKDAYS_FROM[parseDay(since).getDay()]} přibylo`;
+  return `Od ${Number(since.slice(8, 10))}. ${Number(since.slice(5, 7))}. přibylo`;
 }
 
 const WEEKDAYS_ON = ["V neděli", "V pondělí", "V úterý", "Ve středu", "Ve čtvrtek", "V pátek", "V sobotu"];

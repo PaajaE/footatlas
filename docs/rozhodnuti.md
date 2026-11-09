@@ -252,3 +252,13 @@ Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chro
 - **Sbírky, Razítka.** Malé pečeti s monogramem: získané rumělkový vosk (klepnutí otevře `/zastavka/[id]`), nezískané slepý tužkový obrys. Sekce „Pečeti kapitol“ beze změny (balík H).
 - **Objevovat.** Karty připravovaných výprav mají větu „Připravujeme. Až bude výprava hotová, objeví se tady.“ (`UPCOMING_NOTE`).
 - Neověřeno: vykreslení vody na zařízení (MapLibre Native, `line-offset` u ploch), vzhled zástupného listu v tmavém vzhledu na telefonu.
+
+## 0028 Plynulý let návratu řízený mapou a texty „Od posledně přibylo“
+Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy, na telefonu se ověřuje
+
+- **Problém.** Na telefonu (motorola edge 50 fusion) se let návratu sekal: mapa se pohnula a 150–250 ms stála. Kamera dostávala `easeTo` každých 50 ms přes JS a každý pokyn rušil předchozí. Navíc se při každém kroku znovu posílala do mapy celá trasa (nový objekt `line(coords)`), ušlá část od začátku výpravy i bod značky.
+- **Kamera podle plánu.** `FlightMap` dostane `cameraAt(ms)` (poloha a přiblížení z `returnPlan`) a čas hodin. Kameře se pošle jeden pokyn na úsek 700 ms (`SEG_MS`) s cílem na konci úseku; plynulost počítá MapLibre nativně. Zastavení u míst, „Dál“ i pauza zůstávají ze stejných hodin.
+- **Značka uprostřed.** Za letu je značka „vy“ pevně uprostřed mapy (kamera je na ní), v mapě se kreslí až po skončení.
+- **Data jen při změně.** Celá trasa a ušlá část před úsekem jsou neměnné; za letu se posílá jen geometrie úseku (po 1/300).
+- **Záběr s cílem.** Po skončení záběr zahrne i další zastávku, je-li do 3 km za koncem úseku. Bez nového místa spodní panel neříká „Žádné nové místo“, ale „Na obzoru: Zámek Veltrusy, ještě 870 m“ s hádankou.
+- **Texty** (docs/nazvoslovi.md, rozhodnutí 0029): „Od posledně přibylo“ místo „Dnes jste ušli“ (číslo není součet dne a odporovalo dlaždici „Dnes“), „Přehrát cestu“, „Odemkli jste“, „Objev“ místo „Malý objev“, „Přeskočit“. Rámeček mapy ukazuje skutečnou etapu („Etapa III · Vltavská stezka“), ne napevno „List I“. Karta „Od posledně“ už neopakuje číslo ve větě (`changeDetails`).

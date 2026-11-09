@@ -11,11 +11,11 @@ import { Button, Card, T } from "./ui";
 
 /**
  * Kompaktní karta „Od posledně“ ve chvíli, kdy přibylo ≥ 300 m nebo místo (rozhodnutí 0022): číslo, úsek „A → B“,
- * věta a tlačítko k návratu „Inkoust“. Na Domů je až pod kartou další zastávky; když není co ukázat, nezobrazuje se.
+ * co se cestou stalo (bez opakování čísla) a tlačítko „Přehrát cestu“. Na Domů je až pod kartou další zastávky; když není co ukázat, nezobrazuje se.
  * Úsek se předává parametry. Karta zůstává, dokud se návrat nepřehraje do konce nebo se nezavře („Zavřít“);
- * neviděné dny se sčítají a nadpis pak říká „Od 24. 10. jste ušli“ (rozhodnutí 0024).
+ * neviděné dny se sčítají a nadpis pak říká „Od 24. 10. přibylo“ (rozhodnutí 0024).
  */
-export function ReturnCard({ fromM, toM, sentence }: { fromM: number; toM: number; sentence: string }) {
+export function ReturnCard({ fromM, toM, details }: { fromM: number; toM: number; details: string }) {
   const router = useRouter();
   const { colors, fonts } = useTheme();
   const { daySlices, markSeen } = useExpedition();
@@ -28,7 +28,7 @@ export function ReturnCard({ fromM, toM, sentence }: { fromM: number; toM: numbe
         <SectionLabel>{heading}</SectionLabel>
         <T style={{ fontFamily: fonts.display, fontSize: 22, lineHeight: 26, color: colors.fg }}>{`${d.value} ${d.unit}`}</T>
       </View>
-      <T style={{ fontFamily: fonts.display, fontSize: 16, lineHeight: 21, color: colors.fgSoft }}>{sentence}</T>
+      {details !== "" && <T style={{ fontFamily: fonts.display, fontSize: 16, lineHeight: 21, color: colors.fgSoft }}>{details}</T>}
       {route && (
         <T variant="small" style={{ fontSize: 13, lineHeight: 17 }}>
           {route}
@@ -36,7 +36,7 @@ export function ReturnCard({ fromM, toM, sentence }: { fromM: number; toM: numbe
       )}
       <Button
         compact
-        label="Přehrát návrat"
+        label="Přehrát cestu"
         onPress={() => router.push({ pathname: "/navrat", params: { from: String(Math.round(fromM)), to: String(Math.round(toM)) } })}
       />
       <Pressable
