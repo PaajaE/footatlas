@@ -35,3 +35,7 @@ Jednotné pojmy v textech aplikace (rozhodnutí 0029). Platí pro obrazovky, př
 ## Kde ještě odchylky jsou
 
 Žádné známé. Přehrání cesty (`navrat.tsx`, `ReturnCard`, `HaltCard`) je sjednocené v rozhodnutí 0028: „Od posledně přibylo“, „Přehrát cestu“, „Objev“, „Odemkli jste“, „Přeskočit“, „Na obzoru“.
+
+## Doplnění z návrhu v2
+
+Pojmy Mezitím, Před vámi, Atlas, Téma a Symbol a slova, která se přestávají používat (Domů, Dnes jako název obrazovky, Objevovat, Kam dnes dojdu), jsou v [navrh-v2.md](navrh-v2.md) § 9.

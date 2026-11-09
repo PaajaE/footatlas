@@ -190,6 +190,8 @@ Výprava o 80 km vyžaduje zhruba 11–16 plných zastávek (po 5–10 km plus k
 
 ## 8. Navigace a obrazovky
 
+> **Nahrazeno** návrhem v2 ([navrh-v2.md](navrh-v2.md) § 3, rozhodnutí 0030): tři záložky Výprava, Atlas, Kronika; Domů a Objevovat zanikají, „Od posledně“ je chvíle Mezitím. Text níže je původní verze.
+
 Čtyři záložky:
 
 - **Domů** – dnešní postup, co se změnilo od minule, další zastávka a vzdálenost k ní, poslední objevy.

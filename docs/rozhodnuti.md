@@ -276,3 +276,15 @@ Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chro
 - **Vysvětlující věta o kapitolách** se ukazuje jen, dokud chodec neotevře žádnou kapitolu (`footatlas.chapteropened.v1` v AsyncStorage, `useChapterExplainer`).
 - Nezahrnuto (soubory souběžné relace 0028): „Dnes jste ušli“ na kartě návratu, „Přehrát návrat“ → „Přehrát cestu“, „Malý objev“ na kartě zastavení.
 - Neověřeno: systémové sdílení na Androidu a iOS, safe area pruhu pohlednice na telefonu s gestovou lištou, kompaktní řádek Kroniky s načtenou historií (v ukázkovém postupu historie není).
+
+## 0030 Návrh v2: tři záložky, Mezitím, nový let, razítka se symboly, témata
+Datum: 9. 11. 2026 · Stav: přijato k realizaci (balíky K–N); podrobnosti v [navrh-v2.md](navrh-v2.md)
+
+- **Proč.** Tři videa z telefonu ukázala, že Domů a Výprava ukazují totéž, kapitoly výpravy jsou rozházené mezi Domů a Kroniku, „Dnes“ po několika dnech pauzy lže a let návratu je sice plynulý, ale honí tečku zblízka, jede stůj–jeď a nic nekreslí.
+- **Tři záložky:** Výprava (mapa a panel, otevírá se jako první), Atlas (výpravy, razítka, témata), Kronika (deník, životní cesta, rok). Domů a Objevovat zanikají. Nahrazuje § 8 specifikace.
+- **Mezitím** je chvíle po otevření, ne záložka: pruh na Výpravě, po dokončené etapě nebo pauze ≥ 3 dny přehrání přes celou obrazovku. Nikdy „Dnes“.
+- **Před vámi** nahrazuje „Kam dnes dojdu“: pás trasy a odhad podle vlastního tempa.
+- **Let:** úvodní a závěrečný záběr, oddálená kamera, pero kreslí čáru, plynulé barvení, místa za letu bez zastavení (zastávky a konce etap se zastavením s plynulým dojezdem a rozjezdem).
+- **Razítka se symboly** podle typu místa (16 symbolů, česká tradice turistických známek), pečeti etap a kapitol s kresbou.
+- **Kapitola vs. téma:** kapitola patří k výpravě a uzavře se; téma prochází atlasem a roste s každou výpravou (`themeId`).
+- Konkurence (Pikmin Bloom, Relive, The Conqueror, World Walking) je rozebraná v navrh-v2.md § 2.
