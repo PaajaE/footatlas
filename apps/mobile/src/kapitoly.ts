@@ -11,6 +11,8 @@ export interface KChapter {
   id: string;
   title: string;
   titleGenitive?: string;
+  /** Téma atlasu (rozhodnutí 0031). */
+  themeId?: string;
   /** Id míst v pořadí trasy. */
   placeIds: readonly string[];
 }

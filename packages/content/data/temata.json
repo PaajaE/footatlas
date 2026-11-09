@@ -1,0 +1,53 @@
+{
+  "themes": [
+    {
+      "id": "vorari",
+      "title": "Voraři",
+      "titleGenitive": "Vorařů",
+      "symbol": "vor",
+      "intro": "Než přišly silnice a železnice, plulo dřevo po řekách na vorech. Celnice, přístavy, zdymadla a kanály ukazují, jak lidé řeky přizpůsobovali dopravě.",
+      "milestones": [5, 15, 30],
+      "unit": { "one": "vorařské místo", "few": "vorařská místa", "many": "vorařských míst" },
+      "verified": false
+    },
+    {
+      "id": "mosty",
+      "title": "Mosty",
+      "titleGenitive": "Mostů",
+      "symbol": "most",
+      "intro": "Mosty a lávky převádějí cestu přes vodu. Každá doba stavěla jinak, od kamenných oblouků po ocel a beton.",
+      "milestones": [3, 10, 25],
+      "unit": { "one": "most", "few": "mosty", "many": "mostů" },
+      "verified": false
+    },
+    {
+      "id": "ostrovy",
+      "title": "Ostrovy",
+      "titleGenitive": "Ostrovů",
+      "symbol": "ostrov",
+      "intro": "Řeky obtékají ostrovy malé i velké. Na některých se sportuje, na jiných se žije.",
+      "milestones": [3, 10, 25],
+      "unit": { "one": "ostrov", "few": "ostrovy", "many": "ostrovů" },
+      "verified": false
+    },
+    {
+      "id": "pocatky",
+      "title": "Počátky Čech",
+      "titleGenitive": "Počátků Čech",
+      "symbol": "hradiste",
+      "intro": "Hradiště, rotundy a hory opředené pověstmi. K těmto místům se váže vyprávění o počátcích českého státu, zčásti doložené, zčásti legendární.",
+      "milestones": [3, 10, 25],
+      "verified": false
+    },
+    {
+      "id": "sidla",
+      "title": "Šlechtická sídla",
+      "titleGenitive": "Šlechtických sídel",
+      "symbol": "zamek",
+      "intro": "Šlechta si stavěla zámky, letohrádky a zahrady na nejlepších místech v krajině. Mnohé z nich jsou dnes otevřené jako muzea nebo parky.",
+      "milestones": [5, 15, 30],
+      "unit": { "one": "sídlo", "few": "sídla", "many": "sídel" },
+      "verified": false
+    }
+  ]
+}

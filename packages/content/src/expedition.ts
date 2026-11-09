@@ -13,7 +13,7 @@ export const routeTypeLabel: Record<RouteType, string> = {
   imported: "Skutečná trasa · vlastní import",
 };
 
-const chapter = z.object({ id: z.string().min(1), title: z.string().min(1) });
+const chapter = z.object({ id: z.string().min(1), title: z.string().min(1), themeId: z.string().min(1).optional() });
 
 /**
  * Výprava jako obsahový balíček. Geometrie (body trasy) je v samostatném souboru `routeFile`,

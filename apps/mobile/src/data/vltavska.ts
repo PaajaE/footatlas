@@ -41,6 +41,8 @@ export interface AppChapter {
   /** Název ve 2. pádě („Mostů a lávek“); chybí-li, použije se `title`. */
   titleGenitive?: string;
   blurb: string;
+  /** Téma atlasu, do kterého kapitola patří (rozhodnutí 0031). */
+  themeId?: string;
   /** Úvod kapitoly, začátek příběhu. */
   intro?: string;
   /** Závěr po uzavření kapitoly. */
@@ -110,7 +112,15 @@ function load(): LoadedExpedition {
     }))
     .sort((a, b) => a.atM - b.atM);
   const obsah = obsahJson as unknown as {
-    chapters: Array<{ id: string; title: string; titleGenitive?: string; blurb: string; intro?: string; outro?: string }>;
+    chapters: Array<{
+      id: string;
+      title: string;
+      titleGenitive?: string;
+      blurb: string;
+      themeId?: string;
+      intro?: string;
+      outro?: string;
+    }>;
     stories: Array<{
       id: string;
       hook: string;
@@ -137,6 +147,7 @@ function load(): LoadedExpedition {
     title: c.title,
     titleGenitive: c.titleGenitive,
     blurb: c.blurb,
+    themeId: c.themeId,
     intro: c.intro,
     outro: c.outro,
     placeIds: places.filter((p) => p.chapterId === c.id).map((p) => p.id),

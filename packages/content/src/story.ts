@@ -37,6 +37,8 @@ export const storyChapter = z.object({
   /** Název ve 2. pádě pro věty „do uzavření Mostů a lávek“. */
   titleGenitive: z.string().min(1).optional(),
   blurb: z.string().min(1),
+  /** Téma atlasu, do kterého kapitola patří (`data/temata.json`, rozhodnutí 0031). */
+  themeId: z.string().min(1).optional(),
   /** Úvod kapitoly, začátek příběhu (2–3 věty). */
   intro: z.string().min(1).max(400).optional(),
   /** Závěr po uzavření kapitoly (2–3 věty). */
