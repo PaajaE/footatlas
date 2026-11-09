@@ -118,3 +118,19 @@ describe("okolí místa", () => {
     expect(approachFraction(500, 0, 100)).toBe(1);
   });
 });
+
+import { reachEmptyText } from "./home";
+
+describe("Kam dnes dojdu bez opakování další zastávky", () => {
+  it("neopakuje další zastávku z karty nad sebou", () => {
+    const t = reachEmptyText("2 km", { id: "s2", name: "Troja" }, "3,1 km", "s2");
+    expect(t).not.toContain("Troja");
+    expect(t).toBe("Za 2 km nic nového. Další místo je o kus dál, zkuste delší procházku.");
+  });
+  it("jiné nejbližší místo (malý objev) jmenuje", () => {
+    expect(reachEmptyText("1 km", { id: "d1", name: "Lávka" }, "1,4 km", "s2")).toBe("Za 1 km nic nového. Nejbližší místo, Lávka, je za 1,4 km.");
+  });
+  it("na konci trasy", () => {
+    expect(reachEmptyText("4 km", undefined, "", undefined)).toBe("Za 4 km už nic nezbývá.");
+  });
+});

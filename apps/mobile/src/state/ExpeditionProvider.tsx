@@ -26,6 +26,7 @@ import { DEFAULT_DEMO, loadDemo, loadStepProfile, saveDemo, saveStepProfile, typ
 import { loadJourneyEvents, loadSession, recordJourneyEvents, saveSession } from "./sessionStore";
 import { FOREGROUND_INTERVAL_MS, shouldRefresh } from "./refreshPolicy";
 import type { DailyDistance } from "../home";
+import { seenAfter, type ReturnAction } from "../navrat";
 
 export type DataStatus =
   | { kind: "loading" }
@@ -62,7 +63,8 @@ interface ExpeditionContextValue {
   resume: () => Promise<void>;
   refresh: () => Promise<void>;
   /** Zapamatuje si, kam až uživatel viděl postup (pro „od posledně“). */
-  markSeen: () => void;
+  /** Zapamatuje postup jako viděný: celý (bez argumentu), nebo jen do `upToM` (konec přehraného návratu). */
+  markSeen: (upToM?: number) => void;
   setDemo: (patch: Partial<DemoState>) => void;
   resetAll: () => Promise<void>;
 }
@@ -298,16 +300,21 @@ export function ExpeditionProvider({ children }: { children: ReactNode }) {
     [walkedM, previousM],
   );
 
-  const markSeen = useCallback(() => {
-    if (demo.enabled) {
-      if (demo.walkedM > demo.seenM) setDemo({ seenM: demo.walkedM });
-      return;
-    }
-    const s = sessionRef.current;
-    if (!s) return;
-    const next = markSessionSeen(s, walkedM);
-    if (next !== s) void persistSession(next);
-  }, [demo, walkedM, persistSession, setDemo]);
+  const markSeen = useCallback(
+    (upToM?: number) => {
+      const action: ReturnAction = upToM === undefined ? { kind: "dismiss" } : { kind: "finish", source: "domu", toM: upToM };
+      if (demo.enabled) {
+        const seenM = seenAfter(demo.seenM, demo.walkedM, action);
+        if (seenM > demo.seenM) setDemo({ seenM });
+        return;
+      }
+      const s = sessionRef.current;
+      if (!s) return;
+      const next = markSessionSeen(s, seenAfter(s.lastSeenWalkedM, walkedM, action));
+      if (next !== s) void persistSession(next);
+    },
+    [demo, walkedM, persistSession, setDemo],
+  );
 
   const value: ExpeditionContextValue = {
     ready,

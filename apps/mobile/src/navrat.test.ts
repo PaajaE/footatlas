@@ -5,6 +5,9 @@ import {
   FLIGHT_MAX_MS,
   FLIGHT_MIN_MS,
   counterM,
+  dayReplayParams,
+  returnSource,
+  seenAfter,
   easeInOut,
   easeInOutInverse,
   flightDurationMs,
@@ -171,5 +174,70 @@ describe("flightZoom", () => {
   it("je vždy v rozsahu 11,5 až 14,5", () => {
     expect(flightZoom(0, 4000)).toBe(14.5);
     expect(flightZoom(500_000, 9000)).toBe(11.5);
+  });
+});
+
+describe("kdy se návrat spotřebuje (rozhodnutí 0024)", () => {
+  /** Karta „Od posledně“ podle stejné podmínky jako na Domů (bez nových míst a etap). */
+  const cardShown = (seenM: number, walkedM: number) => shouldShowReturn({ deltaM: walkedM - seenM, newPlaceCount: 0, newStageCount: 0 });
+
+  it("odchod z Domů (jiná záložka, zastávka) kartu nespotřebuje", () => {
+    expect(seenAfter(1000, 4000, { kind: "leave" })).toBe(1000);
+    expect(cardShown(seenAfter(1000, 4000, { kind: "leave" }), 4000)).toBe(true);
+  });
+
+  it("přehrání z Domů do konce zapamatuje konec přehraného úseku", () => {
+    expect(seenAfter(1000, 4000, { kind: "finish", source: "domu", toM: 4000 })).toBe(4000);
+    expect(cardShown(4000, 4000)).toBe(false);
+    // Co přibylo během přehrávání, zůstane na příště.
+    expect(seenAfter(1000, 4500, { kind: "finish", source: "domu", toM: 4000 })).toBe(4000);
+  });
+
+  it("přehrání dne z Kroniky návrat nespotřebuje", () => {
+    expect(seenAfter(1000, 4000, { kind: "finish", source: "kronika", toM: 4000 })).toBe(1000);
+  });
+
+  it("„Zavřít“ na kartě zapamatuje celý postup", () => {
+    expect(seenAfter(1000, 4000, { kind: "dismiss" })).toBe(4000);
+  });
+
+  it("viděná hodnota nikdy neklesá a nepřeskočí ušlou", () => {
+    expect(seenAfter(5000, 4000, { kind: "dismiss" })).toBe(5000);
+    expect(seenAfter(1000, 4000, { kind: "finish", source: "domu", toM: 9000 })).toBe(4000);
+  });
+
+  it("zdroj z adresy: jen „kronika“ je přehrání z Kroniky", () => {
+    expect(returnSource("kronika")).toBe("kronika");
+    expect(returnSource(undefined)).toBe("domu");
+    expect(returnSource("cokoli")).toBe("domu");
+    expect(returnSource(["kronika"])).toBe("domu");
+  });
+
+  it("neviděné dny se sčítají a karta ukazuje „Od 24. 10. jste ušli“", () => {
+    const slices = [
+      { day: "2026-10-20", distanceM: 3000 },
+      { day: "2026-10-24", distanceM: 2000 },
+      { day: "2026-10-27", distanceM: 4000 },
+      { day: "2026-11-02", distanceM: 1500 },
+    ];
+    // Naposledy viděno uprostřed 24. 10.; mezitím se Domů několikrát opustilo bez přehrání.
+    let seen = 4000;
+    for (let i = 0; i < 3; i++) seen = seenAfter(seen, 10_500, { kind: "leave" });
+    expect(seen).toBe(4000);
+    expect(cardShown(seen, 10_500)).toBe(true);
+    expect(returnHeading(sinceDay(slices, seen), "2026-11-09")).toBe("Od 24. 10. jste ušli");
+    expect(returnRouteLabel([{ name: "A", atM: 2000 }, { name: "B", atM: 9000 }], seen, 10_500)).toBe("A → B");
+    // Po přehrání zmizí.
+    seen = seenAfter(seen, 10_500, { kind: "finish", source: "domu", toM: 10_500 });
+    expect(cardShown(seen, 10_500)).toBe(false);
+  });
+});
+
+describe("přehrát den z Kroniky", () => {
+  it("úsek dne jako parametry a zdroj Kronika", () => {
+    expect(dayReplayParams({ fromM: 9100.4, toM: 12_200.6 })).toEqual({ from: "9100", to: "12201", zdroj: "kronika" });
+  });
+  it("den bez úseku se nepřehrává", () => {
+    expect(dayReplayParams({ fromM: 5000, toM: 5000 })).toBeUndefined();
   });
 });

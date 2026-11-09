@@ -207,3 +207,14 @@ Datum: 2. 11. 2026 · Stav: přijato; obsah **neověřený** (`verified: false`)
 - **Záměrně bez příběhu:** Slepé rameno, Říční tůně. Konkrétní příběh na trase se nepodařilo doložit a jsou potřeba pro hustotu míst. Kapitola „Řeka a povodně 2002“ se nezaložila (povodeň je doložena jen jedním zdrojem).
 - **Co zůstává neověřené (hlavní).** Všechno v `obsah.json` 2.–4. etapy má dosud jen Wikipedii nebo jeden další zdroj; seznam tvrzení a druhých zdrojů je v `docs/obsah-vltavska-podklady.md` („Úkoly k ověření: příběhy 2.–4. etapy“). Nejslabší: veletrh ve Veltrusích („první na světě“ je sporné), Řež (jediný zdroj), Červený mlýn (uživatelský web), spád zdymadla Hořín (8,5 vs 8,8 m), souřadnice Dolan, Lobečku, Letek a Zámku Hořín (nepřesné, neopravovány). Počty obětí a bomb z náletu na Kralupy se nepoužily.
 - Fotky se nestahovaly; kandidáti z Wikimedia Commons s autorem a licencí jsou v podkladech.
+
+## 0024 Návrat se spotřebuje přehráním (balík F)
+Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy čisté logiky, na zařízení NEOVĚŘENO
+
+- **Problém.** Karta „Od posledně“ zmizela, jakmile chodec opustil Domů (jiná záložka, otevřená zastávka), i když návrat nepřehrál: Domů volalo `markSeen` při odchodu (0022).
+- **Spotřebuje se jen přehráním nebo zavřením.** Odchod z Domů nic nemění. Návrat z Domů se zapamatuje, až `/navrat` dojede do konce (i po „Přeskočit“ nebo při „Omezit pohyb“, kdy se výsledek ukáže hned), a to jen do konce přehraného úseku: co přibylo během přehrávání, zůstane na příště. Na kartě je nenápadné „Zavřít“, které zapamatuje celý postup. Ukázkový režim (`demo.seenM`) jde stejnou cestou. Čistá logika: `seenAfter`, `returnSource` v `src/navrat.ts`; `markSeen` v `ExpeditionProvider` bere nepovinné `upToM`.
+- **Neviděné dny se sčítají.** Viděná hodnota zůstává poslední viděná, úsek proto roste přes víc dní. Nadpis karty je stejný jako na obrazovce návratu (`returnHeading`), např. „Od 24. 10. jste ušli“.
+- **Přehrát den z Kroniky.** Každý den v Deníku má odkaz „Přehrát den“ na `/navrat?from&to&zdroj=kronika` (km začátku a konce dne z `daySlices`, `dayReplayParams`). Takové přehrání návrat nespotřebuje.
+- **Domů bez opakování.** Pořadí: postup etapy (s posledním čtením a dlaždicemi), Od posledně, další zastávka s hádankou, „Kam dnes dojdu“, „Nedávno objeveno“, kapitoly. Když je v dosahu „Kam dnes dojdu“ prázdno a nejbližší místo je ta zastávka z karty nad tím, věta ji neopakuje (`reachEmptyText` v `src/home.ts`). Komponenta `WhereToday` se kvůli tomu přesunula do `components/WhereToday.tsx`, protože `HomeSections.tsx` paralelně upravuje balík H; stará kopie tam zůstává nepoužitá a smaže se po sloučení.
+- Příchod naživo (`ArrivalHost`) při zavření dál volá `markSeen`: chodec nová místa viděl v reálném čase.
+- Neověřeno: chování na zařízení, nadpis návratu při přehrání staršího dne z Kroniky (říká „Od pátku jste ušli“, obrazovku upravuje balík G).
