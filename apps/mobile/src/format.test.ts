@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDistance, formatDistanceNoWrap, formatKm, formatKmMark, keepUnit } from "./format";
+import { formatDistance, formatDistanceNoWrap, formatKm, formatKmMark, keepUnit, shortPlaceName } from "./format";
 
 describe("formatDistance", () => {
   it("pod 15 m je „Jste tady“", () => {
@@ -108,5 +108,29 @@ describe("jednotka u čísla se neodtrhne", () => {
     expect(nb(formatKmMark(4000))).toBe("km␣4,0");
     expect(nb(formatKmMark(35_640))).toBe("km␣35,6");
     expect(nb(formatKmMark(-1))).toBe("km␣0,0");
+  });
+});
+
+describe("shortPlaceName", () => {
+  it("krátký název nechá být", () => {
+    expect(shortPlaceName("Vyšehrad")).toBe("Vyšehrad");
+    expect(shortPlaceName("Karlův most")).toBe("Karlův most");
+  });
+  it("vynechá upřesnění nad/pod", () => {
+    expect(shortPlaceName("Libčice nad Vltavou")).toBe("Libčice");
+    expect(shortPlaceName("Dolany nad Vltavou")).toBe("Dolany");
+  });
+  it("dlouhý název zkrátí po celých slovech", () => {
+    expect(shortPlaceName("Rodný dům Antonína Dvořáka")).toBe("Rodný dům…");
+    expect(shortPlaceName("Plavební komora Troja")).toBe("Plavební…");
+    expect(shortPlaceName("Zámek Nelahozeves")).toBe("Zámek…");
+  });
+  it("příliš dlouhé první slovo zkrátí uprostřed", () => {
+    expect(shortPlaceName("Nejdelšíslovonasvětě", 8)).toBe("Nejdelš…");
+  });
+  it("výsledek nikdy nepřekročí limit", () => {
+    for (const n of ["Holešovický přístav", "První pohled na Mělník", "Soutok v Mělníku", "Plavební kanál Vraňany"]) {
+      expect([...shortPlaceName(n)].length).toBeLessThanOrEqual(13);
+    }
   });
 });

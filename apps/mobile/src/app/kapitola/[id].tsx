@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChapterSeal } from "../../components/ChapterSeal";
@@ -14,11 +15,12 @@ import { zOf } from "../../home";
 import { chapterPlaces, chapterStatus, missingSentence } from "../../kapitoly";
 import { sealKm } from "../../seal";
 import { useExpedition } from "../../state/ExpeditionProvider";
+import { saveChapterOpened } from "../../state/storage";
 import { useTheme } from "../../theme/ThemeProvider";
 
 /**
  * Kapitola (rozhodnutí 0026): název a úvod jako začátek příběhu, postup s pečetí, místa v pořadí trasy
- * (objevená s fotkou nebo razítkem a dnem objevu, zamčená s hádankou a vzdáleností) a po uzavření závěr
+ * (odemčená s fotkou nebo razítkem a dnem odemčení, zamčená s hádankou a vzdáleností) a po uzavření závěr
  * a pohlednice. Kapitoly zatím patří jen k aktuální výpravě.
  */
 export default function ChapterScreen() {
@@ -28,6 +30,10 @@ export default function ChapterScreen() {
   const insets = useSafeAreaInsets();
   const { walkedM, active, events } = useExpedition();
   const chapter = id ? vltavska.chapters.find((c) => c.id === id) : undefined;
+  // Po první otevřené kapitole už vysvětlující věta o kapitolách není potřeba (rozhodnutí 0029).
+  useEffect(() => {
+    if (chapter) void saveChapterOpened();
+  }, [chapter]);
 
   if (!chapter) {
     return (
@@ -79,8 +85,8 @@ export default function ChapterScreen() {
             const photo = placePhoto(p.photo);
             const line = entry.reached
               ? entry.reachedDay
-                ? `Objeveno ${formatDay(entry.reachedDay)}`
-                : "Objeveno"
+                ? `Odemčeno ${formatDay(entry.reachedDay)}`
+                : "Odemčeno"
               : active
                 ? `za ${formatKm(entry.remainingM)}`
                 : `km ${(p.atM / 1000).toFixed(1).replace(".", ",")} od startu`;

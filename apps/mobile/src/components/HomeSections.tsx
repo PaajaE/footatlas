@@ -17,13 +17,14 @@ import { CHAPTERS_EXPLAINER, missingSentence, nearestChapter } from "../kapitoly
 import { useExpedition } from "../state/ExpeditionProvider";
 import { localDateKey } from "@footatlas/core";
 import { useTips } from "../state/useTips";
+import { useChapterExplainer } from "../state/useChapterExplainer";
 import { useTheme } from "../theme/ThemeProvider";
 import { ChapterSeal } from "./ChapterSeal";
 import { SectionLabel } from "./LabeledCard";
 import { Medallion } from "./Medallion";
 import { Seal } from "./Seal";
 import { StatTile } from "./StatTile";
-import { Button, Card, StageBar, T } from "./ui";
+import { Card, StageBar, T } from "./ui";
 
 /** Řádek „Etapa 1 ze 4 · Praha“ + „12,5 z 62 km“ a pruh etap. */
 export function StageProgress() {
@@ -48,7 +49,7 @@ export function StageProgress() {
 }
 
 /**
- * Tři dlaždice: Dnes, Za 7 dní, Pohlednice. Hodnoty jsou ze skutečných dat výpravy;
+ * Tři dlaždice: Dnes (součet za celý den), Za 7 dní, Do pohlednice (zbývá do konce etapy). Hodnoty jsou ze skutečných dat výpravy;
  * dlaždice, na které data nejsou (výprava hotová), se vynechá.
  */
 export function StatTiles() {
@@ -67,12 +68,15 @@ export function StatTiles() {
     <View style={{ flexDirection: "row", gap: 8 }}>
       <StatTile label="Dnes" value={t.value} unit={t.unit} note={todayPlaces > 0 ? pluralNewPlaces(todayPlaces) : undefined} />
       <StatTile label="Za 7 dní" value={w.value} unit={w.unit} note={weekPlaces > 0 ? pluralNewPlaces(weekPlaces) : undefined} />
-      {!state.completed && toStageEnd > 0 && <StatTile label="Pohlednice" value={s.value} unit={s.unit} note="do konce etapy" />}
+      {!state.completed && toStageEnd > 0 && <StatTile label="Do pohlednice" value={s.value} unit={s.unit} note="konec etapy" />}
     </View>
   );
 }
 
-/** Karta další zastávky: medailon, vzdálenost v metrech i krocích, hádanka kurzívou, tlačítko k tipu. */
+/**
+ * Karta další zastávky: medailon, vzdálenost v metrech i krocích, hádanka kurzívou. Klepnutí na kartu otevře místo;
+ * tip k hádance je jen vedlejší odkaz („Tipnout si“ / „Změnit tip“), ne hlavní tlačítko obrazovky (rozhodnutí 0029).
+ */
 export function NextStopCard() {
   const router = useRouter();
   const { colors, fonts } = useTheme();
@@ -87,11 +91,17 @@ export function NextStopCard() {
   const tipped = tips[place.id] !== undefined;
   const open = () => router.push({ pathname: "/zastavka/[id]", params: { id: place.id } });
   return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${place.kind === "stop" ? "Další zastávka" : "Další objev"} ${place.name}, ${distance}`}
+      accessibilityHint="Otevře místo"
+      onPress={open}
+    >
     <Card style={{ gap: 12, padding: 14 }}>
       <View style={{ flexDirection: "row", gap: 14, alignItems: "center" }}>
         <Medallion photo={photo} size={72} locked={photo === undefined} label={photo === undefined && toM < 1000 ? formatDistance(toM) : undefined} />
         <View style={{ flex: 1 }}>
-          <SectionLabel>{place.kind === "stop" ? "Další zastávka" : "Další malý objev"}</SectionLabel>
+          <SectionLabel>{place.kind === "stop" ? "Další zastávka" : "Další objev"}</SectionLabel>
           <T style={{ fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.fg }}>{place.name}</T>
           <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: 20, color: colors.accent }}>{distance}</T>
         </View>
@@ -99,8 +109,22 @@ export function NextStopCard() {
       {teaserText && (
         <T style={{ fontFamily: fonts.displayItalic, fontSize: 18, lineHeight: 24, color: colors.fg }}>{teaserText}</T>
       )}
-      <Button compact label={place.riddle ? (tipped ? "Změnit tip" : "Tipnout si odpověď") : "Podívat se na místo"} onPress={open} />
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        {place.riddle ? (
+          <Pressable accessibilityRole="link" onPress={open} hitSlop={6} style={{ minHeight: 44, justifyContent: "center" }}>
+            <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
+              {tipped ? "Změnit tip" : "Tipnout si"}
+            </T>
+          </Pressable>
+        ) : (
+          <View />
+        )}
+        <T variant="muted" style={{ fontSize: 14, lineHeight: 20, color: colors.mutedStrong }}>
+          Otevřít místo ›
+        </T>
+      </View>
     </Card>
+    </Pressable>
   );
 }
 
@@ -118,7 +142,7 @@ export function RecentlyDiscovered() {
   return (
     <View style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-        <SectionLabel>Nedávno objeveno</SectionLabel>
+        <SectionLabel>Nedávno odemčeno</SectionLabel>
         <Pressable accessibilityRole="link" onPress={() => router.push("/kronika")} style={{ minHeight: 44, justifyContent: "center" }}>
           <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
             Kronika
@@ -171,15 +195,18 @@ export function Chapters() {
   const router = useRouter();
   const { colors, fonts } = useTheme();
   const { walkedM, active } = useExpedition();
+  const explain = useChapterExplainer();
   if (vltavska.chapters.length === 0) return null;
   const nearest = nearestChapter(vltavska.chapters, vltavska.placesById, walkedM, active);
   return (
     <View style={{ gap: 10 }}>
       <View style={{ gap: 2 }}>
         <SectionLabel>Kapitoly</SectionLabel>
-        <T variant="muted" style={{ fontSize: 13, lineHeight: 18, color: colors.mutedStrong }}>
-          {CHAPTERS_EXPLAINER}
-        </T>
+        {explain && (
+          <T variant="muted" style={{ fontSize: 13, lineHeight: 18, color: colors.mutedStrong }}>
+            {CHAPTERS_EXPLAINER}
+          </T>
+        )}
       </View>
       {nearest ? (
         <Pressable

@@ -100,8 +100,8 @@ export function ConfidenceBar({ by, compact = false }: { by: { verified: number;
   const { colors } = useTheme();
   const sh = confidenceShares(by);
   const parts = [
-    { key: "verified", share: sh.verified, color: colors.fg, m: by.verified, text: "ověřeno" },
-    { key: "estimated", share: sh.estimated, color: TAN, m: by.estimated, text: "odhad z kroků" },
+    { key: "verified", share: sh.verified, color: colors.fg, m: by.verified, text: "změřeno telefonem" },
+    { key: "estimated", share: sh.estimated, color: TAN, m: by.estimated, text: "dopočítáno z kroků" },
     { key: "manual", share: sh.manual, color: colors.line, m: by.manual, text: "zadáno ručně" },
   ].filter((p) => p.m > 0);
   if (parts.length === 0) return null;

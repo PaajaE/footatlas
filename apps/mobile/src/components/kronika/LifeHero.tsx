@@ -7,19 +7,52 @@ import { Globe, useInk } from "./parts";
 
 /**
  * Tmavá karta nahoře v Kronice: zeměkoule, „Ušli jste“, velké číslo a střídavé postřehy. Klepnutí otevře Kartu života.
- * Všechna čísla jsou z kroniky; kroky jsou odhad z délky kroku.
+ * Všechna čísla jsou z kroniky; kroky jsou odhad z délky kroku. V plné velikosti jen na záložce Deník; na ostatních
+ * záložkách (`compact`) je to jeden tmavý řádek „371 km · asi 512 000 kroků ›“ (rozhodnutí 0029).
  */
-export function LifeHero({ totalM, steps, facts, onPress }: { totalM: number; steps: number | null; facts: string[]; onPress: () => void }) {
+export function LifeHero({
+  totalM,
+  steps,
+  facts,
+  onPress,
+  compact = false,
+}: {
+  totalM: number;
+  steps: number | null;
+  facts: string[];
+  onPress: () => void;
+  compact?: boolean;
+}) {
   const ink = useInk();
   const { fonts } = useTheme();
   const [i, setI] = useState(0);
   useEffect(() => {
-    if (facts.length < 2) return;
+    if (compact || facts.length < 2) return;
     const id = setInterval(() => setI((n) => (n + 1) % facts.length), 5000);
     return () => clearInterval(id);
-  }, [facts.length]);
+  }, [facts.length, compact]);
   const big = bigDistance(totalM);
   const fact = facts[i % Math.max(1, facts.length)];
+  if (compact) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Ušli jste ${big.value} ${big.unit}${steps !== null ? `, asi ${formatStepCount(steps)} kroků` : ""}. Otevřít kartu života`}
+        onPress={onPress}
+        style={{ borderRadius: 16, backgroundColor: ink.bg, paddingHorizontal: 14, paddingVertical: 10, flexDirection: "row", alignItems: "baseline", gap: 8 }}
+      >
+        <T style={{ fontFamily: fonts.display, fontSize: 22, lineHeight: 26, color: ink.text }} numberOfLines={1}>
+          {`${big.value}\u00A0${big.unit}`}
+        </T>
+        <T variant="muted" style={{ flex: 1, color: ink.soft }} numberOfLines={1}>
+          {steps !== null ? `asi ${formatStepCount(steps)} kroků` : ""}
+        </T>
+        <T variant="muted" style={{ color: ink.soft, fontSize: 18 }}>
+          ›
+        </T>
+      </Pressable>
+    );
+  }
   return (
     <Pressable
       accessibilityRole="button"

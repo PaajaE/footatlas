@@ -31,7 +31,10 @@ function sinceLabel(day: string): string {
   return `${MONTHS_GEN[Number(day.slice(5, 7)) - 1]} ${day.slice(0, 4)}`;
 }
 
-/** Kronika: zeměkoule s ušlou vzdáleností a přepínač Deník / Cesta / Rok / Sbírky (docs/design-prototyp.md). */
+/**
+ * Kronika: zeměkoule s ušlou vzdáleností a přepínač Deník / Cesta / Rok / Sbírky (docs/design-prototyp.md).
+ * Velká karta se zeměkoulí je jen na Deníku, jinde jeden řádek (rozhodnutí 0029).
+ */
 export default function Chronicle() {
   const router = useRouter();
   const { ready, stats, days, lastReadAt, sync, syncNow } = useChronicle();
@@ -103,7 +106,13 @@ export default function Chronicle() {
           />
         </Card>
       ) : (
-        <LifeHero totalM={total} steps={estimateSteps(total, stepLength.meters)} facts={facts} onPress={() => router.push("/karta-zivota")} />
+        <LifeHero
+          compact={tab !== "denik"}
+          totalM={total}
+          steps={estimateSteps(total, stepLength.meters)}
+          facts={facts}
+          onPress={() => router.push("/karta-zivota")}
+        />
       )}
 
       <Segmented items={TABS} value={tab} onChange={setTab} />

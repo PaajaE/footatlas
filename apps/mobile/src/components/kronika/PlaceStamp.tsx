@@ -7,8 +7,8 @@ import { useTheme } from "../../theme/ThemeProvider";
 const WAX = { body: "#9B2C22", shadow: "#5A1610", text: "#F6D9CF", glint: "#E7A08F" };
 
 /**
- * Malá pečeť místa v mřížce Razítek: získané místo je rumělkový vosk s monogramem a klepnutím otevře detail
- * místa; nezískané je slepý tužkový obrys s monogramem jen naznačeným.
+ * Malé razítko místa v mřížce Razítek míst: získané místo je rumělkový vosk s monogramem a klepnutím otevře detail
+ * místa; nezískané je slepý tužkový obrys s otazníkem, bez názvu (rozhodnutí 0029).
  */
 export function PlaceStamp({
   monogram,
@@ -48,13 +48,13 @@ export function PlaceStamp({
         allowFontScaling={false}
         style={{ fontFamily: fonts.display, fontSize, lineHeight: fontSize * 1.2, color: got ? WAX.text : colors.muted, opacity: got ? 1 : 0.55 }}
       >
-        {monogram}
+        {got ? monogram : "?"}
       </Text>
     </View>
   );
   if (!got || !onPress) {
     return (
-      <View accessible accessibilityRole="image" accessibilityLabel={got ? `${name}, razítko získáno` : `${name}, zatím bez razítka`}>
+      <View accessible accessibilityRole="image" accessibilityLabel={got ? `${name}, razítko získáno` : "Zatím neodemčené místo"}>
         {face}
       </View>
     );

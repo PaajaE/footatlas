@@ -122,9 +122,9 @@ function joinNames(names: readonly string[]): string {
 export function backText(places: readonly PcPlace[]): string[] {
   const out: string[] = [];
   const stops = places.filter((p) => p.kind === "stop").map((p) => p.name);
-  if (stops.length > 0) out.push(`Cestou jste minuli: ${joinNames(stops)}.`);
+  if (stops.length > 0) out.push(`Cestou jste odemkli: ${joinNames(stops)}.`);
   const discoveries = places.filter((p) => p.kind === "discovery").length;
-  if (discoveries > 0) out.push(discoveries === 1 ? "Přibyl 1 malý objev." : `Přibylo ${discoveries} malých objevů.`);
+  if (discoveries > 0) out.push(discoveries === 1 ? "Přibyl 1 objev." : discoveries <= 4 ? `Přibyly ${discoveries} objevy.` : `Přibylo ${discoveries} objevů.`);
   const hooked = places.filter((p) => p.hook).at(-1);
   if (hooked) out.push(`„${hooked.hook}“`);
   return out;
@@ -152,4 +152,13 @@ export function nextStageCard(
     teaser: names.length > 0 ? `${joinNames(names)}.` : undefined,
     firstRiddle: inStage.find((p) => p.riddle)?.riddle?.question,
   };
+}
+
+/**
+ * Text, který se pošle tlačítkem „Poslat“ (obrázek zatím poslat nejde, rozhodnutí 0022): nadpis pohlednice,
+ * etapa nebo kapitola, věty z rubu a podpis výpravy. Prázdné části se vynechají.
+ */
+export function postcardShareText(p: { title: string; subtitle?: string; lines: readonly string[]; expedition: string }): string {
+  const head = p.subtitle && p.subtitle !== p.title ? `${p.title} (${p.subtitle})` : p.title;
+  return [`Pohlednice: ${head}`, ...p.lines, `${p.expedition} · FootAtlas`].filter((s) => s.trim().length > 0).join("\n");
 }

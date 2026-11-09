@@ -252,3 +252,17 @@ Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chro
 - **Sbírky, Razítka.** Malé pečeti s monogramem: získané rumělkový vosk (klepnutí otevře `/zastavka/[id]`), nezískané slepý tužkový obrys. Sekce „Pečeti kapitol“ beze změny (balík H).
 - **Objevovat.** Karty připravovaných výprav mají větu „Připravujeme. Až bude výprava hotová, objeví se tady.“ (`UPCOMING_NOTE`).
 - Neověřeno: vykreslení vody na zařízení (MapLibre Native, `line-offset` u ploch), vzhled zástupného listu v tmavém vzhledu na telefonu.
+
+## 0029 Názvosloví (balík J)
+Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chromiu (390 dp, světlý vzhled, ukázkový postup), na zařízení NEOVĚŘENO
+
+- **Názvosloví** je v [`docs/nazvoslovi.md`](nazvoslovi.md): výprava, etapa, místo, zastávka, objev, razítko, pečeť, kapitola, odemknout, „Od posledně přibylo“, „Přehrát cestu“, hádanka a tip. „List“ už v textu není synonymem etapy; zůstává jen jako ozdobný titulek rámečku mapy s číslem etapy. Etapa se dokončí, kapitola uzavře.
+- **Uplatněno v textech:** „Další malý objev“ → „Další objev“ (Domů, Výprava, detail místa, Objevy); „Nedávno objeveno“ → „Nedávno odemčeno“; „Objeveno“ → „Odemčeno“ v kapitole; „List II“ → „Etapa II“ (Sbírky, Výprava); „Razítka“ → „Razítka míst“; věta změny (`changeSentence` v `packages/core`) „Od posledně jste ušli … Minuli jste: … Přibyl 1 malý objev.“ → „Od posledně přibylo … Odemkli jste: … Přibyl 1 objev.“ (a správně „Přibyly 2 objevy“); rub pohlednice „Cestou jste minuli“ → „Cestou jste odemkli“; Deník „Objev dne / Dnes jste objevili / Den bez objevu“ → „Místo dne / Dnes jste odemkli / Den bez nového místa“; dlaždice „Pohlednice · do konce etapy“ → „Do pohlednice · konec etapy“; „Tipnout si odpověď“ → „Tipnout si“.
+- **Domů, další zastávka:** celá karta otevře místo; tip k hádance je vedlejší odkaz „Tipnout si / Změnit tip“, ne hlavní červené tlačítko.
+- **Pohlednice ze Sbírek** (`from=sbirky`), když má chodec etapu za sebou: bez „Etapa dokončena“, čísel, karty další etapy a bez „Uložit do Kroniky“, pokud už uložená je; jen pohlednice, „Poslat“ a „Zpět“. Tlačítka jsou v pevném pruhu nad systémovou lištou (`insets.bottom`). „Poslat“ (na všech pohlednicích) sdílí text pohlednice systémovým sdílením (`Share`); obrázek dál nejde (0022).
+- **Sbírky, razítka** jsou seskupená po etapách (nadpis „Etapa II · …“, počet), pod každým krátký název na jeden řádek (`shortPlaceName` ve `format.ts`: bez „nad/pod …“, delší po celých slovech se třemi tečkami). Nezískané místo je slepý obrys s „?“ a bez názvu.
+- **Kronika:** velká karta se zeměkoulí jen na Deníku, na Cesta, Rok a Sbírky jeden tmavý řádek „km · kroky ›“.
+- **Karta života:** místo „Z čeho číslo je: ověřeno / odhad z kroků“ věta „371 km, z toho 41 km změřil telefon přesně, zbytek jsme dopočítali z kroků.“ (`confidenceSentence`); pruh a vysvětlení až po „Jak počítáme?“. Popisky pruhu: „změřeno telefonem“, „dopočítáno z kroků“, „zadáno ručně“.
+- **Vysvětlující věta o kapitolách** se ukazuje jen, dokud chodec neotevře žádnou kapitolu (`footatlas.chapteropened.v1` v AsyncStorage, `useChapterExplainer`).
+- Nezahrnuto (soubory souběžné relace 0028): „Dnes jste ušli“ na kartě návratu, „Přehrát návrat“ → „Přehrát cestu“, „Malý objev“ na kartě zastavení.
+- Neověřeno: systémové sdílení na Androidu a iOS, safe area pruhu pohlednice na telefonu s gestovou lištou, kompaktní řádek Kroniky s načtenou historií (v ukázkovém postupu historie není).

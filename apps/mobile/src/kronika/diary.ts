@@ -106,15 +106,15 @@ export function diaryInsight(d: DiaryDay, ctx: InsightContext): string {
   const names = d.places.map((p) => p.name);
   if (names.length >= 3) return `${pluralPlaces(names.length)} za jediný den. Deník se plní.`;
   if (names.length === 2) return `Dvě místa za jeden den: ${joinNames(names)}.`;
-  if (names.length === 1) return ctx.isToday ? `Dnes jste objevili: ${names[0]}.` : `Objev dne: ${names[0]}.`;
+  if (names.length === 1) return ctx.isToday ? `Dnes jste odemkli: ${names[0]}.` : `Místo dne: ${names[0]}.`;
   if (ctx.isToday && ctx.nextStop && ctx.nextStop.remainingM >= 15) {
-    return `Bez objevu zatím. ${ctx.nextStop.name} čeká ${formatDistance(ctx.nextStop.remainingM)} od vás.`;
+    return `Zatím bez nového místa. ${ctx.nextStop.name} čeká ${formatDistance(ctx.nextStop.remainingM)} od vás.`;
   }
   if (ctx.isLongest) return "Nejdelší den výpravy zatím. Nohy to zaznamenaly.";
   if (d.distanceM >= 10_000) return "Pořádný den. Deset kilometrů a víc.";
   return d.distanceM < 500
-    ? `Krátká procházka bez objevu. I tak se cesta prodloužila o ${lengthText(d.distanceM)}.`
-    : `Den bez objevu, ale cesta se prodloužila o ${lengthText(d.distanceM)}.`;
+    ? `Krátká procházka bez nového místa. I tak se cesta prodloužila o ${lengthText(d.distanceM)}.`
+    : `Den bez nového místa, ale cesta se prodloužila o ${lengthText(d.distanceM)}.`;
 }
 
 /** Karty deníku s postřehem; příznak nejdelšího dne se dopočítá zde. */
