@@ -288,3 +288,18 @@ Datum: 9. 11. 2026 · Stav: přijato k realizaci (balíky K–N); podrobnosti v 
 - **Razítka se symboly** podle typu místa (16 symbolů, česká tradice turistických známek), pečeti etap a kapitol s kresbou.
 - **Kapitola vs. téma:** kapitola patří k výpravě a uzavře se; téma prochází atlasem a roste s každou výpravou (`themeId`).
 - Konkurence (Pikmin Bloom, Relive, The Conqueror, World Walking) je rozebraná v navrh-v2.md § 2.
+
+## 0032 Razítka se symboly
+Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chromiu (390 dp, světlý vzhled, ukázkový postup), na zařízení NEOVĚŘENO
+
+- **Proč.** Monogramy uprostřed razítek („ZdH“, „PT“) nikdo nerozluštil. Podle návrhu v2 (§ 6, rozhodnutí 0030) a vzoru českých turistických známek nese razítko kreslený symbol podle typu místa.
+- **Obsah.** Místo má nepovinné pole `symbol` s jednou ze 16 hodnot (`hradiste`, `zamek`, `most`, `lavka`, `ostrov`, `zdymadlo`, `pristav`, `privoz`, `vor`, `skala`, `obec`, `nota`, `mlyn`, `vyhled`, `rakos`, `soutok`; `packages/content/src/symbols.ts`, bez zodu, aby šel importovat i v aplikaci). Schéma odmítne jinou hodnotu, test hlídá, že každé z 39 míst Vltavské stezky má symbol přesně podle tabulky v navrh-v2 § 6.1. Loader aplikace neznámou hodnotu zahodí.
+- **Kresby** jsou vlastní, ne z ikonové sady: `apps/mobile/src/components/stamps/` (geometrie v `glyphs.ts`, jedna komponenta na symbol a mapa `STAMP_SYMBOLS`). ViewBox 24, jedna linka 1,6 se zaoblenými konci, bez výplní, jen drobné tenčí šrafy (0,9), barva z props. V malých razítcích se linka zesílí na 2. Náhled: `docs/razitka/symboly.png` (skript `apps/mobile/scripts/razitka-nahled.mjs`) a sekce „Symboly razítek“ ve vývojovém panelu (`docs/razitka/aplikace.png`).
+- **Razítko** (`Seal`, druhy `stamp` a `wax`): uprostřed symbol, u razítka pod ním km a datum. Pořadí záloh: symbol → fotka (jen vosk) → monogram názvu. Symbol se doplní sám podle `placeId` nebo jména místa, takže stávající volání (návrat, zastavení, pohlednice, přívoz, Domů) symbol dostanou beze změny. Pod 64 px (`COMPACT_SEAL_PX`) razítko vynechá text po obvodu i km a datum a ukáže jen rámeček a větší symbol.
+- **Zamčené razítko** (`kind: "locked"` se `symbol`, `placeId` nebo `name`): slepý čárkovaný obrys se stejným symbolem tužkou, vybledle. Chodec vidí, že ho čeká most, ne který. Bez symbolu zůstává otazník.
+- **Pečeť etapy:** vosk s římským číslem a drobným symbolem cíle etapy (symbol posledního místa etapy, `stageSymbol`). Doplní se podle `stageIndex` nebo římského čísla, takže i karta zastavení a pohlednice ji mají bez úprav. Ve Sbírkách nahrazuje prázdný kroužek u dokončené etapy.
+- **Pečeť kapitoly** (`ChapterSeal`): Voraři = vor, Mosty a lávky = most, Ostrovy = ostrov, Počátky Čech = hradiště, Šlechtická sídla = zámek (podle id i názvu, `chapterSymbol` v `razitka.ts`). Uzavřená je vosk se symbolem, otevřená slepý obrys se stejným symbolem; kapitola bez symbolu má dál monogram a zámek.
+- **Sbírky:** mřížka razítek používá kompaktní `Seal` (48 px), monogramy a `PlaceStamp` zrušeny. Struktura obrazovky beze změny.
+- **Beze změny:** medailony na mapě (předgenerovaná PNG v `map/medallionFiles`), `SealBadge` na fotce místa, monogram na zástupném obrázku místa bez fotky (`PlaceHero`).
+- **Nota:** symbol `nota` je lyra s notou mezi strunami; v 28 px čte spíš jako lyra.
+- Neověřeno: vykreslení na telefonu (react-native-svg, `transform` u vnořené skupiny), tmavý vzhled.

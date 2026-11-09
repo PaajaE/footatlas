@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { buildPlan, computeState, densityReport, routeLengthM, type RoutePoint } from "@footatlas/core";
-import { expedition } from "./index";
+import { PLACE_SYMBOLS, expedition } from "./index";
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "data", "vltavska-stezka");
 const read = (f: string) => JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
@@ -17,6 +17,18 @@ describe("pilotní výprava Vltavská stezka", () => {
     expect(parsed.data.status).toBe("draft");
     expect(parsed.data.routeType).toBe("virtual");
     expect(parsed.data.places).toHaveLength(39);
+  });
+
+  it("každé místo má symbol razítka podle návrhu v2 § 6.1", () => {
+    const e = parsed.data!;
+    const missing = e.places.filter((p) => !p.symbol).map((p) => p.id);
+    expect(missing).toEqual([]);
+    const by = (s: string) => e.places.filter((p) => p.symbol === s).map((p) => p.id);
+    expect(by("hradiste")).toEqual(["vysehrad", "levy-hradec", "klecany"]);
+    expect(by("zamek")).toEqual(["troja", "roztoky", "nelahozeves", "veltrusy", "horin"]);
+    expect(by("obec")).toHaveLength(8);
+    expect(by("soutok")).toEqual(["melnik"]);
+    expect(new Set(e.places.map((p) => p.symbol)).size).toBe(PLACE_SYMBOLS.length);
   });
 
   it("délka v metadatech odpovídá geometrii", () => {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PLACE_SYMBOLS } from "./symbols";
 
 /** Šablona místa výpravy (spec 7.3). Plné zastávky vyžadují dva nezávislé zdroje. */
 const source = z.object({ title: z.string().min(1), url: z.url() });
@@ -8,6 +9,9 @@ const image = z.object({
   license: z.string().min(1),
 });
 
+export const placeSymbol = z.enum(PLACE_SYMBOLS);
+export type { PlaceSymbol } from "./symbols";
+
 export const placeBase = {
   id: z.string().min(1),
   name: z.string().min(1),
@@ -15,6 +19,8 @@ export const placeBase = {
   lon: z.number().min(-180).max(180),
   /** Odemkne se po ušlé vzdálenosti od startu, v metrech. */
   unlockAtM: z.number().nonnegative(),
+  /** Symbol na razítku; bez něj se kreslí monogram názvu. */
+  symbol: placeSymbol.optional(),
 };
 
 export const stop = z.object({
