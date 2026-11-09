@@ -5,7 +5,7 @@ export interface ChangeSummary {
   deltaM: number;
   /** Názvy zastávek odemčených od posledně, v pořadí po trase. */
   stops: string[];
-  /** Počet nově odemčených malých objevů. */
+  /** Počet nově odemčených objevů (menších míst). */
   discoveries: number;
   /** Čísla (od 1) etap dokončených od posledně. */
   stagesCompleted: number[];
@@ -32,7 +32,7 @@ function km(m: number): string {
 /** Česká věta pro kartu „Od posledně“; bez změny řekne, že se nic nestalo. */
 export function changeSentence(c: ChangeSummary): string {
   if (c.deltaM < 100 && c.stops.length === 0 && c.discoveries === 0) return "Od posledně se nic nezměnilo.";
-  return [`Od posledně jste ušli ${km(c.deltaM)}.`, changeDetails(c)].filter(Boolean).join(" ");
+  return [`Od posledně přibylo ${km(c.deltaM)}.`, changeDetails(c)].filter(Boolean).join(" ");
 }
 
 /**

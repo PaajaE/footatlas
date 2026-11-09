@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
-import { View } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Globe, Seal, useInk, ConfidenceBar } from "../components/kronika/parts";
 import { Button, Card, Screen, T } from "../components/ui";
 import { useChronicle } from "../db/ChronicleProvider";
 import { vltavska } from "../data/vltavska";
 import { healthSourceName } from "../health/names";
-import { bigDistance, distanceSentence, earthShare, earthShareLabel, estimateSteps, formatStepCount, longestDaySentence } from "../kronika/earth";
+import { bigDistance, confidenceSentence, distanceSentence, earthShare, earthShareLabel, estimateSteps, formatStepCount, longestDaySentence } from "../kronika/earth";
 import { useExpedition } from "../state/ExpeditionProvider";
 import { useTheme } from "../theme/ThemeProvider";
 
@@ -41,6 +41,8 @@ export default function LifeCard() {
       ].filter((s): s is string => s !== null),
     [total, stats.longestDay],
   );
+  const sourceSentence = confidenceSentence(stats.byConfidence);
+  const [howOpen, setHowOpen] = useState(false);
   const since = stats.firstDay ? `od ${MONTHS_GEN[Number(stats.firstDay.slice(5, 7)) - 1]} ${stats.firstDay.slice(0, 4)}` : null;
 
   return (
@@ -95,15 +97,31 @@ export default function LifeCard() {
             ))}
           </View>
 
-          <Card style={{ gap: 8, padding: 14 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-              <T variant="label" style={{ fontSize: 14 }}>
-                Z čeho číslo je
+          {sourceSentence && (
+            <Card style={{ gap: 8, padding: 14 }}>
+              <T variant="body" style={{ fontSize: 15, lineHeight: 22 }}>
+                {sourceSentence}
               </T>
-              <T variant="small">poctivě</T>
-            </View>
-            <ConfidenceBar by={stats.byConfidence} />
-          </Card>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded: howOpen }}
+                onPress={() => setHowOpen((o) => !o)}
+                style={{ minHeight: 44, justifyContent: "center", alignSelf: "flex-start" }}
+              >
+                <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
+                  {howOpen ? "Skrýt podrobnosti" : "Jak počítáme?"}
+                </T>
+              </Pressable>
+              {howOpen && (
+                <View style={{ gap: 10 }}>
+                  <ConfidenceBar by={stats.byConfidence} />
+                  <T variant="muted">
+                    {`Kde telefon zaznamenal ušlou vzdálenost (${healthSourceName()}), bereme ji tak, jak je. Kde zná jen kroky, vynásobíme je délkou vašeho kroku (teď ${Math.round(stepLength.meters * 100)} cm, změníte v Nastavení). Ručně zadané dny počítáme, jak jste je zadali.`}
+                  </T>
+                </View>
+              )}
+            </Card>
+          )}
         </>
       )}
 

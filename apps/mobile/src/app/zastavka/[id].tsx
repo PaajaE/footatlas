@@ -21,7 +21,7 @@ import { useExpedition } from "../../state/ExpeditionProvider";
 import { useTips } from "../../state/useTips";
 import { useTheme } from "../../theme/ThemeProvider";
 
-const KIND_LABEL = { stop: "Zastávka", discovery: "Malý objev" } as const;
+const KIND_LABEL = { stop: "Zastávka", discovery: "Objev" } as const;
 
 export default function PlaceDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -117,7 +117,7 @@ export default function PlaceDetail() {
       <Card style={{ gap: 6 }}>
         <T variant="strong">{reached ? "Odemčeno" : "Zatím zamčeno"}</T>
         <T variant="muted">
-          {reached ? "Toto místo jste už minuli." : active ? unlockText(remaining) : "Odemkne se po ušlé vzdálenosti od startu."}
+          {reached ? "Toto místo jste už odemkli." : active ? unlockText(remaining) : "Odemkne se po ušlé vzdálenosti od startu."}
         </T>
       </Card>
     </>

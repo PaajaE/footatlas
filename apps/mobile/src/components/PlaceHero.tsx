@@ -63,7 +63,7 @@ export function PlaceHero({
   locked: boolean;
   /** Název místa (monogram a popisek pro čtečku). */
   name: string;
-  /** Druh místa nad monogramem, např. „Malý objev · etapa III“. */
+  /** Druh místa nad monogramem, např. „Objev · etapa III“. */
   kindLabel: string;
   /** Prvky na fotce (tlačítko Mapa, pečeť, štítek). */
   children?: React.ReactNode;

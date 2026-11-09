@@ -18,7 +18,7 @@ describe("co se změnilo od posledně", () => {
 
   it("jen kilometry a objev", () => {
     const s = computeState(plan, 6_000, { previousWalkedM: 5_000 });
-    expect(changeSentence(summarizeChange(s, 5_000, nameOf))).toBe("Od posledně jste ušli 1,0 km. Přibyl 1 objev.");
+    expect(changeSentence(summarizeChange(s, 5_000, nameOf))).toBe("Od posledně přibylo 1,0 km. Přibyl 1 objev.");
   });
 
   it("zastávka a dokončená etapa", () => {
@@ -26,7 +26,7 @@ describe("co se změnilo od posledně", () => {
     const c = summarizeChange(s, 2_000, nameOf);
     expect(c.stagesCompleted).toEqual([1]);
     expect(c.stops).toEqual(["Troja", "Roztoky"]);
-    expect(changeSentence(c)).toBe("Od posledně jste ušli 6,2 km. Dokončili jste 1. etapu. Odemkli jste: Troja, Roztoky. Přibyl 1 objev.");
+    expect(changeSentence(c)).toBe("Od posledně přibylo 6,2 km. Dokončili jste 1. etapu. Odemkli jste: Troja, Roztoky. Přibyl 1 objev.");
   });
 
   it("vzdálenost nikdy nevychází záporná", () => {
@@ -37,6 +37,6 @@ describe("co se změnilo od posledně", () => {
   it("dlouhý seznam zastávek se zkrátí", () => {
     const many = { deltaM: 50_000, stops: ["A", "B", "C", "D", "E"], discoveries: 0, stagesCompleted: [1, 2] };
     expect(changeDetails(many)).toBe("Dokončili jste etapy 1 a 2. Odemkli jste: C, D, E a 2 dalších.");
-    expect(changeSentence(many)).toBe("Od posledně jste ušli 50,0 km. Dokončili jste etapy 1 a 2. Odemkli jste: C, D, E a 2 dalších.");
+    expect(changeSentence(many)).toBe("Od posledně přibylo 50,0 km. Dokončili jste etapy 1 a 2. Odemkli jste: C, D, E a 2 dalších.");
   });
 });

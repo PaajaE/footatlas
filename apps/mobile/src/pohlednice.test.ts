@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   backText,
+  postcardShareText,
   formatDayRange,
   nextStageCard,
   pickPhotoKey,
@@ -66,7 +67,7 @@ describe("texty", () => {
   });
   it("text rubu jen z reálných míst", () => {
     const s = stageSummary(stage0, places, slices, 1300);
-    expect(backText(s.places)).toEqual(["Cestou jste minuli: Zámek.", "Přibylo 2 malých objevů.", "„Háček zámku.“"]);
+    expect(backText(s.places)).toEqual(["Cestou jste odemkli: Zámek.", "Přibyly 2 objevy.", "„Háček zámku.“"]);
     expect(backText([])).toEqual([]);
   });
   it("fotka líce a konce etapy", () => {
@@ -89,5 +90,16 @@ describe("karta další etapy", () => {
   });
   it("bez hádanky ji nevymýšlí", () => {
     expect(nextStageCard(stage0, places, fmt).firstRiddle).toBeUndefined();
+  });
+});
+
+describe("postcardShareText", () => {
+  it("složí nadpis, věty z rubu a podpis", () => {
+    expect(postcardShareText({ title: "Zámek Roztoky", subtitle: "Etapa II", lines: ["Cestou jste odemkli: Zámek.", ""], expedition: "Vltavská stezka" })).toBe(
+      "Pohlednice: Zámek Roztoky (Etapa II)\nCestou jste odemkli: Zámek.\nVltavská stezka · FootAtlas",
+    );
+  });
+  it("podtitul shodný s nadpisem neopakuje", () => {
+    expect(postcardShareText({ title: "Etapa I", subtitle: "Etapa I", lines: [], expedition: "V" })).toBe("Pohlednice: Etapa I\nV · FootAtlas");
   });
 });

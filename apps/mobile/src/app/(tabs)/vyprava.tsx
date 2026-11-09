@@ -104,7 +104,7 @@ export default function Expedition() {
         </View>
         <StageBar stages={vltavska.plan.stages} walkedM={state.walkedM} />
         <T variant="small">
-          List {roman(state.stage.index + 1)} · {stamps.reached} {stampsWord(stamps.reached)} z {stamps.total}
+          Etapa {roman(state.stage.index + 1)} · {stamps.reached} {stampsWord(stamps.reached)} z {stamps.total}
           {demo.enabled ? " · ukázkový postup" : ""}
         </T>
       </View>
@@ -153,7 +153,7 @@ export default function Expedition() {
             ) : null}
             {nextSmall && (
               <T variant="muted">
-                Malý objev za {formatDistanceNoWrap(state.toNextM ?? 0)}: <T variant="strong">{nextSmall.name}</T>
+                Objev za {formatDistanceNoWrap(state.toNextM ?? 0)}: <T variant="strong">{nextSmall.name}</T>
               </T>
             )}
             {facts.length > 0 && (

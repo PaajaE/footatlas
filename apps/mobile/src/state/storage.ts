@@ -153,3 +153,21 @@ export async function savePostcards(stages: number[]): Promise<void> {
     // uložení se nepovedlo, platí jen do zavření aplikace
   }
 }
+
+const CHAPTER_OPENED_KEY = "footatlas.chapteropened.v1";
+
+/**
+ * Otevřel už chodec nějakou kapitolu? Do té doby se pod nadpisem kapitol (Domů, Sbírky) ukazuje
+ * vysvětlující věta; potom už ne (rozhodnutí 0029).
+ */
+export async function loadChapterOpened(): Promise<boolean> {
+  return (await readJson(CHAPTER_OPENED_KEY)) === true;
+}
+
+export async function saveChapterOpened(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(CHAPTER_OPENED_KEY, JSON.stringify(true));
+  } catch {
+    // věta se příště může ukázat znovu
+  }
+}

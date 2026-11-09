@@ -231,3 +231,30 @@ export function nextLifeStop(totalM: number): { name: string; remainingKm: numbe
   const c = CITY_STOPS.find((s) => s.km > km);
   return c ? { name: c.name, remainingKm: Math.ceil(c.km - km) } : null;
 }
+
+/**
+ * Lidská věta o tom, z čeho je celkové číslo (karta života, rozhodnutí 0029): „371 km, z toho 41 km změřil telefon
+ * přesně, zbytek jsme dopočítali z kroků.“ Podrobné rozdělení je až pod „Jak počítáme?“. Bez dat `null`.
+ */
+export function confidenceSentence(by: { verified: number; estimated: number; manual: number }): string | null {
+  const v = Math.max(0, by.verified);
+  const e = Math.max(0, by.estimated);
+  const m = Math.max(0, by.manual);
+  const total = v + e + m;
+  if (!(total > 0)) return null;
+  const head = formatKmBig(total);
+  const tiny = total * 0.005;
+  const hasV = v > tiny;
+  const hasE = e > tiny;
+  const hasM = m > tiny;
+  if (hasV && !hasE && !hasM) return `${head}, všechno změřil telefon přesně.`;
+  if (hasE && !hasV && !hasM) return `${head}, všechno jsme dopočítali z kroků.`;
+  if (hasM && !hasV && !hasE) return `${head}, všechno jste zadali ručně.`;
+  const V = `${formatKmBig(v)} změřil telefon přesně`;
+  const M = `${formatKmBig(m)} jste zadali ručně`;
+  const E = "zbytek jsme dopočítali z kroků";
+  if (hasV && hasE && hasM) return `${head}, z toho ${V}, ${M} a ${E}.`;
+  if (hasV && hasE) return `${head}, z toho ${V}, ${E}.`;
+  if (hasV && hasM) return `${head}, z toho ${V} a ${M}.`;
+  return `${head}, z toho ${M}, ${E}.`;
+}

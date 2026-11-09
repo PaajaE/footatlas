@@ -74,8 +74,8 @@ describe("postřehy", () => {
     expect(diaryInsight({ ...base, stagesDone: [2] }, ctx)).toContain("Konec 2. etapy");
   });
   it("podle počtu míst", () => {
-    expect(diaryInsight({ ...base, places: [place("Karlův most")] }, ctx)).toBe("Objev dne: Karlův most.");
-    expect(diaryInsight({ ...base, places: [place("Karlův most")] }, { ...ctx, isToday: true })).toBe("Dnes jste objevili: Karlův most.");
+    expect(diaryInsight({ ...base, places: [place("Karlův most")] }, ctx)).toBe("Místo dne: Karlův most.");
+    expect(diaryInsight({ ...base, places: [place("Karlův most")] }, { ...ctx, isToday: true })).toBe("Dnes jste odemkli: Karlův most.");
     expect(diaryInsight({ ...base, places: [place("A"), place("B")] }, ctx)).toBe("Dvě místa za jeden den: A a B.");
     expect(diaryInsight({ ...base, places: [place("A"), place("B"), place("C")] }, ctx)).toBe("3 místa za jediný den. Deník se plní.");
     expect(diaryInsight({ ...base, places: Array.from({ length: 5 }, (_, i) => place(`m${i}`)) }, ctx)).toContain("5 míst");
@@ -83,16 +83,16 @@ describe("postřehy", () => {
   it("dnešek bez objevu ukáže další místo, jen pokud není na dosah ruky", () => {
     const today = { isToday: true, isLongest: false };
     expect(diaryInsight({ ...base, distanceM: 300 }, { ...today, nextStop: { name: "Trojský zámek", remainingM: 40 } })).toBe(
-      "Bez objevu zatím. Trojský zámek čeká 40 m od vás.",
+      "Zatím bez nového místa. Trojský zámek čeká 40 m od vás.",
     );
     expect(diaryInsight({ ...base, distanceM: 300 }, { ...today, nextStop: { name: "Trojský zámek", remainingM: 5 } })).toContain("Krátká procházka");
   });
   it("nejdelší a dlouhý den, jinak podle délky", () => {
     expect(diaryInsight(base, { ...ctx, isLongest: true })).toContain("Nejdelší den výpravy zatím");
     expect(diaryInsight({ ...base, distanceM: 12_000 }, ctx)).toContain("Pořádný den");
-    expect(diaryInsight({ ...base, distanceM: 300 }, ctx)).toBe("Krátká procházka bez objevu. I tak se cesta prodloužila o 300 m.");
-    expect(diaryInsight({ ...base, distanceM: 600 }, ctx)).toBe("Den bez objevu, ale cesta se prodloužila o 600 m.");
-    expect(diaryInsight(base, ctx)).toBe("Den bez objevu, ale cesta se prodloužila o 3,0 km.");
+    expect(diaryInsight({ ...base, distanceM: 300 }, ctx)).toBe("Krátká procházka bez nového místa. I tak se cesta prodloužila o 300 m.");
+    expect(diaryInsight({ ...base, distanceM: 600 }, ctx)).toBe("Den bez nového místa, ale cesta se prodloužila o 600 m.");
+    expect(diaryInsight(base, ctx)).toBe("Den bez nového místa, ale cesta se prodloužila o 3,0 km.");
   });
   it("karty: nejdelší den se označí jen při aspoň 3 dnech, další místo jen u dneška", () => {
     const mk = (day: string, m: number): DiaryDay => ({ ...base, day, distanceM: m });

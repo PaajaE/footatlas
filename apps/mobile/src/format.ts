@@ -89,3 +89,22 @@ export function formatKmMark(meters: number): string {
   const m = Number.isFinite(meters) ? Math.max(0, meters) : 0;
   return `km${NBSP}${(m / 1000).toFixed(1).replace(".", ",")}`;
 }
+
+/**
+ * Krátký název místa na jeden řádek pod razítkem ve Sbírkách: bez zeměpisného upřesnění („Libčice nad Vltavou“ →
+ * „Libčice“) a nad `max` znaků jen celá slova, která se vejdou, se třemi tečkami („Rodný dům Antonína Dvořáka“ →
+ * „Rodný dům…“). Když se nevejde ani první slovo, zkrátí se samo.
+ */
+export function shortPlaceName(name: string, max = 13): string {
+  const trimmed = name.trim().replace(/\s+(nad|pod)\s+.+$/u, "");
+  if ([...trimmed].length <= max) return trimmed;
+  const words = trimmed.split(/\s+/u);
+  let out = "";
+  for (const w of words) {
+    const next = out ? `${out} ${w}` : w;
+    if ([...next].length > max - 1) break;
+    out = next;
+  }
+  if (!out) out = [...trimmed].slice(0, max - 1).join("");
+  return `${out}…`;
+}

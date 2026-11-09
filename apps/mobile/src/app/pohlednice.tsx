@@ -1,7 +1,7 @@
 import { cumulativeM, localDateKey } from "@footatlas/core";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, Image, Pressable, ScrollView, View } from "react-native";
+import { Animated, Easing, Image, Pressable, ScrollView, Share, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LabeledCard, SectionLabel } from "../components/LabeledCard";
 import { RouteSketch } from "../components/RouteSketch";
@@ -20,6 +20,7 @@ import {
   pluralDays,
   pluralDiscoveries,
   pluralStops,
+  postcardShareText,
   postcardTitle,
   stageEndpoints,
   stageSummary,
@@ -35,10 +36,13 @@ const FLIP_MS = 400;
  * Pohlednice z etapy (docs/prototyp-snimky/04-pohlednice.jpg): tři čísla z dat výpravy, otočná pohlednice
  * (líc: fotka nebo náčrt úseku s rukopisným nadpisem a pečetí etapy; rub: razítka, data a věty z objevů etapy),
  * karta další etapy a „Uložit do Kroniky“. Otevírá se po dokončení etapy a z detailu místa („Poslat jako pohlednici“).
+ * Ze Sbírek (`from=sbirky`) u etapy, kterou má chodec dávno za sebou, je to jen prohlížení: pohlednice, „Poslat“
+ * a „Zpět“, bez „Etapa dokončena“, karty další etapy a bez „Uložit do Kroniky“, je-li už uložená (rozhodnutí 0029).
+ * Tlačítka jsou v pevném pruhu dole nad systémovou lištou (safe area).
  * „Sdílet obrázek“ chybí: bez nativního modulu na snímek obrazovky ho nejde udělat (rozhodnutí 0022).
  */
 export default function Postcard() {
-  const { stage: stageParam, place: placeParam, chapter: chapterParam } = useLocalSearchParams<{ stage?: string; place?: string; chapter?: string }>();
+  const { stage: stageParam, place: placeParam, chapter: chapterParam, from } = useLocalSearchParams<{ stage?: string; place?: string; chapter?: string; from?: string }>();
   const router = useRouter();
   const { colors, fonts } = useTheme();
   const insets = useSafeAreaInsets();
@@ -99,11 +103,26 @@ export default function Postcard() {
     : { transform: [{ perspective: 1200 }, { rotateY: flip.interpolate({ inputRange: [0, 1], outputRange: ["180deg", "360deg"] }) }] };
   const lastTwo = (chapter ? chapterReached : summary.places).slice(-2);
 
+  // Prohlížení ze Sbírek: etapa je dokončená a chodec už je v další (nebo má celou výpravu za sebou).
+  const archive = !chapter && from === "sbirky" && summary.completed && (ex.state.completed || ex.state.stage.index > stage.index);
+  const heading = chapter ? "Kapitola uzavřena" : archive ? "Pohlednice z etapy" : summary.completed ? "Etapa dokončena" : "Pohlednice z etapy";
+  const showSave = !chapter && !(archive && saved);
+  const send = () => {
+    const message = postcardShareText({
+      title,
+      subtitle: chapter ? `Kapitola · ${vltavska.name}` : `Etapa ${roman}`,
+      lines: text.slice(0, 3),
+      expedition: vltavska.name,
+    });
+    void Share.share({ message }).catch(() => undefined);
+  };
+  const [footerH, setFooterH] = useState(0);
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 16, paddingHorizontal: 20, paddingBottom: Math.max(insets.bottom, 20) + 8, gap: 16 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 16, paddingHorizontal: 20, paddingBottom: footerH + 16, gap: 16 }} showsVerticalScrollIndicator={false}>
         <View style={{ gap: 2 }}>
-          <SectionLabel size={15}>{chapter ? "Kapitola uzavřena" : summary.completed ? "Etapa dokončena" : "Pohlednice z etapy"}</SectionLabel>
+          <SectionLabel size={15}>{heading}</SectionLabel>
           <T style={{ fontFamily: fonts.display, fontSize: 38, lineHeight: 42, color: colors.fg }}>{chapter ? chapter.title : `Etapa ${roman}${stage.index === 0 ? " · Praha" : end ? ` · ${end.name}` : ""}`}</T>
           {!chapter && start && end && (
             <T variant="muted" style={{ fontSize: 15, color: colors.mutedStrong }}>
@@ -112,7 +131,7 @@ export default function Postcard() {
           )}
         </View>
 
-        {!chapter && (
+        {!chapter && !archive && (
           <View style={{ flexDirection: "row", gap: 14 }}>
             <Stat value={`${km.value} ${km.unit}`} note="ušlo se" />
             {summary.days !== undefined && summary.firstDay && summary.lastDay && (
@@ -196,7 +215,7 @@ export default function Postcard() {
           </T>
         </View>
 
-        {!chapter && nextCard && (
+        {!chapter && !archive && nextCard && (
           <LabeledCard label={nextCard.heading} gap={8} style={{ borderRadius: 22, padding: 16 }}>
             <T variant="small" style={{ fontSize: 14, color: colors.mutedStrong }}>
               {nextCard.meta}
@@ -206,13 +225,32 @@ export default function Postcard() {
           </LabeledCard>
         )}
 
-        <View style={{ gap: 10 }}>
-          {!chapter && <Button kind={saved ? "secondary" : "primary"} label={saved ? "Uloženo v Kronice" : "Uložit do Kroniky"} onPress={save} disabled={saved} />}
-          <Pressable accessibilityRole="button" onPress={() => router.back()} style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}>
-            <T style={{ fontFamily: fonts.bodySemi, fontSize: 16, color: colors.accent }}>{!chapter && next ? `Pokračovat na etapu ${toRoman(next.index + 1)}` : "Zavřít"}</T>
-          </Pressable>
-        </View>
       </ScrollView>
+
+      <View
+        onLayout={(e) => setFooterH(e.nativeEvent.layout.height)}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingHorizontal: 20,
+          paddingTop: 12,
+          paddingBottom: Math.max(insets.bottom, 16) + 8,
+          gap: 8,
+          backgroundColor: colors.bg,
+          borderTopWidth: 1,
+          borderTopColor: colors.line,
+        }}
+      >
+        {showSave && <Button kind={saved ? "secondary" : "primary"} label={saved ? "Uloženo v Kronice" : "Uložit do Kroniky"} onPress={save} disabled={saved} />}
+        <Button kind={showSave ? "secondary" : "primary"} label="Poslat" onPress={send} />
+        <Pressable accessibilityRole="button" onPress={() => router.back()} style={{ minHeight: 44, alignItems: "center", justifyContent: "center" }}>
+          <T style={{ fontFamily: fonts.bodySemi, fontSize: 16, color: colors.accent }}>
+            {!chapter && !archive && next ? `Pokračovat na etapu ${toRoman(next.index + 1)}` : "Zpět"}
+          </T>
+        </Pressable>
+      </View>
     </View>
   );
 }
