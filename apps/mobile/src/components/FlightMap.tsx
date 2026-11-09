@@ -45,8 +45,9 @@ const FLIGHT_ZOOM_DEFAULT = 14;
 const FOLLOW_MS = 70;
 
 /**
- * Mapa návratu: stejný atlasový styl jako Výprava, ale kamera MapLibre letí po ušlém úseku (klíčové body z
- * `flightKeyframes`, ease-in-out) a po skončení (nebo přeskočení) ukáže celý úsek. Místa se odemykají podle polohy letu.
+ * Mapa návratu: stejný atlasový styl jako Výprava, ale kamera MapLibre plynule sleduje polohu letu (`walkedM`,
+ * ease-in-out, u míst zastavuje podle plánu `returnPlan`) a po skončení (nebo přeskočení) ukáže celý úsek.
+ * Místa se odemykají podle polohy letu.
  */
 export function FlightMap(props: FlightMapProps) {
   const [state, setState] = useState<Assets>({ kind: "loading" });
@@ -71,7 +72,7 @@ export function FlightMap(props: FlightMapProps) {
   return <Live {...props} assets={state.assets} />;
 }
 
-function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runKey, finished, reduceMotion, height, frame, assets }: FlightMapProps & { assets: MapAssets }) {
+function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runKey, finished, holdZoom = 0, reduceMotion, height, frame, assets }: FlightMapProps & { assets: MapAssets }) {
   const { name, colors } = useTheme();
   const mapTheme = themes[name === "dark" ? "parchment-night" : "parchment-day"];
   const mode = mapTheme.mode;
@@ -151,8 +152,10 @@ function Live({ route, cumulative, places, fromM, toM, walkedM, durationMs, runK
 
   useEffect(() => {
     if (finished || reduceMotion) return;
-    camera.current?.easeTo({ center: [you.lon, you.lat], zoom: flightZ, duration: FOLLOW_MS, easing: "linear" });
-  }, [you, finished, reduceMotion, flightZ]);
+    // U zastavení kamera zpomalí (to dělá čas letu z plánu) a mírně se přiblíží; obojí ze stejných hodin.
+    const zoom = flightZoom(toM - fromM, durationMs, holdZoom);
+    camera.current?.easeTo({ center: [you.lon, you.lat], zoom, duration: FOLLOW_MS, easing: "linear" });
+  }, [you, finished, reduceMotion, holdZoom, fromM, toM, durationMs]);
 
   // Konec letu (doběhl, nebo se přeskočil): ukázat celý úsek.
   useEffect(() => {
