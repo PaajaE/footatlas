@@ -17,6 +17,9 @@ export interface UpcomingExpedition {
   verified: boolean;
 }
 
+/** Věta na kartě připravované výpravy: náhled trasy je jen obecná čára, výprava ještě není hotová. */
+export const UPCOMING_NOTE = "Připravujeme. Až bude výprava hotová, objeví se tady.";
+
 export const UPCOMING_TYPE_LABEL: Record<UpcomingType, string> = {
   real: "Skutečná trasa",
   simplified: "Zjednodušená",

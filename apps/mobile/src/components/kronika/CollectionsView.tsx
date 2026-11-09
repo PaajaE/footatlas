@@ -1,11 +1,13 @@
 import { useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { vltavska } from "../../data/vltavska";
-import { formatDistance } from "../../format";
+import { formatDistanceNoWrap } from "../../format";
 import { chapterProgress, roman, stageProgress, stageStateLabel } from "../../kronika/collections";
 import { useTheme } from "../../theme/ThemeProvider";
 import { Card, T } from "../ui";
+import { uniqueMonograms } from "../../monogram";
 import { Seal } from "./parts";
+import { PlaceStamp } from "./PlaceStamp";
 
 /** Sbírky rozjeté výpravy: listy atlasu (etapy), razítka míst a pečeti kapitol. */
 export function CollectionsView({
@@ -29,6 +31,7 @@ export function CollectionsView({
   }
   const places = vltavska.places;
   const got = places.filter((p) => p.atM <= walkedM).length;
+  const monograms = uniqueMonograms(places.map((p) => p.name));
   return (
     <View style={{ gap: 14 }}>
       <T variant="label" style={{ fontSize: 14 }}>
@@ -73,20 +76,18 @@ export function CollectionsView({
           </T>
         </View>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }} accessibilityLabel={`Razítka míst: ${got} z ${places.length}`}>
-          {places.map((p) => (
-            <View
+          {places.map((p, i) => (
+            <PlaceStamp
               key={p.id}
-              style={
-                p.atM <= walkedM
-                  ? { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: colors.accent, backgroundColor: `${colors.accent}20`, alignItems: "center", justifyContent: "center" }
-                  : { width: 30, height: 30, borderRadius: 15, borderWidth: 1.4, borderStyle: "dashed", borderColor: colors.muted }
-              }
-            >
-              {p.atM <= walkedM && <View style={{ width: 16, height: 16, borderRadius: 8, borderWidth: 1, borderColor: colors.accent }} />}
-            </View>
+              monogram={monograms[i]!}
+              name={p.name}
+              got={p.atM <= walkedM}
+              seed={i * 7 + 3}
+              onPress={() => router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })}
+            />
           ))}
         </View>
-        {nextStop && nextStop.remainingM >= 15 && <T variant="muted">Nejbližší prázdné políčko se zaplní za {formatDistance(nextStop.remainingM)}.</T>}
+        {nextStop && nextStop.remainingM >= 15 && <T variant="muted">Nejbližší prázdné políčko se zaplní za {formatDistanceNoWrap(nextStop.remainingM)}.</T>}
       </Card>
 
       {vltavska.chapters.length > 0 && (

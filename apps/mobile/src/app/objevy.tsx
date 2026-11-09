@@ -4,7 +4,7 @@ import { Pressable, ScrollView, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, T } from "../components/ui";
 import { vltavska } from "../data/vltavska";
-import { formatDay } from "../format";
+import { formatDay, formatKmMark } from "../format";
 import { useExpedition } from "../state/ExpeditionProvider";
 import { useTheme } from "../theme/ThemeProvider";
 
@@ -74,7 +74,7 @@ export default function Discoveries() {
           return (
             <ScrollView key={p.id} style={{ width }} contentContainerStyle={{ padding: 20, paddingBottom: 32, gap: 18 }}>
               <T variant="label">
-                {p.kind === "stop" ? "Zastávka" : "Malý objev"} · km {(p.atM / 1000).toFixed(1).replace(".", ",")}
+                {p.kind === "stop" ? "Zastávka" : "Malý objev"} · {formatKmMark(p.atM)}
               </T>
               <T variant="display">{p.name}</T>
               <T style={{ fontFamily: fonts.displayItalic, fontSize: 24, lineHeight: 32 }}>{`„${p.hook}“`}</T>

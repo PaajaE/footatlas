@@ -68,3 +68,24 @@ export function formatDay(day: string): string {
   const d = Number(day.slice(8, 10));
   return `${d}. ${MONTHS[m]} ${y}`;
 }
+
+const NBSP = " ";
+
+/**
+ * Číslo a jednotka nerozdělitelně („4,0 km“ s pevnou mezerou): v úzkém řádku se jednotka nesmí odtrhnout
+ * na další řádek ani oříznout (dřív se na kartě zamčeného místa zobrazilo „ještě 4,0“ bez „km“).
+ */
+export function keepUnit(text: string): string {
+  return text.replace(/(\d) (km|m|kroků|kroky|krok)\b/g, `$1${NBSP}$2`).replace(/\b(km) (\d)/g, `$1${NBSP}$2`);
+}
+
+/** Zbývající vzdálenost s jednotkou, která se neodtrhne: „4,0 km“, „350 m · asi 480 kroků“. */
+export function formatDistanceNoWrap(meters: number, opts?: { stepLengthM?: number }): string {
+  return keepUnit(formatDistance(meters, opts));
+}
+
+/** Poloha místa na trase: „km 4,0“ (start „km 0,0“), jednotka nerozdělitelně. */
+export function formatKmMark(meters: number): string {
+  const m = Number.isFinite(meters) ? Math.max(0, meters) : 0;
+  return `km${NBSP}${(m / 1000).toFixed(1).replace(".", ",")}`;
+}

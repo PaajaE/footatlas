@@ -7,7 +7,7 @@ import { T } from "../ui";
 import { groupThousands } from "../../kronika/earth";
 import { Globe, useInk } from "../kronika/parts";
 import type { UpcomingExpedition } from "../../kronika/upcoming";
-import { UPCOMING_TYPE_LABEL } from "../../kronika/upcoming";
+import { UPCOMING_NOTE, UPCOMING_TYPE_LABEL } from "../../kronika/upcoming";
 
 /** Náhled trasy rozjeté výpravy: čára z bodů trasy, ušlá část rumělkově, zbytek tečkovaně. */
 export function RouteBanner({ walkedM, height = 150 }: { walkedM: number; height?: number }) {
@@ -70,6 +70,7 @@ export function TripCard({ trip, wished, onToggle }: { trip: UpcomingExpedition;
         <T variant="muted" style={{ fontSize: 13, lineHeight: 18 }}>
           {trip.blurb}
         </T>
+        <T style={{ fontFamily: fonts.displayItalic, fontSize: 14, lineHeight: 19, color: colors.mutedStrong }}>{UPCOMING_NOTE}</T>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8, marginTop: "auto" }}>
           <T variant="small" style={{ flexShrink: 1 }}>
             {trip.meta}

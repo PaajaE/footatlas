@@ -38,6 +38,14 @@ const isPolygon = ["==", ["geometry-type"], "Polygon"];
 const isLine = ["==", ["geometry-type"], "LineString"];
 const zoomWidth = (...stops: number[]) => ["interpolate", ["exponential", 1.4], ["zoom"], ...stops];
 
+/** Krytí akvarelové vody (plochy i rozpitý podklad řeky): papír pod ní prosvítá při každém přiblížení. */
+export const WATER_WASH_OPACITY = 0.42;
+/**
+ * Jádro čárové řeky: do zoomu 12 sytý tah, pak slábne, protože od zoomu kolem 13 má Vltava v dlaždicích i plochu
+ * koryta a sytý pruh uprostřed by z ní udělal plnou modrou.
+ */
+export const RIVER_CORE_OPACITY = ["interpolate", ["linear"], ["zoom"], 12, 0.95, 14, 0.45, 16, 0.3];
+
 const URBAN = ["residential", "commercial", "industrial", "retail", "railway", "hospital", "school", "university", "college", "kindergarten", "military"];
 const GREEN = ["park", "garden", "grass", "meadow", "grassland", "village_green", "recreation_ground", "playground", "pitch", "golf_course", "dog_park", "cemetery", "allotments", "nature_reserve", "national_park", "zoo", "wetland", "farmland"];
 const WOOD = ["forest", "wood", "scrub"];
@@ -82,14 +90,24 @@ export function buildAtlasStyle({ theme, tilesUrl, glyphs }: BuildStyleOptions):
   add({ id: "ink-vine-line", type: "line", ...v("landuse"), filter: kindIn(...VINE), paint: { "line-color": a.vineLine, "line-width": 0.7 } });
   add({ id: "ink-urban", type: "fill", ...v("landuse"), filter: kindIn(...URBAN), paint: { "fill-pattern": pat("blk-ink") } });
   add({ id: "ink-urban-line", type: "line", ...v("landuse"), filter: kindIn(...URBAN), paint: { "line-color": a.blockLine, "line-width": 0.8 } });
-  add({ id: "ink-water", type: "fill", ...v("water"), filter: isPolygon, paint: { "fill-color": a.river } });
+  // Vodní plochy (při velkém přiblížení i koryto Vltavy) jako akvarel, ne plná modrá: stejná barva a krytí jako
+  // rozpitý podklad čárové řeky, rozpitý břeh a pod ním světlejší pruh, aby plocha navázala na řeku z menších zoomů.
+  add({ id: "ink-water", type: "fill", ...v("water"), filter: isPolygon, paint: { "fill-color": a.river, "fill-opacity": WATER_WASH_OPACITY, "fill-antialias": false } });
+  add({
+    id: "ink-water-bank",
+    type: "line",
+    ...v("water"),
+    filter: isPolygon,
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": a.river, "line-width": zoomWidth(10, 2, 14, 6, 18, 14), "line-offset": zoomWidth(10, 1, 14, 3, 18, 7), "line-opacity": 0.35, "line-blur": zoomWidth(10, 1, 14, 3, 18, 6) },
+  });
   add({
     id: "ink-water-edge",
     type: "line",
     ...v("water"),
     filter: isPolygon,
     layout: { "line-cap": "round", "line-join": "round" },
-    paint: { "line-color": a.riverEdge, "line-width": 1.1, "line-opacity": 0.55, "line-blur": 0.8 },
+    paint: { "line-color": a.riverEdge, "line-width": 1.1, "line-opacity": 0.55, "line-blur": 0.8, "line-dasharray": [6, 1.4, 3, 1.1] },
   });
   // Akvarelová řeka (čárová): široký rozpitý podklad, hustší jádro a nepravidelný okraj z krátkých čárek.
   const river = ["all", isLine, kindIn("river", "stream", "canal")];
@@ -99,7 +117,7 @@ export function buildAtlasStyle({ theme, tilesUrl, glyphs }: BuildStyleOptions):
     ...v("water"),
     filter: river,
     layout: { "line-cap": "round", "line-join": "round" },
-    paint: { "line-color": a.river, "line-width": zoomWidth(8, 3, 12, 11, 14, 20, 18, 60), "line-opacity": 0.42, "line-blur": zoomWidth(8, 1, 14, 6, 18, 14) },
+    paint: { "line-color": a.river, "line-width": zoomWidth(8, 3, 12, 11, 14, 20, 18, 60), "line-opacity": WATER_WASH_OPACITY, "line-blur": zoomWidth(8, 1, 14, 6, 18, 14) },
   });
   add({
     id: "ink-river",
@@ -107,7 +125,7 @@ export function buildAtlasStyle({ theme, tilesUrl, glyphs }: BuildStyleOptions):
     ...v("water"),
     filter: river,
     layout: { "line-cap": "round", "line-join": "round" },
-    paint: { "line-color": a.river, "line-width": zoomWidth(8, 1.4, 12, 6, 14, 11, 18, 36), "line-opacity": 0.95, "line-blur": 0.6 },
+    paint: { "line-color": a.river, "line-width": zoomWidth(8, 1.4, 12, 6, 14, 11, 18, 36), "line-opacity": RIVER_CORE_OPACITY, "line-blur": 0.6 },
   });
   add({
     id: "ink-river-edge",
@@ -142,6 +160,15 @@ export function buildAtlasStyle({ theme, tilesUrl, glyphs }: BuildStyleOptions):
   add({ id: "sk-vine", type: "fill", ...v("landuse"), filter: kindIn(...VINE), paint: { "fill-pattern": pat("vine-sketch"), "fill-opacity": 0.85 } });
   add({ id: "sk-green-line", type: "line", ...v("landuse"), filter: kindIn(...GREEN), paint: { "line-color": a.pencilSoft, "line-width": 0.5, "line-dasharray": [3, 2] } });
   add({ id: "sk-water-edge", type: "line", ...v("water"), filter: isPolygon, paint: { "line-color": a.pencil, "line-width": 0.7, "line-opacity": 0.7 } });
+  // Druhá, přerušovaná tužková linka kousek od břehu: vodní plocha ve skice je kresba, ne výplň.
+  add({
+    id: "sk-water-ripple",
+    type: "line",
+    ...v("water"),
+    filter: isPolygon,
+    minzoom: 12,
+    paint: { "line-color": a.pencilSoft, "line-width": 0.6, "line-opacity": 0.8, "line-offset": zoomWidth(12, 2, 18, 8), "line-dasharray": [5, 3] },
+  });
   add({
     id: "sk-river",
     type: "line",

@@ -9,7 +9,7 @@ import { Seal } from "../components/Seal";
 import { useReduceMotion } from "../components/useReduceMotion";
 import { Button, T } from "../components/ui";
 import { vltavska } from "../data/vltavska";
-import { formatDistance } from "../format";
+import { formatDistanceNoWrap, formatKmMark } from "../format";
 import { formatDayNumeric } from "../home";
 import { ferryInfo, ferryTexts, isFerry } from "../privoz";
 import { sealKm } from "../seal";
@@ -80,7 +80,7 @@ export default function Ferry() {
   const dockA = { x: W * 0.32, y: H * 0.64 };
   const dockB = { x: W * 0.65, y: H * 0.58 };
   const flip = (a: number, b: number) => boat.interpolate({ inputRange: [0, 1], outputRange: [a, b] });
-  const kmText = `Na trase · km ${(place.atM / 1000).toFixed(1).replace(".", ",")}`;
+  const kmText = `Na trase · ${formatKmMark(place.atM)}`;
   const riverPath = `M${riverL} 0 C ${riverL + 14} ${H * 0.25}, ${riverL - 10} ${H * 0.55}, ${riverL + 6} ${H} L${riverR + 4} ${H} C ${riverR - 12} ${H * 0.6}, ${riverR + 10} ${H * 0.3}, ${riverR} 0 Z`;
 
   return (
@@ -169,7 +169,7 @@ export default function Ferry() {
             </>
           ) : (
             <T variant="muted" style={{ color: colors.mutedStrong }}>
-              {`Až sem dojdete, za ${formatDistance(place.atM - ex.walkedM, { stepLengthM: ex.stepLength.meters })}, převezete se.`}
+              {`Až sem dojdete, za ${formatDistanceNoWrap(place.atM - ex.walkedM, { stepLengthM: ex.stepLength.meters })}, převezete se.`}
             </T>
           )}
           {info && (
@@ -179,7 +179,7 @@ export default function Ferry() {
               </LabeledCard>
               {info.next && (
                 <LabeledCard label="Další přívoz" gap={4} style={{ flex: 1, borderRadius: 16, padding: 12 }}>
-                  <T variant="body">{`${info.next.place.name} za ${formatDistance(info.next.distanceM)}`}</T>
+                  <T variant="body">{`${info.next.place.name} za ${formatDistanceNoWrap(info.next.distanceM)}`}</T>
                 </LabeledCard>
               )}
             </View>

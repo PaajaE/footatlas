@@ -2,7 +2,7 @@ import type { ImageSourcePropType } from "react-native";
 
 /**
  * Fotky míst zabalené v aplikaci. Klíč je `photo` z expedition.json.
- * Autoři a licence jsou v `credits.ts`; místa bez fotky tu nejsou a obrazovky ukážou skicu s otazníkem.
+ * Autoři a licence jsou v `credits.ts`; místa bez fotky tu nejsou a detail místa ukáže zástupný list atlasu s monogramem (`PlaceSheet`).
  */
 export const PLACE_PHOTOS: Record<string, ImageSourcePropType> = {
   vysehrad: require("../../assets/places/vysehrad.jpg"),

@@ -1,18 +1,18 @@
 import { localDateKey } from "@footatlas/core";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LabeledCard, SectionLabel } from "../../components/LabeledCard";
-import { BackPill, PlaceHero } from "../../components/PlaceHero";
+import { BackPill, PlaceHero, heroShowsPhoto } from "../../components/PlaceHero";
 import { RiddleCard, TipResult } from "../../components/Riddle";
 import { SealBadge } from "../../components/Seal";
 import { Button, Card, Screen, T } from "../../components/ui";
 import { creditForPhoto, creditLine } from "../../data/credits";
 import { placePhoto } from "../../data/photos";
 import { vltavska, type AppPlace } from "../../data/vltavska";
-import { formatDayLong, formatDistance } from "../../format";
+import { formatDayLong, formatDistanceNoWrap, formatKmMark } from "../../format";
 import { isFerry } from "../../privoz";
 import { approachFraction, dayFromKey, formatDayNumeric, neighbours, sumLastDays, tileDistance, zOf } from "../../home";
 import { sealKm, toRoman } from "../../seal";
@@ -30,6 +30,8 @@ export default function PlaceDetail() {
   const { walkedM, active, events, daily, stepLength } = useExpedition();
   const { tips, setTip } = useTips();
   const [creditsOpen, setCreditsOpen] = useState(false);
+  /** Výška spodního pevného pruhu („Další místo“); obsah pod ním musí jít odrolovat celý. */
+  const [barHeight, setBarHeight] = useState(0);
   const place = id ? vltavska.placesById.get(id) : undefined;
 
   if (!place) {
@@ -51,7 +53,7 @@ export default function PlaceDetail() {
   const { prev, next } = neighbours(vltavska.places, place.id);
   const photo = placePhoto(place.photo);
   const credit = creditForPhoto(place.photo);
-  const remaining = formatDistance(place.atM - walkedM, { stepLengthM: stepLength.meters });
+  const remaining = formatDistanceNoWrap(place.atM - walkedM, { stepLengthM: stepLength.meters });
   const hasStory = place.hook !== undefined;
   const eyebrowBase = `${KIND_LABEL[place.kind]} · etapa ${toRoman(stage.index + 1)}`;
   const reachedDay = event?.reachedDay ?? localDateKey(new Date());
@@ -59,9 +61,9 @@ export default function PlaceDetail() {
   const open = (p: AppPlace) => router.replace({ pathname: "/zastavka/[id]", params: { id: p.id } });
 
   const hero = (
-    <PlaceHero photo={photo} locked={!reached}>
+    <PlaceHero photo={photo} locked={!reached} name={place.name} kindLabel={eyebrowBase}>
       <View style={{ position: "absolute", left: 14, top: insets.top + 14 }}>
-        <BackPill onPhoto={photo !== undefined} />
+        <BackPill onPhoto={heroShowsPhoto(photo, !reached)} />
       </View>
       {!reached && (
         <View
@@ -99,7 +101,7 @@ export default function PlaceDetail() {
   const title = (
     <View style={{ gap: 2 }}>
       <SectionLabel size={15}>
-        {reached ? `${eyebrowBase}${place.atM === 0 ? " · start výpravy" : ""}` : `${KIND_LABEL[place.kind]} · km ${(place.atM / 1000).toFixed(1).replace(".", ",")}`}
+        {reached ? `${eyebrowBase}${place.atM === 0 ? " · start výpravy" : ""}` : `${KIND_LABEL[place.kind]} · ${formatKmMark(place.atM)}`}
       </SectionLabel>
       <T style={{ fontFamily: fonts.display, fontSize: 42, lineHeight: 46, color: colors.fg }}>
         {place.name}
@@ -145,7 +147,7 @@ export default function PlaceDetail() {
             </View>
             <T variant="small" style={{ fontSize: 13, color: colors.mutedStrong }}>
               {nextInChapter
-                ? `${zOf(reachedCount, members.length)} · další ${nextInChapter.name} za ${formatDistance(nextInChapter.atM - walkedM)}`
+                ? `${zOf(reachedCount, members.length)} · další ${nextInChapter.name} za ${formatDistanceNoWrap(nextInChapter.atM - walkedM)}`
                 : zOf(reachedCount, members.length)}
             </T>
           </LabeledCard>
@@ -160,9 +162,9 @@ export default function PlaceDetail() {
             <T variant="body" style={{ flex: 1, color: colors.mutedStrong }} numberOfLines={1}>
               {prev ? `Předtím: ${prev.name}` : "Od startu"}
             </T>
-            <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, color: colors.accent }}>
-              {remaining === "Jste tady" ? remaining : `ještě ${remaining}`}
-            </T>
+            <Text numberOfLines={1} style={{ flexShrink: 0, fontFamily: fonts.bodySemi, fontSize: 15, color: colors.accent }}>
+              {remaining === "Jste tady" ? remaining : `ještě\u00A0${remaining}`}
+            </Text>
           </View>
           <View style={{ height: 6, borderRadius: 3, backgroundColor: colors.line, overflow: "hidden" }}>
             <View style={{ width: `${approachFraction(walkedM, prev?.atM, place.atM) * 100}%`, height: 6, backgroundColor: colors.accent }} />
@@ -200,11 +202,25 @@ export default function PlaceDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: next ? Math.max(barHeight, 96) + 16 : Math.max(insets.bottom, 20) + 16 }}>
         {hero}
         <View style={{ paddingHorizontal: 20, gap: 14, marginTop: -18 }}>
           {title}
           {body}
+          {/* Akce u odemčeného místa jsou v toku obsahu, ne v pevném pruhu: na telefonu 360–412 dp by jinak
+              překryly kartu „Ve vašem deníku“. Pevně dole zůstává jen „Další místo / Další zastávka“. */}
+          {reached && (
+            <View style={{ gap: 10 }}>
+              {isFerry(place) && (
+                <Button kind="secondary" label="Převezli jste se na druhý břeh" onPress={() => router.push({ pathname: "/privoz", params: { id: place.id } })} />
+              )}
+              <Button
+                kind="secondary"
+                label="Poslat jako pohlednici"
+                onPress={() => router.push({ pathname: "/pohlednice", params: { stage: String(stage.index), place: place.id } })}
+              />
+            </View>
+          )}
           {reached && credit && (
             <View>
               <Pressable
@@ -227,6 +243,7 @@ export default function PlaceDetail() {
       </ScrollView>
       {next && (
         <View
+          onLayout={(e) => setBarHeight(e.nativeEvent.layout.height)}
           style={{
             position: "absolute",
             left: 0,
@@ -246,18 +263,6 @@ export default function PlaceDetail() {
             </Defs>
             <Rect x={0} y={0} width="100%" height="100%" fill="url(#bar-fade)" />
           </Svg>
-          {reached && (
-            <View style={{ gap: 10, marginBottom: 10 }}>
-              {isFerry(place) && (
-                <Button kind="secondary" label="Převezli jste se na druhý břeh" onPress={() => router.push({ pathname: "/privoz", params: { id: place.id } })} />
-              )}
-              <Button
-                kind="secondary"
-                label="Poslat jako pohlednici"
-                onPress={() => router.push({ pathname: "/pohlednice", params: { stage: String(stage.index), place: place.id } })}
-              />
-            </View>
-          )}
           <Button label={next.kind === "stop" ? "Další zastávka" : "Další místo"} onPress={() => open(next)} />
         </View>
       )}
@@ -265,7 +270,7 @@ export default function PlaceDetail() {
   );
 
   function neighbourDistance(deltaM: number): string {
-    const d = formatDistance(Math.abs(deltaM));
+    const d = formatDistanceNoWrap(Math.abs(deltaM));
     if (d === "Jste tady") return d;
     return deltaM <= 0 ? `před ${d}` : `za ${d}`;
   }
