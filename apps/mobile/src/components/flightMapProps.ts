@@ -15,6 +15,8 @@ export interface FlightMapProps {
   runKey: number;
   /** Let skončil nebo byl přeskočen: kamera se zastaví a ukáže celý úsek. */
   finished: boolean;
+  /** U zastavení: kamera se přiblíží o `holdZoom` × 0,5 (0 až 1, viz `holdZoomAt`). */
+  holdZoom?: number;
   /** Při „Omezit pohyb“ kamera neletí, jen se objeví celý úsek. */
   reduceMotion: boolean;
   height: number;
