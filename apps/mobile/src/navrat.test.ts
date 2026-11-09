@@ -255,6 +255,8 @@ describe("přehrát den z Kroniky", () => {
   });
   it("den bez úseku se nepřehrává", () => {
     expect(dayReplayParams({ fromM: 5000, toM: 5000 })).toBeUndefined();
+  });
+});
 
 describe("zastavení u míst", () => {
   const stop = (id: string, atM: number) => ({ id, kind: "stop" as const, atM });
