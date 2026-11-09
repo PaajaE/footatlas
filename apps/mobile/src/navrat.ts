@@ -27,6 +27,40 @@ export function shouldShowReturn(s: ReturnSummary): boolean {
   return s.deltaM >= RETURN_MIN_M || s.newPlaceCount > 0 || s.newStageCount > 0;
 }
 
+/**
+ * Odkud se návrat přehrává: z karty „Od posledně“ na Domů, nebo jako přehrání dne z Kroniky.
+ * Jen přehrání z Domů (a „Zavřít“ na kartě) návrat spotřebuje (rozhodnutí 0024).
+ */
+export type ReturnSource = "domu" | "kronika";
+
+/** Parametr `zdroj` z adresy `/navrat`; cokoli jiného než „kronika“ je návrat z Domů. */
+export function returnSource(param: string | string[] | undefined): ReturnSource {
+  return param === "kronika" ? "kronika" : "domu";
+}
+
+/** Co se s kartou „Od posledně“ stalo. Odchod z Domů (jiná záložka, otevřená zastávka) návrat nespotřebuje. */
+export type ReturnAction =
+  | { kind: "leave" }
+  | { kind: "dismiss" }
+  | { kind: "finish"; source: ReturnSource; toM: number };
+
+/**
+ * Do kolika metrů je postup „viděný“ po akci. Přehrání z Domů do konce zapamatuje konec přehraného úseku
+ * (co přibylo mezitím, zůstane na příště), „Zavřít“ celý dosavadní postup. Hodnota nikdy neklesá.
+ */
+export function seenAfter(seenM: number, walkedM: number, action: ReturnAction): number {
+  if (action.kind === "leave") return seenM;
+  if (action.kind === "finish" && action.source !== "domu") return seenM;
+  const upTo = action.kind === "finish" ? Math.min(action.toM, walkedM) : walkedM;
+  return Math.max(seenM, upTo);
+}
+
+/** Úsek pro přehrání dne z Kroniky; den bez úseku se nepřehrává. */
+export function dayReplayParams(d: { fromM: number; toM: number }): { from: string; to: string; zdroj: "kronika" } | undefined {
+  if (!(d.toM - d.fromM > 0)) return undefined;
+  return { from: String(Math.round(d.fromM)), to: String(Math.round(d.toM)), zdroj: "kronika" };
+}
+
 /** Doba letu v ms, 4000 až 9000, lineárně podle délky úseku mezi 1 a 15 km. */
 export function flightDurationMs(deltaM: number): number {
   const d = Number.isFinite(deltaM) ? Math.max(0, deltaM) : 0;

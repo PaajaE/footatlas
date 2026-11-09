@@ -20,6 +20,7 @@ import {
   playbackEndMs,
   returnHeading,
   returnRouteLabel,
+  returnSource,
   sinceDay,
   stampSchedule,
   stampsLanded,
@@ -38,7 +39,7 @@ const MAP_FALLBACK_H = 420;
  * se po odchodu z Domů maže. Přeskočit jde klepnutím na mapu nebo tlačítkem; při „Omezit pohyb“ se jen objeví výsledek.
  */
 export default function Return() {
-  const { from, to } = useLocalSearchParams<{ from?: string; to?: string }>();
+  const { from, to, zdroj } = useLocalSearchParams<{ from?: string; to?: string; zdroj?: string }>();
   const router = useRouter();
   const { colors, fonts } = useTheme();
   const insets = useSafeAreaInsets();
@@ -66,8 +67,10 @@ export default function Return() {
   const counter = tileDistance(counterM(deltaM, duration, clock.elapsedMs));
   const frame = `List I · ${vltavska.name}`;
 
-  // Zapamatovat si, že úsek byl vidět (Domů to udělalo při odchodu; tady pro případ otevření odjinud).
-  useEffect(() => () => ex.markSeen(), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Návrat z Domů se spotřebuje, až dojede do konce; přehrání dne z Kroniky ne (rozhodnutí 0024).
+  useEffect(() => {
+    if (clock.finished && returnSource(zdroj) === "domu") ex.markSeen(toM);
+  }, [clock.finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nowM = Math.max(toM, ex.walkedM);
   const next = vltavska.places.find((p) => p.kind === "stop" && p.atM > nowM);

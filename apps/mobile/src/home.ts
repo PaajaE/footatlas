@@ -108,6 +108,21 @@ export function reachQuip(choice: ReachChoice, placeNames: readonly string[]): s
   return undefined;
 }
 
+/**
+ * Věta „Kam dnes dojdu?“, když v dosahu nic není. Je-li nejbližší místo zároveň další zastávkou,
+ * kterou Domů ukazuje v kartě nad tím, věta ji neopakuje.
+ */
+export function reachEmptyText(
+  label: string,
+  nearest: { id: string; name: string } | undefined,
+  nearestDistance: string,
+  nextStopId: string | undefined,
+): string {
+  if (!nearest) return `Za ${label} už nic nezbývá.`;
+  if (nearest.id === nextStopId) return `Za ${label} nic nového. Další místo je o kus dál, zkuste delší procházku.`;
+  return `Za ${label} nic nového. Nejbližší místo, ${nearest.name}, je za ${nearestDistance}.`;
+}
+
 /** „4 z 5“, „3 ze 6“: předložka „ze“ před číslovkami, které začínají souhláskovou skupinou (dvou, tří, čtyř, šesti, sedmi …). */
 export function zOf(done: number, total: number): string {
   const ze = [2, 3, 4, 6, 7, 12, 13, 14, 16, 17].includes(total);
