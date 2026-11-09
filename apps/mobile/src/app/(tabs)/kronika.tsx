@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { CollectionsView } from "../../components/kronika/CollectionsView";
@@ -36,7 +36,12 @@ export default function Chronicle() {
   const router = useRouter();
   const { ready, stats, days, lastReadAt, sync, syncNow } = useChronicle();
   const { active, walkedM, state, events, daySlices, stepLength } = useExpedition();
-  const [tab, setTab] = useState<Tab>("denik");
+  // `?tab=sbirky` otevře rovnou Sbírky (odkaz „Všechny kapitoly“ na Domů).
+  const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
+  const [tab, setTab] = useState<Tab>(TABS.some((t) => t.key === tabParam) ? (tabParam as Tab) : "denik");
+  useEffect(() => {
+    if (TABS.some((t) => t.key === tabParam)) setTab(tabParam as Tab);
+  }, [tabParam]);
   const empty = stats.daysWithRecord === 0;
   const busy = sync.kind === "syncing";
 

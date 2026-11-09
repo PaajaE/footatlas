@@ -30,10 +30,19 @@ export const story = z.object({
 });
 export type Story = z.infer<typeof story>;
 
+/** Kapitola: nitka příběhu přes víc míst jedné výpravy (rozhodnutí 0026). */
 export const storyChapter = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
+  /** Název ve 2. pádě pro věty „do uzavření Mostů a lávek“. */
+  titleGenitive: z.string().min(1).optional(),
   blurb: z.string().min(1),
+  /** Úvod kapitoly, začátek příběhu (2–3 věty). */
+  intro: z.string().min(1).max(400).optional(),
+  /** Závěr po uzavření kapitoly (2–3 věty). */
+  outro: z.string().min(1).max(400).optional(),
+  /** Fakta prošla kontrolou dvěma zdroji. */
+  verified: z.boolean().optional(),
 });
 export type StoryChapter = z.infer<typeof storyChapter>;
 

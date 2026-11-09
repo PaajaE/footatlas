@@ -6,6 +6,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LabeledCard, SectionLabel } from "../../components/LabeledCard";
 import { BackPill, PlaceHero } from "../../components/PlaceHero";
+import { ChapterTag } from "../../components/ChapterTag";
 import { RiddleCard, TipResult } from "../../components/Riddle";
 import { SealBadge } from "../../components/Seal";
 import { Button, Card, Screen, T } from "../../components/ui";
@@ -104,6 +105,7 @@ export default function PlaceDetail() {
       <T style={{ fontFamily: fonts.display, fontSize: 42, lineHeight: 46, color: colors.fg }}>
         {place.name}
       </T>
+      <ChapterTag placeId={place.id} />
     </View>
   );
 
