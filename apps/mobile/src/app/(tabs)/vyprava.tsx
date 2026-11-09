@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StageBar, T } from "../../components/ui";
 import { ExpeditionMap } from "../../components/ExpeditionMap";
 import { vltavska } from "../../data/vltavska";
-import { formatDistance, formatKm } from "../../format";
+import { formatDistanceNoWrap, formatKm } from "../../format";
 import { nextFerry, placesWord, roman, stageStamps, stampsWord } from "../../map/vypravaInfo";
 import { useExpedition } from "../../state/ExpeditionProvider";
 import { useTheme } from "../../theme/ThemeProvider";
@@ -41,8 +41,8 @@ export default function Expedition() {
   const toStageEnd = state.completed ? 0 : Math.max(0, state.stage.endM - walkedM);
   const facts: Array<{ label: string; value: string }> = [];
   if (upcoming > 0) facts.push({ label: "Na dalších 5 km", value: `${upcoming} ${placesWord(upcoming)}` });
-  if (ferry) facts.push({ label: "Přívoz", value: `za ${formatDistance(ferry.atM - walkedM)}` });
-  if (toStageEnd > 0) facts.push({ label: "Konec etapy", value: `za ${formatDistance(toStageEnd)}` });
+  if (ferry) facts.push({ label: "Přívoz", value: `za ${formatDistanceNoWrap(ferry.atM - walkedM)}` });
+  if (toStageEnd > 0) facts.push({ label: "Konec etapy", value: `za ${formatDistanceNoWrap(toStageEnd)}` });
 
   const stamps = stageStamps(vltavska.places, state.stage, state.walkedM);
   const riddle = next?.riddle?.question ?? next?.hook;
@@ -104,7 +104,7 @@ export default function Expedition() {
         </View>
         <StageBar stages={vltavska.plan.stages} walkedM={state.walkedM} />
         <T variant="small">
-          List {roman(state.stage.index + 1)} · {stamps.reached} {stampsWord(stamps.reached)} z {stamps.total}
+          Etapa {roman(state.stage.index + 1)} · {stamps.reached} {stampsWord(stamps.reached)} z {stamps.total}
           {demo.enabled ? " · ukázkový postup" : ""}
         </T>
       </View>
@@ -140,7 +140,7 @@ export default function Expedition() {
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
               <T variant="label">Další zastávka</T>
               <T variant="title" style={{ color: colors.accent, fontSize: 24 }}>
-                {formatDistance(state.toNextStopM ?? 0, { stepLengthM: stepLength.meters })}
+                {formatDistanceNoWrap(state.toNextStopM ?? 0, { stepLengthM: stepLength.meters })}
               </T>
             </View>
             <T variant="display" style={{ fontSize: 30, lineHeight: 36 }}>
@@ -153,7 +153,7 @@ export default function Expedition() {
             ) : null}
             {nextSmall && (
               <T variant="muted">
-                Malý objev za {formatDistance(state.toNextM ?? 0)}: <T variant="strong">{nextSmall.name}</T>
+                Objev za {formatDistanceNoWrap(state.toNextM ?? 0)}: <T variant="strong">{nextSmall.name}</T>
               </T>
             )}
             {facts.length > 0 && (

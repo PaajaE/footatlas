@@ -1,6 +1,8 @@
-import { View } from "react-native";
+import { useRouter } from "expo-router";
+import { Pressable, View } from "react-native";
 import Svg, { Line } from "react-native-svg";
 import { miniMap, rangeLabel, type DiaryDay } from "../../kronika/diary";
+import { dayReplayParams } from "../../navrat";
 import { formatStepCount } from "../../kronika/earth";
 import { useTheme } from "../../theme/ThemeProvider";
 import { T } from "../ui";
@@ -12,6 +14,7 @@ const kmPill = (m: number) => (m < 1000 ? `${Math.max(10, Math.round(m / 10) * 1
 
 /** Deník jako časová osa: čárkovaná nit, pečeť u dne a karta dne s minimapou úseku. */
 export function DiaryView({ cards, scaleM }: { cards: DiaryCard[]; scaleM: number }) {
+  const router = useRouter();
   const { colors, fonts } = useTheme();
   if (cards.length === 0) {
     return (
@@ -31,6 +34,7 @@ export function DiaryView({ cards, scaleM }: { cards: DiaryCard[]; scaleM: numbe
       {cards.map((d) => {
         const mm = miniMap(d, scaleM);
         const found = d.places.length > 0;
+        const replay = dayReplayParams(d);
         return (
           <View
             key={d.day}
@@ -99,6 +103,18 @@ export function DiaryView({ cards, scaleM }: { cards: DiaryCard[]; scaleM: numbe
                   </View>
                 ))}
               </View>
+            )}
+            {replay && (
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel={`Přehrát den: ${d.title}`}
+                onPress={() => router.push({ pathname: "/navrat", params: replay })}
+                style={{ alignSelf: "flex-start", minHeight: 44, justifyContent: "center" }}
+              >
+                <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
+                  Přehrát den
+                </T>
+              </Pressable>
             )}
           </View>
         );

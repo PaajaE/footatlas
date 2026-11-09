@@ -5,6 +5,10 @@ import {
   FLIGHT_MAX_MS,
   FLIGHT_MIN_MS,
   counterM,
+  dayHeading,
+  dayReplayParams,
+  returnSource,
+  seenAfter,
   easeInOut,
   easeInOutInverse,
   flightDurationMs,
@@ -17,7 +21,23 @@ import {
   sinceDay,
   stampSchedule,
   stampsLanded,
+  activeHalt,
+  BRAKE_MS,
+  firstSentence,
+  flightAt,
+  HOLD_DISCOVERY_MS,
+  HOLD_STAGE_MS,
+  HOLD_STOP_MS,
+  HOLD_ZOOM_IN,
+  holdZoomAt,
+  planStampsLanded,
+  realAtFlight,
+  RETURN_MAX_MS,
+  RETURN_TARGET_MIN_MS,
+  returnPlan,
+  returnTotalMs,
 } from "./navrat";
+import { vltavska } from "./data/vltavska";
 import { MIN_STAMP_GAP_MS } from "./seal";
 
 describe("kdy se přehrává návrat", () => {
@@ -123,12 +143,21 @@ describe("počítadlo", () => {
 describe("nadpis a úsek", () => {
   it("od dne", () => {
     const today = "2026-11-02"; // pondělí
-    expect(returnHeading(undefined, today)).toBe("Od posledně jste ušli");
-    expect(returnHeading("2026-11-02", today)).toBe("Dnes jste ušli");
-    expect(returnHeading("2026-11-01", today)).toBe("Od včerejška jste ušli");
-    expect(returnHeading("2026-10-30", today)).toBe("Od pátku jste ušli");
-    expect(returnHeading("2026-10-28", today)).toBe("Od středy jste ušli");
-    expect(returnHeading("2026-10-24", today)).toBe("Od 24. 10. jste ušli");
+    expect(returnHeading(undefined, today)).toBe("Od posledně přibylo");
+    expect(returnHeading("2026-11-02", today)).toBe("Od posledně přibylo");
+    expect(returnHeading("2026-11-01", today)).toBe("Od včerejška přibylo");
+    expect(returnHeading("2026-10-30", today)).toBe("Od pátku přibylo");
+    expect(returnHeading("2026-10-28", today)).toBe("Od středy přibylo");
+    expect(returnHeading("2026-10-24", today)).toBe("Od 24. 10. přibylo");
+  });
+  it("jeden den z Kroniky", () => {
+    const today = "2026-11-02"; // pondělí
+    expect(dayHeading(undefined, today)).toBe("Ten den jste ušli");
+    expect(dayHeading("2026-11-02", today)).toBe("Dnes jste ušli");
+    expect(dayHeading("2026-11-01", today)).toBe("Včera jste ušli");
+    expect(dayHeading("2026-10-30", today)).toBe("V pátek jste ušli");
+    expect(dayHeading("2026-10-28", today)).toBe("Ve středu jste ušli");
+    expect(dayHeading("2026-10-24", today)).toBe("24. 10. jste ušli");
   });
   it("den, kdy začal sbíraný úsek", () => {
     const slices = [
@@ -171,5 +200,193 @@ describe("flightZoom", () => {
   it("je vždy v rozsahu 11,5 až 14,5", () => {
     expect(flightZoom(0, 4000)).toBe(14.5);
     expect(flightZoom(500_000, 9000)).toBe(11.5);
+  });
+});
+
+describe("kdy se návrat spotřebuje (rozhodnutí 0024)", () => {
+  /** Karta „Od posledně“ podle stejné podmínky jako na Domů (bez nových míst a etap). */
+  const cardShown = (seenM: number, walkedM: number) => shouldShowReturn({ deltaM: walkedM - seenM, newPlaceCount: 0, newStageCount: 0 });
+
+  it("odchod z Domů (jiná záložka, zastávka) kartu nespotřebuje", () => {
+    expect(seenAfter(1000, 4000, { kind: "leave" })).toBe(1000);
+    expect(cardShown(seenAfter(1000, 4000, { kind: "leave" }), 4000)).toBe(true);
+  });
+
+  it("přehrání z Domů do konce zapamatuje konec přehraného úseku", () => {
+    expect(seenAfter(1000, 4000, { kind: "finish", source: "domu", toM: 4000 })).toBe(4000);
+    expect(cardShown(4000, 4000)).toBe(false);
+    // Co přibylo během přehrávání, zůstane na příště.
+    expect(seenAfter(1000, 4500, { kind: "finish", source: "domu", toM: 4000 })).toBe(4000);
+  });
+
+  it("přehrání dne z Kroniky návrat nespotřebuje", () => {
+    expect(seenAfter(1000, 4000, { kind: "finish", source: "kronika", toM: 4000 })).toBe(1000);
+  });
+
+  it("„Zavřít“ na kartě zapamatuje celý postup", () => {
+    expect(seenAfter(1000, 4000, { kind: "dismiss" })).toBe(4000);
+  });
+
+  it("viděná hodnota nikdy neklesá a nepřeskočí ušlou", () => {
+    expect(seenAfter(5000, 4000, { kind: "dismiss" })).toBe(5000);
+    expect(seenAfter(1000, 4000, { kind: "finish", source: "domu", toM: 9000 })).toBe(4000);
+  });
+
+  it("zdroj z adresy: jen „kronika“ je přehrání z Kroniky", () => {
+    expect(returnSource("kronika")).toBe("kronika");
+    expect(returnSource(undefined)).toBe("domu");
+    expect(returnSource("cokoli")).toBe("domu");
+    expect(returnSource(["kronika"])).toBe("domu");
+  });
+
+  it("neviděné dny se sčítají a karta ukazuje „Od 24. 10. jste ušli“", () => {
+    const slices = [
+      { day: "2026-10-20", distanceM: 3000 },
+      { day: "2026-10-24", distanceM: 2000 },
+      { day: "2026-10-27", distanceM: 4000 },
+      { day: "2026-11-02", distanceM: 1500 },
+    ];
+    // Naposledy viděno uprostřed 24. 10.; mezitím se Domů několikrát opustilo bez přehrání.
+    let seen = 4000;
+    for (let i = 0; i < 3; i++) seen = seenAfter(seen, 10_500, { kind: "leave" });
+    expect(seen).toBe(4000);
+    expect(cardShown(seen, 10_500)).toBe(true);
+    expect(returnHeading(sinceDay(slices, seen), "2026-11-09")).toBe("Od 24. 10. přibylo");
+    expect(returnRouteLabel([{ name: "A", atM: 2000 }, { name: "B", atM: 9000 }], seen, 10_500)).toBe("A → B");
+    // Po přehrání zmizí.
+    seen = seenAfter(seen, 10_500, { kind: "finish", source: "domu", toM: 10_500 });
+    expect(cardShown(seen, 10_500)).toBe(false);
+  });
+});
+
+describe("přehrát den z Kroniky", () => {
+  it("úsek dne jako parametry a zdroj Kronika", () => {
+    expect(dayReplayParams({ fromM: 9100.4, toM: 12_200.6 })).toEqual({ from: "9100", to: "12201", zdroj: "kronika" });
+  });
+  it("den bez úseku se nepřehrává", () => {
+    expect(dayReplayParams({ fromM: 5000, toM: 5000 })).toBeUndefined();
+  });
+});
+
+describe("zastavení u míst", () => {
+  const stop = (id: string, atM: number) => ({ id, kind: "stop" as const, atM });
+  const disc = (id: string, atM: number) => ({ id, kind: "discovery" as const, atM });
+
+  it("zastávka 5 s, objev 3 s, konec etapy 6 s (i když leží u zastávky)", () => {
+    const plan = returnPlan([disc("a", 2000), stop("b", 5000), stop("c", 8000)], [{ index: 0, endM: 8000 }], 0, 10_000);
+    expect(plan.halts.map((h) => [h.placeId, h.holdMs, h.stageIndex])).toEqual([
+      ["a", HOLD_DISCOVERY_MS, undefined],
+      ["b", HOLD_STOP_MS, undefined],
+      ["c", HOLD_STAGE_MS, 0],
+    ]);
+    expect(plan.stamps).toEqual([]);
+    // Let 4,5 s + 3 + 5 + 6 s stání + po 1 s navíc za brzdění a rozjezd u každého místa.
+    expect(returnTotalMs(plan)).toBeGreaterThanOrEqual(RETURN_TARGET_MIN_MS);
+    expect(returnTotalMs(plan)).toBeLessThanOrEqual(RETURN_MAX_MS);
+  });
+
+  it("konec etapy mimo místo je samostatné zastavení s pečetí", () => {
+    const plan = returnPlan([], [{ index: 1, endM: 3000 }], 0, 6000);
+    expect(plan.halts).toHaveLength(1);
+    expect(plan.halts[0]).toMatchObject({ stageIndex: 1, holdMs: HOLD_STAGE_MS });
+    expect(plan.halts[0]!.placeId).toBeUndefined();
+  });
+
+  it("od 6 míst stojí jen u zastávek a etap, objevy dostanou rychlé razítko", () => {
+    const places = [disc("a", 1000), disc("b", 2000), stop("c", 3000), disc("d", 4000), disc("e", 5000), disc("f", 6000)];
+    const plan = returnPlan(places, [], 0, 7000);
+    expect(plan.halts.map((h) => h.placeId)).toEqual(["c"]);
+    expect(plan.stamps.map((s) => s.id)).toEqual(["a", "b", "d", "e", "f"]);
+    const all = [...plan.stamps.map((s) => s.atMs), plan.halts[0]!.arriveMs].sort((x, y) => x - y);
+    for (let i = 1; i < all.length; i++) expect(all[i]! - all[i - 1]!).toBeGreaterThanOrEqual(MIN_STAMP_GAP_MS);
+    // Při 5 místech by se stálo u všech.
+    expect(returnPlan(places.slice(0, 5), [], 0, 7000).halts).toHaveLength(5);
+  });
+
+  it("dlouhý úsek se vejde do 40 s; konce etap zůstanou", () => {
+    const places = Array.from({ length: 10 }, (_, i) => stop(`s${i}`, (i + 1) * 6000));
+    const stages = [{ index: 0, endM: 18_000 }, { index: 1, endM: 42_000 }];
+    const plan = returnPlan(places, stages, 0, 62_000);
+    expect(returnTotalMs(plan)).toBeLessThanOrEqual(RETURN_MAX_MS);
+    expect(plan.halts.filter((h) => h.stageIndex !== undefined).map((h) => h.placeId)).toEqual(["s2", "s6"]);
+    expect(plan.halts.length + plan.stamps.length).toBe(10);
+  });
+
+  it("čas letu: roste spojitě, u místa stojí přesně na jeho poloze a nikdy nejde zpět", () => {
+    const fromM = 0;
+    const toM = 10_000;
+    const plan = returnPlan([disc("a", 3000), stop("b", 3100), stop("c", 10_000)], [], fromM, toM);
+    let prev = 0;
+    for (let t = 0; t <= plan.totalMs + 100; t += 10) {
+      const f = flightAt(plan, t);
+      expect(f).toBeGreaterThanOrEqual(prev - 1e-9);
+      // Plynulost: za 10 ms skutečného času nejvýš 10 ms času letu (rychlost ≤ 1).
+      expect(f - prev).toBeLessThanOrEqual(10 + 1e-6);
+      prev = f;
+    }
+    for (const h of plan.halts) {
+      expect(flightAt(plan, h.arriveMs + 1)).toBeCloseTo(h.flightMs, 6);
+      expect(flightAt(plan, h.arriveMs + h.holdMs - 1)).toBeCloseTo(h.flightMs, 6);
+      const m = fromM + easeInOut(h.flightMs / plan.durationMs) * (toM - fromM);
+      expect(m).toBeCloseTo(h.atM, 3);
+    }
+    expect(flightAt(plan, plan.motionEndMs)).toBe(plan.durationMs);
+  });
+
+  it("rychlost se před místem zmenšuje k nule (brzdění asi 1 s) a zoom přiblíží o 0,5", () => {
+    const plan = returnPlan([stop("a", 5000)], [], 0, 10_000);
+    const h = plan.halts[0]!;
+    const v = (t: number) => flightAt(plan, t + 5) - flightAt(plan, t - 5);
+    expect(v(h.arriveMs - 900)).toBeGreaterThan(v(h.arriveMs - 100));
+    expect(v(h.arriveMs - 20)).toBeLessThan(0.5);
+    expect(v(h.arriveMs - BRAKE_MS - 200)).toBeCloseTo(10, 6);
+    expect(holdZoomAt(plan, h.arriveMs + 100)).toBe(1);
+    expect(holdZoomAt(plan, 0)).toBe(0);
+    expect(flightZoom(10_000, plan.durationMs, 1) - flightZoom(10_000, plan.durationMs)).toBeCloseTo(HOLD_ZOOM_IN, 9);
+  });
+
+  it("realAtFlight je inverze flightAt mimo zastavení", () => {
+    const plan = returnPlan([stop("a", 4000), disc("b", 7000)], [], 0, 10_000);
+    for (const t of [100, 900, 2500, plan.halts[0]!.arriveMs - 300, plan.halts[1]!.arriveMs - 50]) {
+      expect(realAtFlight(plan, flightAt(plan, t))).toBeCloseTo(t, 3);
+    }
+  });
+
+  it("probíhající zastavení a zbývající čas", () => {
+    const plan = returnPlan([stop("a", 5000)], [], 0, 10_000);
+    const h = plan.halts[0]!;
+    expect(activeHalt(plan, h.arriveMs - 1)).toBeUndefined();
+    expect(activeHalt(plan, h.arriveMs)?.remaining).toBe(1);
+    expect(activeHalt(plan, h.arriveMs + h.holdMs / 2)?.remaining).toBeCloseTo(0.5, 9);
+    expect(activeHalt(plan, h.arriveMs + h.holdMs)).toBeUndefined();
+    expect(planStampsLanded(plan, h.arriveMs - 1)).toEqual([]);
+    expect(planStampsLanded(plan, h.arriveMs)).toEqual(["a"]);
+  });
+
+  it("bez míst je návrat jen let", () => {
+    const plan = returnPlan([], [], 0, 2000);
+    expect(plan.halts).toEqual([]);
+    expect(returnTotalMs(plan)).toBe(flightDurationMs(2000));
+    expect(flightAt(plan, plan.durationMs / 2)).toBe(plan.durationMs / 2);
+  });
+
+  it("pilot: celý úsek i denní úsek se vejdou do cíle", () => {
+    const places = vltavska.places.map((p) => ({ id: p.id, kind: p.kind, atM: p.atM }));
+    const whole = returnPlan(places, vltavska.plan.stages, 0, vltavska.totalM);
+    expect(returnTotalMs(whole)).toBeLessThanOrEqual(RETURN_MAX_MS);
+    expect(whole.halts.filter((h) => h.stageIndex !== undefined)).toHaveLength(4);
+    const day = returnPlan(places, vltavska.plan.stages, 8000, 19_000);
+    expect(returnTotalMs(day)).toBeGreaterThanOrEqual(RETURN_TARGET_MIN_MS);
+    expect(returnTotalMs(day)).toBeLessThanOrEqual(RETURN_MAX_MS);
+  });
+});
+
+describe("první věta háčku", () => {
+  it("vezme první větu, datum s tečkou ji neutne", () => {
+    expect(firstSentence("Pět set let se mu říkalo prostě Kamenný most.")).toBe("Pět set let se mu říkalo prostě Kamenný most.");
+    expect(firstSentence("V roce 1869 tu stálo 27 domů. Dnes jich je 765.")).toBe("V roce 1869 tu stálo 27 domů.");
+    expect(firstSentence("Tady byl 19. února 982 zvolen biskup. Další věta.")).toBe("Tady byl 19. února 982 zvolen biskup.");
+    expect(firstSentence(undefined)).toBeUndefined();
+    expect(firstSentence("  ")).toBeUndefined();
   });
 });

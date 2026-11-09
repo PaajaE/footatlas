@@ -1,7 +1,7 @@
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
-import { changeSentence, summarizeChange } from "@footatlas/core";
-import { Chapters, NextStopCard, RecentlyDiscovered, StageProgress, StatTiles, WhereToday } from "../../components/HomeSections";
+import { useRouter } from "expo-router";
+import { changeDetails, summarizeChange } from "@footatlas/core";
+import { Chapters, NextStopCard, RecentlyDiscovered, StageProgress, StatTiles } from "../../components/HomeSections";
+import { WhereToday } from "../../components/WhereToday";
 import { ReturnCard } from "../../components/ReturnCard";
 import { LastUpdated } from "../../components/LastUpdated";
 import { ScreenHeader } from "../../components/ScreenHeader";
@@ -17,14 +17,6 @@ export default function Home() {
   const router = useRouter();
   const ex = useExpedition();
   const { state, active, paused, status } = ex;
-
-  // „Od posledně“ se ukazuje při otevření a zapamatuje se až po odchodu z obrazovky.
-  useFocusEffect(
-    useCallback(() => {
-      return () => ex.markSeen();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ex.markSeen]),
-  );
 
   if (!ex.ready) return <Screen>{null}</Screen>;
 
@@ -63,11 +55,12 @@ export default function Home() {
     <Screen top={16} gap={16} onRefresh={ex.demo.enabled ? undefined : ex.refresh} refreshing={ex.refreshing}>
       <ScreenHeader date={dateLine} title={vltavska.name} onSettings={settings} />
       {state.completed ? <T variant="label">Výprava dokončena</T> : null}
+      {/* Pořadí bez opakování (rozhodnutí 0024): postup, od posledně, další zastávka, kam dnes dojdu, objevy, kapitoly. */}
       <StageProgress />
       <LastUpdated />
       <StatTiles />
+      {showReturn && <ReturnCard fromM={previousM} toM={state.walkedM} details={changeDetails(summary)} />}
       {!state.completed && <NextStopCard />}
-      {showReturn && <ReturnCard fromM={previousM} toM={state.walkedM} sentence={changeSentence(summary)} />}
       <WhereToday />
       <RecentlyDiscovered />
       <Chapters />

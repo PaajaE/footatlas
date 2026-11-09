@@ -1,34 +1,30 @@
 import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { vltavska } from "../data/vltavska";
 import { placePhoto } from "../data/photos";
-import { formatDistance, formatKm, pluralPlaces } from "../format";
+import { formatDistance, formatKm } from "../format";
 import {
   formatDayNumeric,
   formatWhen,
   isWithinLastDays,
-  reachQuip,
   stageLabel,
   sumLastDays,
   tileDistance,
-  walkEstimate,
   pluralNewPlaces,
   zOf,
-  type ReachChoice,
 } from "../home";
-import { placesWithin } from "../riddle";
+import { CHAPTERS_EXPLAINER, missingSentence, nearestChapter } from "../kapitoly";
 import { useExpedition } from "../state/ExpeditionProvider";
 import { localDateKey } from "@footatlas/core";
 import { useTips } from "../state/useTips";
+import { useChapterExplainer } from "../state/useChapterExplainer";
 import { useTheme } from "../theme/ThemeProvider";
-import { Chip } from "./Chip";
+import { ChapterSeal } from "./ChapterSeal";
 import { SectionLabel } from "./LabeledCard";
 import { Medallion } from "./Medallion";
 import { Seal } from "./Seal";
 import { StatTile } from "./StatTile";
-import { useReduceMotion } from "./useReduceMotion";
-import { Button, Card, StageBar, T } from "./ui";
+import { Card, StageBar, T } from "./ui";
 
 /** Řádek „Etapa 1 ze 4 · Praha“ + „12,5 z 62 km“ a pruh etap. */
 export function StageProgress() {
@@ -53,7 +49,7 @@ export function StageProgress() {
 }
 
 /**
- * Tři dlaždice: Dnes, Za 7 dní, Pohlednice. Hodnoty jsou ze skutečných dat výpravy;
+ * Tři dlaždice: Dnes (součet za celý den), Za 7 dní, Do pohlednice (zbývá do konce etapy). Hodnoty jsou ze skutečných dat výpravy;
  * dlaždice, na které data nejsou (výprava hotová), se vynechá.
  */
 export function StatTiles() {
@@ -72,12 +68,15 @@ export function StatTiles() {
     <View style={{ flexDirection: "row", gap: 8 }}>
       <StatTile label="Dnes" value={t.value} unit={t.unit} note={todayPlaces > 0 ? pluralNewPlaces(todayPlaces) : undefined} />
       <StatTile label="Za 7 dní" value={w.value} unit={w.unit} note={weekPlaces > 0 ? pluralNewPlaces(weekPlaces) : undefined} />
-      {!state.completed && toStageEnd > 0 && <StatTile label="Pohlednice" value={s.value} unit={s.unit} note="do konce etapy" />}
+      {!state.completed && toStageEnd > 0 && <StatTile label="Do pohlednice" value={s.value} unit={s.unit} note="konec etapy" />}
     </View>
   );
 }
 
-/** Karta další zastávky: medailon, vzdálenost v metrech i krocích, hádanka kurzívou, tlačítko k tipu. */
+/**
+ * Karta další zastávky: medailon, vzdálenost v metrech i krocích, hádanka kurzívou. Klepnutí na kartu otevře místo;
+ * tip k hádance je jen vedlejší odkaz („Tipnout si“ / „Změnit tip“), ne hlavní tlačítko obrazovky (rozhodnutí 0029).
+ */
 export function NextStopCard() {
   const router = useRouter();
   const { colors, fonts } = useTheme();
@@ -92,11 +91,17 @@ export function NextStopCard() {
   const tipped = tips[place.id] !== undefined;
   const open = () => router.push({ pathname: "/zastavka/[id]", params: { id: place.id } });
   return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${place.kind === "stop" ? "Další zastávka" : "Další objev"} ${place.name}, ${distance}`}
+      accessibilityHint="Otevře místo"
+      onPress={open}
+    >
     <Card style={{ gap: 12, padding: 14 }}>
       <View style={{ flexDirection: "row", gap: 14, alignItems: "center" }}>
         <Medallion photo={photo} size={72} locked={photo === undefined} label={photo === undefined && toM < 1000 ? formatDistance(toM) : undefined} />
         <View style={{ flex: 1 }}>
-          <SectionLabel>{place.kind === "stop" ? "Další zastávka" : "Další malý objev"}</SectionLabel>
+          <SectionLabel>{place.kind === "stop" ? "Další zastávka" : "Další objev"}</SectionLabel>
           <T style={{ fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.fg }}>{place.name}</T>
           <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: 20, color: colors.accent }}>{distance}</T>
         </View>
@@ -104,99 +109,22 @@ export function NextStopCard() {
       {teaserText && (
         <T style={{ fontFamily: fonts.displayItalic, fontSize: 18, lineHeight: 24, color: colors.fg }}>{teaserText}</T>
       )}
-      <Button compact label={place.riddle ? (tipped ? "Změnit tip" : "Tipnout si odpověď") : "Podívat se na místo"} onPress={open} />
-    </Card>
-  );
-}
-
-/** „Kam dnes dojdu?“: co by se odemklo při 1, 2, 4 km nebo na konci etapy. Nic se nenastavuje ani neukládá. */
-export function WhereToday() {
-  const router = useRouter();
-  const { colors, fonts } = useTheme();
-  const { state, walkedM, stepLength } = useExpedition();
-  const reduce = useReduceMotion();
-  const [choice, setChoice] = useState<ReachChoice>(2000);
-  const swap = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    if (reduce) return;
-    swap.setValue(0);
-    Animated.timing(swap, { toValue: 1, duration: 350, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
-  }, [choice, reduce, swap]);
-  if (state.completed) return null;
-
-  const stageRemainingM = Math.max(0, state.stage.endM - walkedM);
-  const reachM = choice === "stage" ? stageRemainingM : choice;
-  const toM = Math.min(walkedM + reachM, vltavska.totalM);
-  const found = placesWithin(vltavska.places, walkedM, toM);
-  const label = choice === "stage" ? formatKm(stageRemainingM) : `${choice / 1000} km`;
-  const names = found.map((p) => p.name);
-  const nearest = vltavska.places.find((p) => p.atM > walkedM);
-  const quip = reachQuip(choice, names);
-
-  const chips: Array<{ key: ReachChoice; text: string }> = [
-    { key: 1000, text: "1 km" },
-    { key: 2000, text: "2 km" },
-    { key: 4000, text: "4 km" },
-    { key: "stage", text: formatKm(stageRemainingM) },
-  ];
-
-  return (
-    <Card style={{ gap: 12, padding: 14 }}>
-      <View>
-        <SectionLabel>Kam dnes dojdu?</SectionLabel>
-        <T variant="muted" style={{ fontSize: 13, lineHeight: 17, color: colors.mutedStrong }}>
-          Vyberte procházku, ukážu, co cestou odemknete.
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        {place.riddle ? (
+          <Pressable accessibilityRole="link" onPress={open} hitSlop={6} style={{ minHeight: 44, justifyContent: "center" }}>
+            <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
+              {tipped ? "Změnit tip" : "Tipnout si"}
+            </T>
+          </Pressable>
+        ) : (
+          <View />
+        )}
+        <T variant="muted" style={{ fontSize: 14, lineHeight: 20, color: colors.mutedStrong }}>
+          Otevřít místo ›
         </T>
       </View>
-      <View style={{ flexDirection: "row", gap: 6 }}>
-        {chips.map((c) => (
-          <Chip key={String(c.key)} label={c.text} selected={choice === c.key} onPress={() => setChoice(c.key)} />
-        ))}
-      </View>
-      <Animated.View
-        style={{
-          gap: 8,
-          opacity: reduce ? 1 : swap,
-          transform: reduce ? [] : [{ translateY: swap.interpolate({ inputRange: [0, 1], outputRange: [6, 0] }) }],
-        }}
-      >
-        {found.length > 0 ? (
-          <>
-            <T style={{ fontFamily: fonts.display, fontSize: 20, lineHeight: 25, color: colors.fg }}>
-              {choice === "stage" ? `Za ${label}: konec etapy` : `Za ${label}: ${pluralPlaces(found.length)}`}
-            </T>
-            {found.map((p) => (
-              <Pressable
-                key={p.id}
-                accessibilityRole="button"
-                accessibilityLabel={`${p.name}, ${formatDistance(p.atM - walkedM)}`}
-                onPress={() => router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })}
-                hitSlop={{ top: 4, bottom: 4 }}
-                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
-              >
-                <View style={{ width: 16, height: 16, borderRadius: 8, borderWidth: 1.4, borderStyle: "dashed", borderColor: colors.muted }} />
-                <T variant="body" style={{ flex: 1, fontSize: 14, lineHeight: 18 }} numberOfLines={1}>
-                  {p.name}
-                </T>
-                <T variant="small" style={{ fontSize: 13, lineHeight: 18 }}>
-                  {formatDistance(p.atM - walkedM)}
-                </T>
-              </Pressable>
-            ))}
-            <T variant="small" style={{ fontSize: 13, lineHeight: 17, color: colors.mutedStrong }}>
-              {walkEstimate(toM - walkedM, stepLength.meters)}
-            </T>
-            {quip && <T style={{ fontFamily: fonts.displayItalic, fontSize: 16, lineHeight: 21, color: colors.ochre }}>{quip}</T>}
-          </>
-        ) : (
-          <T variant="muted">
-            {nearest
-              ? `Za ${label} nic nového. Nejbližší místo, ${nearest.name}, je za ${formatDistance(nearest.atM - walkedM, { stepLengthM: stepLength.meters })}.`
-              : `Za ${label} už nic nezbývá.`}
-          </T>
-        )}
-      </Animated.View>
     </Card>
+    </Pressable>
   );
 }
 
@@ -214,7 +142,7 @@ export function RecentlyDiscovered() {
   return (
     <View style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-        <SectionLabel>Nedávno objeveno</SectionLabel>
+        <SectionLabel>Nedávno odemčeno</SectionLabel>
         <Pressable accessibilityRole="link" onPress={() => router.push("/kronika")} style={{ minHeight: 44, justifyContent: "center" }}>
           <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
             Kronika
@@ -259,35 +187,65 @@ export function RecentlyDiscovered() {
   );
 }
 
-/** Kapitoly s postupem: kolik míst nitky už jste prošli. */
+/**
+ * Nejbližší kapitola: z neuzavřených ta, které chybí nejméně míst, s větou „Ještě 1 místo do uzavření …“.
+ * Klepnutí otevře kapitolu, odkaz „Všechny kapitoly“ vede do Sbírek v Kronice.
+ */
 export function Chapters() {
+  const router = useRouter();
   const { colors, fonts } = useTheme();
   const { walkedM, active } = useExpedition();
+  const explain = useChapterExplainer();
   if (vltavska.chapters.length === 0) return null;
+  const nearest = nearestChapter(vltavska.chapters, vltavska.placesById, walkedM, active);
   return (
     <View style={{ gap: 10 }}>
-      <SectionLabel>Kapitoly</SectionLabel>
-      {vltavska.chapters.map((c) => {
-        const members = c.placeIds.map((id) => vltavska.placesById.get(id)!).filter(Boolean);
-        const done = members.filter((m) => active && m.atM <= walkedM).length;
-        const pct = members.length === 0 ? 0 : (done / members.length) * 100;
-        return (
-          <View key={c.id} style={{ gap: 5 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-              <T style={{ fontFamily: fonts.display, fontSize: 18, lineHeight: 24, color: colors.fg }}>{c.title}</T>
-              <T variant="small" style={{ fontSize: 13, lineHeight: 18 }}>
-                {zOf(done, members.length)}
+      <View style={{ gap: 2 }}>
+        <SectionLabel>Kapitoly</SectionLabel>
+        {explain && (
+          <T variant="muted" style={{ fontSize: 13, lineHeight: 18, color: colors.mutedStrong }}>
+            {CHAPTERS_EXPLAINER}
+          </T>
+        )}
+      </View>
+      {nearest ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Kapitola ${nearest.chapter.title}, ${zOf(nearest.status.done, nearest.status.total)}. ${missingSentence(nearest.chapter, nearest.status.missing)}`}
+          onPress={() => router.push({ pathname: "/kapitola/[id]", params: { id: nearest.chapter.id } })}
+        >
+          <Card style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14 }}>
+            <ChapterSeal title={nearest.chapter.title} closed={false} size={44} />
+            <View style={{ flex: 1, gap: 4 }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 20, lineHeight: 24, color: colors.fg }} numberOfLines={1}>
+                  {nearest.chapter.title}
+                </T>
+                <T variant="small" style={{ fontSize: 13, lineHeight: 18 }}>
+                  {zOf(nearest.status.done, nearest.status.total)}
+                </T>
+              </View>
+              <View style={{ height: 5, borderRadius: 3, backgroundColor: colors.line, overflow: "hidden" }}>
+                <View style={{ height: 5, width: `${(nearest.status.done / nearest.status.total) * 100}%`, backgroundColor: colors.accent }} />
+              </View>
+              <T style={{ fontFamily: fonts.displayItalic, fontSize: 15, lineHeight: 20, color: colors.fg }}>
+                {missingSentence(nearest.chapter, nearest.status.missing)}
               </T>
             </View>
-            <View style={{ height: 5, borderRadius: 3, backgroundColor: colors.line, overflow: "hidden" }}>
-              <View style={{ height: 5, width: `${pct}%`, backgroundColor: colors.accent }} />
-            </View>
-            <T variant="muted" style={{ fontSize: 13, lineHeight: 18, color: colors.mutedStrong }}>
-              {c.blurb}
-            </T>
-          </View>
-        );
-      })}
+          </Card>
+        </Pressable>
+      ) : (
+        <T variant="muted">Všechny kapitoly jsou uzavřené.</T>
+      )}
+      <Pressable
+        accessibilityRole="link"
+        onPress={() => router.push({ pathname: "/kronika", params: { tab: "sbirky" } })}
+        style={{ minHeight: 44, justifyContent: "center", alignSelf: "flex-start" }}
+      >
+        <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
+          Všechny kapitoly ›
+        </T>
+      </Pressable>
     </View>
   );
 }

@@ -4,7 +4,7 @@ import { AppState, Animated, Easing, Pressable, ScrollView, View } from "react-n
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { placePhoto } from "../data/photos";
 import { vltavska, type AppPlace } from "../data/vltavska";
-import { formatDistance } from "../format";
+import { formatDistanceNoWrap } from "../format";
 import { formatDayNumeric } from "../home";
 import { isFerry } from "../privoz";
 import { detectArrival, watchStep, type Arrival, type WatchState } from "../prichod";
@@ -143,7 +143,7 @@ function ArrivalSheet({ arrival, tips, onClose }: { arrival: Arrival; tips: Reco
           {focus && !focus.hook && <T variant="body" style={{ color: colors.fgSoft }}>{focus.text}</T>}
           {next && (
             <T variant="muted" style={{ color: colors.mutedStrong }}>
-              {`Další zastávka: ${next.name}, ${formatDistance(next.atM - ex.walkedM, { stepLengthM: ex.stepLength.meters })}.`}
+              {`Další zastávka: ${next.name}, ${formatDistanceNoWrap(next.atM - ex.walkedM, { stepLengthM: ex.stepLength.meters })}.`}
             </T>
           )}
           <View style={{ gap: 10 }}>

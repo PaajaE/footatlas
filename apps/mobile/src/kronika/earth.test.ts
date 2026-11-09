@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  confidenceSentence,
   bigDistance,
   CITY_STOPS,
   confidenceShares,
@@ -174,5 +175,27 @@ describe("životní cesta", () => {
     const n = nextLifeStop(1_000_000)!;
     expect(n.name).toBe("Reykjavík".length ? n.name : "");
     expect(n.remainingKm).toBeGreaterThan(0);
+  });
+});
+
+describe("confidenceSentence", () => {
+  const N = " "; // formatKmBig odděluje jednotku obyčejnou mezerou
+  it("telefon a kroky", () => {
+    expect(confidenceSentence({ verified: 41_000, estimated: 330_000, manual: 0 })).toBe(
+      `371${N}km, z toho 41,0${N}km změřil telefon přesně, zbytek jsme dopočítali z kroků.`,
+    );
+  });
+  it("jen jeden zdroj", () => {
+    expect(confidenceSentence({ verified: 5_000, estimated: 0, manual: 0 })).toBe(`5,0${N}km, všechno změřil telefon přesně.`);
+    expect(confidenceSentence({ verified: 0, estimated: 5_000, manual: 0 })).toBe(`5,0${N}km, všechno jsme dopočítali z kroků.`);
+  });
+  it("s ručně zadanou částí", () => {
+    expect(confidenceSentence({ verified: 10_000, estimated: 80_000, manual: 10_000 })).toBe(
+      `100${N}km, z toho 10,0${N}km změřil telefon přesně, 10,0${N}km jste zadali ručně a zbytek jsme dopočítali z kroků.`,
+    );
+    expect(confidenceSentence({ verified: 0, estimated: 8_000, manual: 2_000 })).toBe(`10,0${N}km, z toho 2,0${N}km jste zadali ručně, zbytek jsme dopočítali z kroků.`);
+  });
+  it("bez dat nic", () => {
+    expect(confidenceSentence({ verified: 0, estimated: 0, manual: 0 })).toBeNull();
   });
 });

@@ -1,9 +1,10 @@
 import { localDateKey } from "@footatlas/core";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, Pressable, ScrollView, View } from "react-native";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Easing, Platform, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlightMap } from "../components/FlightMap";
+import { HaltCard } from "../components/HaltCard";
 import { SectionLabel } from "../components/LabeledCard";
 import { Seal } from "../components/Seal";
 import { useClock } from "../components/useClock";
@@ -14,15 +15,20 @@ import { vltavska } from "../data/vltavska";
 import { formatDayLong, formatDistance } from "../format";
 import { formatDayNumeric, pluralNewPlaces, tileDistance } from "../home";
 import {
+  activeHalt,
   counterM,
+  dayHeading,
   easeInOut,
+  flightAt,
   flightDurationMs,
-  playbackEndMs,
+  holdZoomAt,
+  planStampsLanded,
   returnHeading,
+  returnPlan,
   returnRouteLabel,
+  returnSource,
   sinceDay,
-  stampSchedule,
-  stampsLanded,
+  type Halt,
 } from "../navrat";
 import { isFerry } from "../privoz";
 import { placesWithin } from "../riddle";
@@ -31,14 +37,18 @@ import { useExpedition } from "../state/ExpeditionProvider";
 import { useTheme } from "../theme/ThemeProvider";
 
 const MAP_FALLBACK_H = 420;
+/** Kolik rychlých razítek je za letu vidět najednou; starší se sečtou do „+N“. */
+const QUICK_SHOWN = 4;
 
 /**
  * Návrat „Inkoust“ (M1, docs/prototyp-snimky/01-navrat-inkoust.jpg): kamera letí po úseku, který přibyl od posledně,
- * počítadlo roste a razítka dopadají za letem. Úsek přichází v parametrech `from` a `to` (metry), protože „od posledně“
- * se po odchodu z Domů maže. Přeskočit jde klepnutím na mapu nebo tlačítkem; při „Omezit pohyb“ se jen objeví výsledek.
+ * počítadlo roste a razítka dopadají za letem. U míst se let zastaví a zespodu vyjede karta místa (rozhodnutí 0025,
+ * plán v `returnPlan`): klepnutí otevře detail (návrat pozastaví), „Dál“ zastavení přeskočí, „Přeskočit vše“ skočí na
+ * souhrn. Úsek přichází v parametrech `from` a `to` (metry), protože „od posledně“ se po odchodu z Domů maže.
+ * Při „Omezit pohyb“ kamera stojí nad celým úsekem a karty se jen prolnou.
  */
 export default function Return() {
-  const { from, to } = useLocalSearchParams<{ from?: string; to?: string }>();
+  const { from, to, zdroj } = useLocalSearchParams<{ from?: string; to?: string; zdroj?: string }>();
   const router = useRouter();
   const { colors, fonts } = useTheme();
   const insets = useSafeAreaInsets();
@@ -53,21 +63,37 @@ export default function Return() {
   const places = useMemo(() => placesWithin(vltavska.places, fromM, toM), [fromM, toM]);
   const stages = vltavska.plan.stages.filter((s) => s.endM > fromM && s.endM <= toM);
   const duration = flightDurationMs(deltaM);
-  const stamps = useMemo(() => stampSchedule(places, fromM, toM, duration), [places, fromM, toM, duration]);
-  const endMs = playbackEndMs(duration, stamps);
-  const clock = useClock(endMs, reduce);
-  const flightDone = clock.elapsedMs >= duration;
-  const walkedNow = fromM + easeInOut(clock.elapsedMs / duration) * deltaM;
-  const landed = new Set(stampsLanded(stamps, clock.elapsedMs));
+  const plan = useMemo(() => returnPlan(places, vltavska.plan.stages, fromM, toM, duration), [places, fromM, toM, duration]);
+  const clock = useClock(plan.totalMs);
+  const t = clock.elapsedMs;
+  // Čas letu stojí během zastavení; poloha, počítadlo i kamera z něj počítají ze stejných hodin.
+  const flightMs = flightAt(plan, t);
+  const flightDone = t >= plan.motionEndMs;
+  const walkedNow = fromM + easeInOut(flightMs / duration) * deltaM;
+  const landed = new Set(planStampsLanded(plan, t));
+  const quickIds = new Set(plan.stamps.map((s) => s.id));
+  const quickLanded = places.filter((p) => quickIds.has(p.id) && landed.has(p.id));
+  const halt = clock.finished ? undefined : activeHalt(plan, t);
+  // Přiblížení u místa po dvacetinách, aby kamera nedostávala nový pokyn v každém kroku hodin, když se nic nemění.
+  const holdZoom = Math.round(holdZoomAt(plan, t) * 20) / 20;
 
   const today = localDateKey(new Date());
-  const heading = returnHeading(sinceDay(ex.daySlices, fromM), today);
+  const since = sinceDay(ex.daySlices, fromM);
+  const heading = returnSource(zdroj) === "kronika" ? dayHeading(since, today) : returnHeading(since, today);
   const routeLabel = returnRouteLabel(vltavska.places, fromM, toM);
-  const counter = tileDistance(counterM(deltaM, duration, clock.elapsedMs));
-  const frame = `List I · ${vltavska.name}`;
+  const counter = tileDistance(counterM(deltaM, duration, flightMs));
+  const stageNo = vltavska.plan.stages.findIndex((s) => toM <= s.endM);
+  const frame = `Etapa ${toRoman((stageNo < 0 ? vltavska.plan.stages.length - 1 : stageNo) + 1)} · ${vltavska.name}`;
+  // Kamera si z plánu bere polohu dopředu a pohyb nechá na mapě (FlightMap, SEG_MS).
+  const cameraAt = useCallback(
+    (ms: number) => ({ m: fromM + easeInOut(flightAt(plan, ms) / duration) * deltaM, holdZoom: holdZoomAt(plan, ms) }),
+    [plan, fromM, deltaM, duration],
+  );
 
-  // Zapamatovat si, že úsek byl vidět (Domů to udělalo při odchodu; tady pro případ otevření odjinud).
-  useEffect(() => () => ex.markSeen(), []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Návrat z Domů se spotřebuje, až dojede do konce; přehrání dne z Kroniky ne (rozhodnutí 0024).
+  useEffect(() => {
+    if (clock.finished && returnSource(zdroj) === "domu") ex.markSeen(toM);
+  }, [clock.finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nowM = Math.max(toM, ex.walkedM);
   const next = vltavska.places.find((p) => p.kind === "stop" && p.atM > nowM);
@@ -84,6 +110,44 @@ export default function Return() {
     Animated.timing(sheet, { toValue: 1, duration: reduce ? 400 : 350, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, [clock.finished, reduce, sheet]);
 
+  // Karta zastavení: drží si poslední zastavení, aby mohla po skončení zajet.
+  const [shown, setShown] = useState<Halt | undefined>(undefined);
+  const card = useRef(new Animated.Value(0)).current;
+  const haltKey = halt ? `${halt.index}-${clock.runKey}` : undefined;
+  useEffect(() => {
+    if (halt) {
+      setShown(halt.halt);
+      card.setValue(0);
+      Animated.timing(card, { toValue: 1, duration: reduce ? 300 : 420, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
+      return;
+    }
+    Animated.timing(card, { toValue: 0, duration: reduce ? 300 : 320, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start(({ finished }) => {
+      if (finished) setShown(undefined);
+    });
+  }, [haltKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shownPlace = shown?.placeId ? vltavska.places.find((p) => p.id === shown.placeId) : undefined;
+
+  // Klepnutí na kartu: pozastavit a otevřít detail; po návratu na obrazovku pokračovat od stejného místa.
+  const pausedForDetail = useRef(false);
+  const openHalt = () => {
+    if (!shown) return;
+    clock.pause();
+    pausedForDetail.current = true;
+    if (shownPlace) router.push({ pathname: "/zastavka/[id]", params: { id: shownPlace.id } });
+    else if (shown.stageIndex !== undefined) router.push({ pathname: "/pohlednice", params: { stage: String(shown.stageIndex) } });
+  };
+  useFocusEffect(
+    useCallback(() => {
+      if (pausedForDetail.current) {
+        pausedForDetail.current = false;
+        clock.resume();
+      }
+    }, [clock.resume]), // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const nextHalt = () => {
+    if (halt) clock.seek(halt.halt.arriveMs + halt.halt.holdMs);
+  };
+
   const km = (m: number) => sealKm(m);
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -94,7 +158,7 @@ export default function Return() {
           </T>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={clock.finished ? "Zavřít návrat" : "Přeskočit let"}
+            accessibilityLabel={clock.finished ? "Zavřít přehrávání" : "Přeskočit na konec"}
             onPress={clock.finished ? () => router.back() : clock.skip}
             style={{ minHeight: 44, minWidth: 44, justifyContent: "center", alignItems: "flex-end" }}
           >
@@ -127,32 +191,72 @@ export default function Return() {
           durationMs={duration}
           runKey={clock.runKey}
           finished={flightDone}
+          holdZoom={holdZoom}
+          elapsedMs={t}
+          cameraAt={cameraAt}
+          horizonM={next?.atM}
           reduceMotion={reduce}
           height={mapH}
           frame={frame}
         />
-        {/* Klepnutí kamkoli na mapu přeskočí let. */}
-        {!clock.finished && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Přeskočit let"
-            onPress={clock.skip}
-            style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
-          />
-        )}
-        {/* Razítka dopadají za letem; po skončení je převezme spodní panel. */}
-        {!clock.finished && landed.size > 0 && (
-          <View pointerEvents="none" style={{ position: "absolute", left: 14, right: 14, bottom: 14, flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-            {places
-              .filter((p) => landed.has(p.id))
+        {/* Rychlá razítka (místa bez zastavení) dopadají za letem; po skončení je převezme spodní panel. Jen poslední
+            QUICK_SHOWN v jedné řadě, starší jako „+N“, aby razítka nezakryla mapu. */}
+        {!clock.finished && !shown && quickLanded.length > 0 && (
+          <View pointerEvents="none" style={{ position: "absolute", left: 14, right: 14, bottom: 14, flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {quickLanded.length > QUICK_SHOWN && (
+              <View style={{ minWidth: 34, height: 34, borderRadius: 17, paddingHorizontal: 8, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, alignItems: "center", justifyContent: "center" }}>
+                <T style={{ fontFamily: fonts.bodySemi, fontSize: 13, color: colors.accent }}>{`+${quickLanded.length - QUICK_SHOWN}`}</T>
+              </View>
+            )}
+            {quickLanded
+              .slice(-QUICK_SHOWN)
               .map((p) =>
                 p.kind === "stop" ? (
-                  <Seal key={p.id} kind="wax" size={56} animate name={p.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} photo={placePhoto(p.photo)} />
+                  <Seal key={p.id} kind="wax" size={48} animate name={p.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} photo={placePhoto(p.photo)} />
                 ) : (
-                  <Seal key={p.id} kind="stamp" size={56} animate name={p.name} expeditionName={vltavska.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} />
+                  <Seal key={p.id} kind="stamp" size={48} animate name={p.name} expeditionName={vltavska.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} />
                 ),
               )}
           </View>
+        )}
+        {/* Zastavení: razítko dopadne na místo na mapě (kamera na něm stojí uprostřed; web má jen statický náčrt). */}
+        {halt && !reduce && shownPlace && Platform.OS !== "web" && (
+          <View
+            key={`map-${haltKey}`}
+            pointerEvents="none"
+            style={{ position: "absolute", left: 0, right: 0, top: mapH / 2 - 30, alignItems: "center" }}
+          >
+            {shownPlace.kind === "stop" ? (
+              <Seal kind="wax" size={60} animate name={shownPlace.name} kmLabel={km(shownPlace.atM)} dateLabel={formatDayNumeric(today)} photo={placePhoto(shownPlace.photo)} />
+            ) : (
+              <Seal kind="stamp" size={60} animate name={shownPlace.name} expeditionName={vltavska.name} kmLabel={km(shownPlace.atM)} dateLabel={formatDayNumeric(today)} />
+            )}
+          </View>
+        )}
+        {/* Karta místa vyjede zespodu (při „Omezit pohyb“ se jen prolne). */}
+        {shown && !clock.finished && (
+          <Animated.View
+            key={`card-${shown.arriveMs}-${clock.runKey}`}
+            style={{
+              position: "absolute",
+              left: 12,
+              right: 12,
+              bottom: Math.max(insets.bottom, 12),
+              opacity: card,
+              transform: reduce ? [] : [{ translateY: card.interpolate({ inputRange: [0, 1], outputRange: [220, 0] }) }],
+            }}
+          >
+            <HaltCard
+              place={shownPlace}
+              photo={placePhoto(shownPlace?.photo)}
+              stageIndex={shown.stageIndex}
+              expeditionName={vltavska.name}
+              dateLabel={formatDayNumeric(today)}
+              remaining={halt ? halt.remaining : 0}
+              onOpen={openHalt}
+              onNext={nextHalt}
+            />
+          </Animated.View>
         )}
       </View>
 
@@ -176,10 +280,24 @@ export default function Return() {
         >
           <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: Math.max(insets.bottom, 20), gap: 14 }} showsVerticalScrollIndicator={false}>
             <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: colors.line }} />
-            <View style={{ gap: 2 }}>
-              <SectionLabel size={15}>Cestou jste potkali</SectionLabel>
-              <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
-            </View>
+            {places.length > 0 || !next ? (
+              <View style={{ gap: 2 }}>
+                <SectionLabel size={15}>Cestou jste odemkli</SectionLabel>
+                <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
+              </View>
+            ) : (
+              // Bez nového místa: neříkat „nic“, ukázat, co je na obzoru.
+              <View style={{ gap: 4 }}>
+                <SectionLabel size={15}>Na obzoru</SectionLabel>
+                <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{next.name}</T>
+                <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, color: colors.accent }}>
+                  {`ještě ${formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}`}
+                </T>
+                {(next.riddle?.question ?? next.teaser) && (
+                  <T style={{ fontFamily: fonts.displayItalic, fontSize: 17, lineHeight: 23, color: colors.fgSoft }}>{next.riddle?.question ?? next.teaser}</T>
+                )}
+              </View>
+            )}
             {places.length > 0 && (
               <View style={{ flexDirection: "row", flexWrap: "wrap", rowGap: 10 }}>
                 {places.slice(0, 10).map((p) => (
@@ -219,7 +337,7 @@ export default function Return() {
             {ferry && (
               <Button kind="secondary" label={`${ferry.name}: převezli jste se`} onPress={() => router.push({ pathname: "/privoz", params: { id: ferry.id } })} />
             )}
-            {next && (
+            {next && places.length > 0 && (
               <View style={{ borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12, gap: 4 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
                   <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.fg }}>{next.name}</T>
@@ -262,7 +380,7 @@ function clamp(n: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, n));
 }
 
-/** „6 nových míst“, „1 nové místo“; bez nového místa věta o úseku. */
+/** „6 nových míst“, „1 nové místo“; bez nového místa (a bez místa na obzoru, tedy na konci výpravy) „Cíl výpravy“. */
 function newPlacesTitle(n: number): string {
-  return n === 0 ? "Žádné nové místo" : pluralNewPlaces(n);
+  return n === 0 ? "Cíl výpravy" : pluralNewPlaces(n);
 }

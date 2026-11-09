@@ -38,7 +38,13 @@ export interface AppRiddle {
 export interface AppChapter {
   id: string;
   title: string;
+  /** Název ve 2. pádě („Mostů a lávek“); chybí-li, použije se `title`. */
+  titleGenitive?: string;
   blurb: string;
+  /** Úvod kapitoly, začátek příběhu. */
+  intro?: string;
+  /** Závěr po uzavření kapitoly. */
+  outro?: string;
   /** Id míst kapitoly v pořadí trasy. */
   placeIds: string[];
 }
@@ -104,7 +110,7 @@ function load(): LoadedExpedition {
     }))
     .sort((a, b) => a.atM - b.atM);
   const obsah = obsahJson as unknown as {
-    chapters: Array<{ id: string; title: string; blurb: string }>;
+    chapters: Array<{ id: string; title: string; titleGenitive?: string; blurb: string; intro?: string; outro?: string }>;
     stories: Array<{
       id: string;
       hook: string;
@@ -127,7 +133,12 @@ function load(): LoadedExpedition {
     p.chapterId = st.chapterId;
   }
   const chapters: AppChapter[] = obsah.chapters.map((c) => ({
-    ...c,
+    id: c.id,
+    title: c.title,
+    titleGenitive: c.titleGenitive,
+    blurb: c.blurb,
+    intro: c.intro,
+    outro: c.outro,
     placeIds: places.filter((p) => p.chapterId === c.id).map((p) => p.id),
   }));
   const route: RoutePoint[] = (routeJson as unknown as { coordinates: [number, number][] }).coordinates.map(([lon, lat]) => ({
