@@ -37,6 +37,8 @@ import { useExpedition } from "../state/ExpeditionProvider";
 import { useTheme } from "../theme/ThemeProvider";
 
 const MAP_FALLBACK_H = 420;
+/** Kolik rychlých razítek je za letu vidět najednou; starší se sečtou do „+N“. */
+const QUICK_SHOWN = 4;
 
 /**
  * Návrat „Inkoust“ (M1, docs/prototyp-snimky/01-navrat-inkoust.jpg): kamera letí po úseku, který přibyl od posledně,
@@ -70,6 +72,7 @@ export default function Return() {
   const walkedNow = fromM + easeInOut(flightMs / duration) * deltaM;
   const landed = new Set(planStampsLanded(plan, t));
   const quickIds = new Set(plan.stamps.map((s) => s.id));
+  const quickLanded = places.filter((p) => quickIds.has(p.id) && landed.has(p.id));
   const halt = clock.finished ? undefined : activeHalt(plan, t);
   // Přiblížení u místa po dvacetinách, aby kamera nedostávala nový pokyn v každém kroku hodin, když se nic nemění.
   const holdZoom = Math.round(holdZoomAt(plan, t) * 20) / 20;
@@ -196,16 +199,22 @@ export default function Return() {
           height={mapH}
           frame={frame}
         />
-        {/* Rychlá razítka (místa bez zastavení) dopadají za letem; po skončení je převezme spodní panel. */}
-        {!clock.finished && !shown && places.some((p) => quickIds.has(p.id) && landed.has(p.id)) && (
-          <View pointerEvents="none" style={{ position: "absolute", left: 14, right: 14, bottom: 14, flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-            {places
-              .filter((p) => quickIds.has(p.id) && landed.has(p.id))
+        {/* Rychlá razítka (místa bez zastavení) dopadají za letem; po skončení je převezme spodní panel. Jen poslední
+            QUICK_SHOWN v jedné řadě, starší jako „+N“, aby razítka nezakryla mapu. */}
+        {!clock.finished && !shown && quickLanded.length > 0 && (
+          <View pointerEvents="none" style={{ position: "absolute", left: 14, right: 14, bottom: 14, flexDirection: "row", alignItems: "center", gap: 6 }}>
+            {quickLanded.length > QUICK_SHOWN && (
+              <View style={{ minWidth: 34, height: 34, borderRadius: 17, paddingHorizontal: 8, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, alignItems: "center", justifyContent: "center" }}>
+                <T style={{ fontFamily: fonts.bodySemi, fontSize: 13, color: colors.accent }}>{`+${quickLanded.length - QUICK_SHOWN}`}</T>
+              </View>
+            )}
+            {quickLanded
+              .slice(-QUICK_SHOWN)
               .map((p) =>
                 p.kind === "stop" ? (
-                  <Seal key={p.id} kind="wax" size={56} animate name={p.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} photo={placePhoto(p.photo)} />
+                  <Seal key={p.id} kind="wax" size={48} animate name={p.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} photo={placePhoto(p.photo)} />
                 ) : (
-                  <Seal key={p.id} kind="stamp" size={56} animate name={p.name} expeditionName={vltavska.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} />
+                  <Seal key={p.id} kind="stamp" size={48} animate name={p.name} expeditionName={vltavska.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} />
                 ),
               )}
           </View>
