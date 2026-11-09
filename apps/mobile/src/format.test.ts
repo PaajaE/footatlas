@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDistance, formatKm } from "./format";
+import { formatDistance, formatDistanceNoWrap, formatKm, formatKmMark, keepUnit } from "./format";
 
 describe("formatDistance", () => {
   it("pod 15 m je „Jste tady“", () => {
@@ -84,5 +84,29 @@ describe("formatKm", () => {
     expect(formatKm(12500)).toBe("12,5 km");
     expect(formatKm(62000)).toBe("62,0 km");
     expect(formatKm(35600, 0)).toBe("36 km");
+  });
+});
+
+describe("jednotka u čísla se neodtrhne", () => {
+  const nb = (s: string) => s.replace(/\u00A0/g, "␣");
+  it("keepUnit dá pevnou mezeru mezi číslo a jednotku", () => {
+    expect(nb(keepUnit("4,0 km"))).toBe("4,0␣km");
+    expect(nb(keepUnit("40 m · asi 55 kroků"))).toBe("40␣m · asi 55␣kroků");
+    expect(nb(keepUnit("Jste tady"))).toBe("Jste tady");
+    expect(nb(keepUnit("km 12,5"))).toBe("km␣12,5");
+  });
+
+  it("formatDistanceNoWrap má vždy jednotku", () => {
+    for (const m of [20, 350, 999, 1000, 4000, 4049, 12_300, 52_000]) {
+      expect(formatDistanceNoWrap(m)).toMatch(/\d\u00A0(m|km)$/);
+    }
+    expect(nb(formatDistanceNoWrap(4000))).toBe("4,0␣km");
+    expect(formatDistanceNoWrap(5)).toBe("Jste tady");
+  });
+
+  it("formatKmMark: poloha na trase s jednotkou", () => {
+    expect(nb(formatKmMark(4000))).toBe("km␣4,0");
+    expect(nb(formatKmMark(35_640))).toBe("km␣35,6");
+    expect(nb(formatKmMark(-1))).toBe("km␣0,0");
   });
 });

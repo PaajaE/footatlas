@@ -6,6 +6,7 @@ import {
   ATLAS_PATTERNS,
   ATLAS_SKETCH_START,
   ATTRIBUTION,
+  WATER_WASH_OPACITY,
   REVEAL_INNER,
   REVEAL_OUTER,
   buildAtlasStyle,
@@ -123,6 +124,35 @@ describe.each(Object.values(themes))("atlas $id", (theme) => {
     expect(byId["sk-urban"]!.paint["fill-pattern"]).toBe(patternName(theme, "blk-sketch"));
     expect(byId["ink-river"]!.paint["line-color"]).toBe(theme.atlas.river);
     expect(byId["ink-river-wash"]!.paint["line-blur"]).toBeDefined();
+  });
+
+  it("voda je napříč zoomy akvarel v paletě atlasu, ne plná plocha", () => {
+    const water = style.layers.filter((l) => l["source-layer"] === "water" && l.type !== "symbol");
+    expect(water.length).toBeGreaterThan(5);
+    const palette = new Set([theme.atlas.river, theme.atlas.riverEdge, theme.atlas.pencil, theme.atlas.pencilSoft].map((c) => c.toLowerCase()));
+    for (const l of water) {
+      const color = (l.paint["fill-color"] ?? l.paint["line-color"]) as string;
+      expect(palette.has(color.toLowerCase()), l.id).toBe(true);
+      // Žádná vodní vrstva nemá zoomové omezení shora: vzhled se při přiblížení nepřepíná na jiný styl.
+      expect(l.maxzoom, l.id).toBeUndefined();
+    }
+    // Vodní plochy (koryto Vltavy od zoomu kolem 13) jsou průsvitné jako rozpitý podklad čárové řeky.
+    const fills = water.filter((l) => l.type === "fill");
+    expect(fills.map((l) => l.id)).toEqual(["ink-water"]);
+    const byId = Object.fromEntries(style.layers.map((l) => [l.id, l]));
+    expect(byId["ink-water"]!.paint["fill-opacity"]).toBe(WATER_WASH_OPACITY);
+    expect(byId["ink-river-wash"]!.paint["line-opacity"]).toBe(WATER_WASH_OPACITY);
+    expect(WATER_WASH_OPACITY).toBeLessThan(0.6);
+    // Jádro řeky při velkém přiblížení slábne, aby uvnitř plochy nevznikl sytý pruh.
+    const core = byId["ink-river"]!.paint["line-opacity"] as unknown[];
+    expect(core[0]).toBe("interpolate");
+    const stops = core.slice(3) as number[];
+    const at = (z: number) => stops[stops.indexOf(z) + 1]!;
+    expect(at(12)).toBeGreaterThan(0.9);
+    expect(stops[stops.length - 1]).toBeLessThanOrEqual(0.5);
+    // Skica kreslí břeh tužkou, bez výplně.
+    expect(byId["sk-water-edge"]!.paint["line-color"]).toBe(theme.atlas.pencil);
+    expect(byId["sk-water-ripple"]!.paint["line-dasharray"]).toBeDefined();
   });
 
   it("vzory ve stylu existují jako obrázky v aplikaci", () => {

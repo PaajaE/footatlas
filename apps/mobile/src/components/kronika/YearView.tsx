@@ -113,6 +113,9 @@ export function YearView({
           <T variant="label" style={{ fontSize: 14 }}>
             Kdy chodíte nejvíc
           </T>
+          <T variant="small" style={{ fontSize: 12, marginTop: -6 }}>
+            Průměr v km na den se záznamem
+          </T>
           <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, height: 100 }}>
             {weekdays.stats.map((s) => (
               <View key={s.label} style={{ flex: 1, alignItems: "center", gap: 4, justifyContent: "flex-end" }}>
