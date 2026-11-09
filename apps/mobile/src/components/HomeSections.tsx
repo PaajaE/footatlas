@@ -18,10 +18,12 @@ import {
   type ReachChoice,
 } from "../home";
 import { placesWithin } from "../riddle";
+import { CHAPTERS_EXPLAINER, missingSentence, nearestChapter } from "../kapitoly";
 import { useExpedition } from "../state/ExpeditionProvider";
 import { localDateKey } from "@footatlas/core";
 import { useTips } from "../state/useTips";
 import { useTheme } from "../theme/ThemeProvider";
+import { ChapterSeal } from "./ChapterSeal";
 import { Chip } from "./Chip";
 import { SectionLabel } from "./LabeledCard";
 import { Medallion } from "./Medallion";
@@ -259,35 +261,62 @@ export function RecentlyDiscovered() {
   );
 }
 
-/** Kapitoly s postupem: kolik míst nitky už jste prošli. */
+/**
+ * Nejbližší kapitola: z neuzavřených ta, které chybí nejméně míst, s větou „Ještě 1 místo do uzavření …“.
+ * Klepnutí otevře kapitolu, odkaz „Všechny kapitoly“ vede do Sbírek v Kronice.
+ */
 export function Chapters() {
+  const router = useRouter();
   const { colors, fonts } = useTheme();
   const { walkedM, active } = useExpedition();
   if (vltavska.chapters.length === 0) return null;
+  const nearest = nearestChapter(vltavska.chapters, vltavska.placesById, walkedM, active);
   return (
     <View style={{ gap: 10 }}>
-      <SectionLabel>Kapitoly</SectionLabel>
-      {vltavska.chapters.map((c) => {
-        const members = c.placeIds.map((id) => vltavska.placesById.get(id)!).filter(Boolean);
-        const done = members.filter((m) => active && m.atM <= walkedM).length;
-        const pct = members.length === 0 ? 0 : (done / members.length) * 100;
-        return (
-          <View key={c.id} style={{ gap: 5 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-              <T style={{ fontFamily: fonts.display, fontSize: 18, lineHeight: 24, color: colors.fg }}>{c.title}</T>
-              <T variant="small" style={{ fontSize: 13, lineHeight: 18 }}>
-                {zOf(done, members.length)}
+      <View style={{ gap: 2 }}>
+        <SectionLabel>Kapitoly</SectionLabel>
+        <T variant="muted" style={{ fontSize: 13, lineHeight: 18, color: colors.mutedStrong }}>
+          {CHAPTERS_EXPLAINER}
+        </T>
+      </View>
+      {nearest ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Kapitola ${nearest.chapter.title}, ${zOf(nearest.status.done, nearest.status.total)}. ${missingSentence(nearest.chapter, nearest.status.missing)}`}
+          onPress={() => router.push({ pathname: "/kapitola/[id]", params: { id: nearest.chapter.id } })}
+        >
+          <Card style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14 }}>
+            <ChapterSeal title={nearest.chapter.title} closed={false} size={44} />
+            <View style={{ flex: 1, gap: 4 }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 20, lineHeight: 24, color: colors.fg }} numberOfLines={1}>
+                  {nearest.chapter.title}
+                </T>
+                <T variant="small" style={{ fontSize: 13, lineHeight: 18 }}>
+                  {zOf(nearest.status.done, nearest.status.total)}
+                </T>
+              </View>
+              <View style={{ height: 5, borderRadius: 3, backgroundColor: colors.line, overflow: "hidden" }}>
+                <View style={{ height: 5, width: `${(nearest.status.done / nearest.status.total) * 100}%`, backgroundColor: colors.accent }} />
+              </View>
+              <T style={{ fontFamily: fonts.displayItalic, fontSize: 15, lineHeight: 20, color: colors.fg }}>
+                {missingSentence(nearest.chapter, nearest.status.missing)}
               </T>
             </View>
-            <View style={{ height: 5, borderRadius: 3, backgroundColor: colors.line, overflow: "hidden" }}>
-              <View style={{ height: 5, width: `${pct}%`, backgroundColor: colors.accent }} />
-            </View>
-            <T variant="muted" style={{ fontSize: 13, lineHeight: 18, color: colors.mutedStrong }}>
-              {c.blurb}
-            </T>
-          </View>
-        );
-      })}
+          </Card>
+        </Pressable>
+      ) : (
+        <T variant="muted">Všechny kapitoly jsou uzavřené.</T>
+      )}
+      <Pressable
+        accessibilityRole="link"
+        onPress={() => router.push({ pathname: "/kronika", params: { tab: "sbirky" } })}
+        style={{ minHeight: 44, justifyContent: "center", alignSelf: "flex-start" }}
+      >
+        <T variant="strong" accent style={{ fontSize: 14, lineHeight: 20 }}>
+          Všechny kapitoly ›
+        </T>
+      </Pressable>
     </View>
   );
 }

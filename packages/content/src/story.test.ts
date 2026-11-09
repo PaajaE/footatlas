@@ -65,7 +65,29 @@ describe("obsah.json", () => {
       const texts = [s.hook, s.teaser, s.context, s.visitTip, s.riddle?.question, ...(s.riddle?.options ?? [])];
       for (const t of texts) expect(t ?? "", s.id).not.toMatch(/ověř|koncept/i);
     }
-    for (const c of file!.chapters) expect(`${c.title} ${c.blurb}`).not.toMatch(/ověř|koncept/i);
+    for (const c of file!.chapters) expect(`${c.title} ${c.blurb} ${c.intro} ${c.outro}`).not.toMatch(/ověř|koncept/i);
+  });
+
+  it("každá kapitola má úvod, závěr, 2. pád názvu a je neověřená", () => {
+    const sentences = (t: string) => t.split(/[.!?](?:\s|$)/).filter((x) => x.trim().length > 0).length;
+    for (const c of file!.chapters) {
+      expect(c.intro, c.id).toBeDefined();
+      expect(c.outro, c.id).toBeDefined();
+      expect(c.titleGenitive, c.id).toBeDefined();
+      expect(sentences(c.intro!), c.id).toBeGreaterThanOrEqual(2);
+      expect(sentences(c.intro!), c.id).toBeLessThanOrEqual(3);
+      expect(sentences(c.outro!), c.id).toBeGreaterThanOrEqual(2);
+      expect(sentences(c.outro!), c.id).toBeLessThanOrEqual(3);
+      expect(c.verified, c.id).toBe(false);
+    }
+  });
+
+  it("kapitola bez úvodu a závěru projde, s prázdným úvodem ne", () => {
+    const base = load("obsah.json");
+    const bare = { ...base, chapters: base.chapters.map(({ id, title, blurb }: { id: string; title: string; blurb: string }) => ({ id, title, blurb })) };
+    expect(storyFile.safeParse(bare).success).toBe(true);
+    const empty = { ...base, chapters: [{ ...base.chapters[0], intro: "" }, ...base.chapters.slice(1)] };
+    expect(storyFile.safeParse(empty).success).toBe(false);
   });
 
   it("odmítne neznámou kapitolu a duplicitní id", () => {

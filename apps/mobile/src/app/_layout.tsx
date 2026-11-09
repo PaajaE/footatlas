@@ -32,6 +32,7 @@ function Shell() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.bg } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="zastavka/[id]" />
+        <Stack.Screen name="kapitola/[id]" />
         <Stack.Screen name="delka-kroku" />
         <Stack.Screen name="zdroje" />
         <Stack.Screen name="nastaveni" />

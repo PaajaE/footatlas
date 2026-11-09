@@ -2,7 +2,9 @@ import { useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 import { vltavska } from "../../data/vltavska";
 import { formatDistance } from "../../format";
-import { chapterProgress, roman, stageProgress, stageStateLabel } from "../../kronika/collections";
+import { CHAPTERS_EXPLAINER, chapterStatus } from "../../kapitoly";
+import { roman, stageProgress, stageStateLabel } from "../../kronika/collections";
+import { ChapterSeal } from "../ChapterSeal";
 import { useTheme } from "../../theme/ThemeProvider";
 import { Card, T } from "../ui";
 import { Seal } from "./parts";
@@ -91,30 +93,36 @@ export function CollectionsView({
 
       {vltavska.chapters.length > 0 && (
         <View style={{ gap: 10 }}>
-          <T variant="label" style={{ fontSize: 14 }}>
-            Pečeti kapitol
-          </T>
+          <View style={{ gap: 2 }}>
+            <T variant="label" style={{ fontSize: 14 }}>
+              Pečeti kapitol
+            </T>
+            <T variant="muted" style={{ fontSize: 13, lineHeight: 18 }}>
+              {CHAPTERS_EXPLAINER}
+            </T>
+          </View>
           {vltavska.chapters.map((c) => {
-            const pr = chapterProgress(
-              c.placeIds.map((id) => vltavska.placesById.get(id)?.atM ?? Infinity),
-              walkedM,
-            );
+            const pr = chapterStatus(c, vltavska.placesById, walkedM, active);
             return (
-              <View key={c.id} style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line }}>
-                {pr.complete ? (
-                  <Seal size={30} filled />
-                ) : (
-                  <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1.4, borderStyle: "dashed", borderColor: colors.muted }} />
-                )}
+              <Pressable
+                key={c.id}
+                accessibilityRole="button"
+                accessibilityLabel={`Kapitola ${c.title}, ${pr.done} z ${pr.total} míst${pr.closed ? ", uzavřená" : ""}`}
+                accessibilityHint="Otevře kapitolu"
+                onPress={() => router.push({ pathname: "/kapitola/[id]", params: { id: c.id } })}
+                style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line }}
+              >
+                <ChapterSeal title={c.title} closed={pr.closed} size={40} />
                 <View style={{ flex: 1 }}>
                   <T variant="title" style={{ fontSize: 19, lineHeight: 23 }}>
                     {c.title}
                   </T>
-                  <T variant="small">
-                    {pr.done} z {pr.total} míst
-                  </T>
+                  <T variant="small">{pr.closed ? `Uzavřeno · ${pr.total} míst` : `${pr.done} z ${pr.total} míst`}</T>
                 </View>
-              </View>
+                <T variant="muted" style={{ fontSize: 18 }}>
+                  ›
+                </T>
+              </Pressable>
             );
           })}
         </View>
