@@ -2,7 +2,7 @@ import { Pressable, View } from "react-native";
 import { T } from "../ui";
 import { useTheme } from "../../theme/ThemeProvider";
 
-/** Přepínač Deník / Cesta / Rok / Sbírky: pilulky v jedné liště, vybraná je zvednutá. */
+/** Přepínač Deník / Cesta / Rok: pilulky v jedné liště, vybraná je zvednutá. */
 export function Segmented<K extends string>({ items, value, onChange }: { items: ReadonlyArray<{ key: K; label: string }>; value: K; onChange: (k: K) => void }) {
   const { colors, fonts } = useTheme();
   return (

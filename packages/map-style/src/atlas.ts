@@ -266,6 +266,62 @@ export function revealLayers(theme: MapTheme): StyleLayer[] {
   return [fill("reveal-cover-inner", REVEAL_INNER, 0.55), fill("reveal-cover-outer", REVEAL_OUTER, 1)];
 }
 
+/**
+ * Zdroj GeoJSON „ještě nevybarvené“ části úseku za letu (rozhodnutí 0033). Aplikace ho plní čárou od hrotu pera
+ * do cíle úseku; vrstvy `revealPendingLayers` po ní kreslí širokou rozmazanou čáru v barvě papíru. Maska
+ * (`revealMask`) se tak spočítá jen jednou pro celý úsek a plynulé barvení obstará MapLibre: čára se za hrotem
+ * zkracuje, nic se nepřepočítává polygonově.
+ */
+export const REVEAL_PENDING = "reveal-pending";
+
+/** Obvod rovníku (Web Mercator) a velikost dlaždice MapLibre v bodech. */
+const EARTH_M = 40_075_016.686;
+const TILE_DP = 512;
+
+/**
+ * Výraz pro `line-width` / `line-blur`, který drží skutečnou délku `meters` na zemi při každém přiblížení
+ * (na zeměpisné šířce `lat`). Bodů na metr přibývá s každým zoomem dvakrát, proto exponenciální interpolace o základu 2.
+ */
+export function metersToPixels(meters: number, lat: number): unknown[] {
+  const dpPerMZ0 = TILE_DP / (EARTH_M * Math.cos((lat * Math.PI) / 180));
+  const at = (z: number) => meters * dpPerMZ0 * 2 ** z;
+  return ["interpolate", ["exponential", 2], ["zoom"], 0, at(0), 22, at(22)];
+}
+
+/**
+ * Krytí nevybarvené části úseku: široká čára v barvě papíru s měkkým okrajem (`line-blur`), šířka odpovídá
+ * vnějšímu poloměru masky. Vkládá se jako krycí vrstvy před `ATLAS_SKETCH_START`.
+ */
+export function revealPendingLayers(theme: MapTheme, lat: number, radiusM: number): StyleLayer[] {
+  return [
+    {
+      id: "reveal-pending-cover",
+      type: "line",
+      source: REVEAL_PENDING,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": theme.atlas.paper,
+        "line-width": metersToPixels(2.2 * radiusM, lat),
+        "line-blur": metersToPixels(0.5 * radiusM, lat),
+      },
+    },
+  ];
+}
+
+/**
+ * Ztlumení vzorů (šrafování bloků, stromy, vinice) za letu: pro každou vrstvu stylu s `fill-pattern` vrátí její
+ * `fill-opacity` vynásobenou `factor` (1 = jak je ve stylu). Aplikace je posílá jako úpravu existujících vrstev,
+ * takže se styl nenačítá znovu.
+ */
+export function patternDimLayers(style: MapStyle, factor: number): Array<{ id: string; type: "fill"; paint: { "fill-opacity": number } }> {
+  return style.layers
+    .filter((l) => l.type === "fill" && "fill-pattern" in l.paint)
+    .map((l) => {
+      const base = l.paint["fill-opacity"];
+      return { id: l.id, type: "fill" as const, paint: { "fill-opacity": (typeof base === "number" ? base : 1) * factor } };
+    });
+}
+
 /** Zdroj GeoJSON míst (zastávky a malé objevy); vlastnosti viz `PlaceFeatureProps` v aplikaci. */
 export const PLACES_SOURCE = "places";
 /** Zdroj GeoJSON polohy výpravy. */

@@ -276,3 +276,116 @@ Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chro
 - **Vysvětlující věta o kapitolách** se ukazuje jen, dokud chodec neotevře žádnou kapitolu (`footatlas.chapteropened.v1` v AsyncStorage, `useChapterExplainer`).
 - Nezahrnuto (soubory souběžné relace 0028): „Dnes jste ušli“ na kartě návratu, „Přehrát návrat“ → „Přehrát cestu“, „Malý objev“ na kartě zastavení.
 - Neověřeno: systémové sdílení na Androidu a iOS, safe area pruhu pohlednice na telefonu s gestovou lištou, kompaktní řádek Kroniky s načtenou historií (v ukázkovém postupu historie není).
+
+## 0030 Návrh v2: tři záložky, Mezitím, nový let, razítka se symboly, témata
+Datum: 9. 11. 2026 · Stav: přijato k realizaci (balíky K–N); podrobnosti v [navrh-v2.md](navrh-v2.md)
+
+- **Proč.** Tři videa z telefonu ukázala, že Domů a Výprava ukazují totéž, kapitoly výpravy jsou rozházené mezi Domů a Kroniku, „Dnes“ po několika dnech pauzy lže a let návratu je sice plynulý, ale honí tečku zblízka, jede stůj–jeď a nic nekreslí.
+- **Tři záložky:** Výprava (mapa a panel, otevírá se jako první), Atlas (výpravy, razítka, témata), Kronika (deník, životní cesta, rok). Domů a Objevovat zanikají. Nahrazuje § 8 specifikace.
+- **Mezitím** je chvíle po otevření, ne záložka: pruh na Výpravě, po dokončené etapě nebo pauze ≥ 3 dny přehrání přes celou obrazovku. Nikdy „Dnes“.
+- **Před vámi** nahrazuje „Kam dnes dojdu“: pás trasy a odhad podle vlastního tempa.
+- **Let:** úvodní a závěrečný záběr, oddálená kamera, pero kreslí čáru, plynulé barvení, místa za letu bez zastavení (zastávky a konce etap se zastavením s plynulým dojezdem a rozjezdem).
+- **Razítka se symboly** podle typu místa (16 symbolů, česká tradice turistických známek), pečeti etap a kapitol s kresbou.
+- **Kapitola vs. téma:** kapitola patří k výpravě a uzavře se; téma prochází atlasem a roste s každou výpravou (`themeId`).
+- Konkurence (Pikmin Bloom, Relive, The Conqueror, World Walking) je rozebraná v navrh-v2.md § 2.
+
+## 0031 Témata napříč výpravami (balík N)
+Datum: 9. 11. 2026 · Stav: přijato; datový model a čistá logika s testy, **bez obrazovky**; úvody témat **neověřené** (`verified: false`); podrobnosti v [navrh-v2.md](navrh-v2.md) § 7
+
+- **Model.** Téma je samostatná položka obsahu v `packages/content/data/temata.json`, mimo složky výprav, protože ho sdílí víc výprav: `id`, `title`, `titleGenitive`, `symbol` (jeden z 16 symbolů razítek, § 6.1; pečeť kapitoly má symbol svého tématu, § 6.3), `intro` (2–3 věty obecně, ne o jedné řece), `milestones` (ostře vzestupné počty míst) a volitelně `unit` (tvary slova pro věty: „1 most / 3 mosty / 10 mostů“; bez něj se počítají „místa“). Schéma `theme` / `themeFile` a `parseThemes` jsou v `packages/content/src/theme.ts`.
+- **Kapitola má `themeId`** (`storyChapter` v `obsah.json`, volitelně i `chapter` ve schématu výpravy). Ve schématu je pole volitelné, aby obsah šel psát postupně; `checkChapterThemes` a testy hlídají, že ho každá kapitola vydávaného obsahu má a že téma existuje. Pro Vltavskou stezku je pět témat 1:1 s kapitolami: `vorari` (vor), `mosty` (most), `ostrovy` (ostrov), `pocatky` (hradiště), `sidla` (zámek). Téma se jmenuje obecněji než kapitola („Mosty“ vs. „Mosty a lávky“).
+- **Logika** v `apps/mobile/src/temata.ts` (čisté funkce, testy): `themeProgress` sečte kapitoly všech výprav se stejným `themeId` (místo ve dvou kapitolách jednou), vrátí počet odemčených míst, stav kapitol, uzavřené kapitoly po výpravách a nejbližší milník s počtem chybějících míst a příznakem, zda ho jde splnit v dosud známých výpravách. `expeditionThemeContribution` dá věty pro výběr výpravy („Tato výprava přidá 3 mosty do tématu Mosty“), `milestoneSentence` „Ještě 2 místa do milníku 10 mostů“ (bez `unit`: „… do milníku 10 míst Počátků Čech“). Plurál 1 / 2–4 / ostatní (`pluralCs`). Témata pro UI exportuje `apps/mobile/src/data/temata.ts`; loader výpravy předává `themeId` kapitol.
+- **Proč milníky.** Kapitola má pevný počet míst a uzavře se; téma roste s každou výpravou, takže „4/7“ by se s novou výpravou změnilo na „4/12“ a postup by vypadal jako ztráta. Milník je pevný cíl (3, 10, 25 míst), který s přibývajícími výpravami neutíká, a dává tématu další krok i po uzavření všech jeho kapitol. Milníky jsou daleko za jednou výpravou záměrně (Mosty: 4 místa na Vltavě, milník 10), téma tím zve k další výpravě; `nextMilestoneReachable` pozná, kdy milník na další výpravu čeká.
+- **Když přibude výprava.** Do jejího `obsah.json` se kapitolám doplní `themeId` existujících témat, případně se do `temata.json` přidá nové téma. Téma pak automaticky sečte nová místa i kapitoly, uzavřené pečeti přibudou ve skupině nové výpravy a dosavadní postup se nemění (počet odemčených míst ani splněné milníky neklesají). Podmínka: **id míst jsou jedinečná v celém atlasu**, protože odemčená místa se předávají jednou sadou; kontrolu přes výpravy je potřeba přidat s druhou výpravou.
+- Nezahrnuto: obrazovka tématu a sekce v Atlasu (balík L / později), kresby symbolů (balík M), stav témat v Kronice.
+
+## 0032 Razítka se symboly
+Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chromiu (390 dp, světlý vzhled, ukázkový postup), na zařízení NEOVĚŘENO
+
+- **Proč.** Monogramy uprostřed razítek („ZdH“, „PT“) nikdo nerozluštil. Podle návrhu v2 (§ 6, rozhodnutí 0030) a vzoru českých turistických známek nese razítko kreslený symbol podle typu místa.
+- **Obsah.** Místo má nepovinné pole `symbol` s jednou ze 16 hodnot (`hradiste`, `zamek`, `most`, `lavka`, `ostrov`, `zdymadlo`, `pristav`, `privoz`, `vor`, `skala`, `obec`, `nota`, `mlyn`, `vyhled`, `rakos`, `soutok`; `packages/content/src/symbols.ts`, bez zodu, aby šel importovat i v aplikaci). Schéma odmítne jinou hodnotu, test hlídá, že každé z 39 míst Vltavské stezky má symbol přesně podle tabulky v navrh-v2 § 6.1. Loader aplikace neznámou hodnotu zahodí.
+- **Kresby** jsou vlastní, ne z ikonové sady: `apps/mobile/src/components/stamps/` (geometrie v `glyphs.ts`, jedna komponenta na symbol a mapa `STAMP_SYMBOLS`). ViewBox 24, jedna linka 1,6 se zaoblenými konci, bez výplní, jen drobné tenčí šrafy (0,9), barva z props. V malých razítcích se linka zesílí na 2. Náhled: `docs/razitka/symboly.png` (skript `apps/mobile/scripts/razitka-nahled.mjs`) a sekce „Symboly razítek“ ve vývojovém panelu (`docs/razitka/aplikace.png`).
+- **Razítko** (`Seal`, druhy `stamp` a `wax`): uprostřed symbol, u razítka pod ním km a datum. Pořadí záloh: symbol → fotka (jen vosk) → monogram názvu. Symbol se doplní sám podle `placeId` nebo jména místa, takže stávající volání (návrat, zastavení, pohlednice, přívoz, Domů) symbol dostanou beze změny. Pod 64 px (`COMPACT_SEAL_PX`) razítko vynechá text po obvodu i km a datum a ukáže jen rámeček a větší symbol.
+- **Zamčené razítko** (`kind: "locked"` se `symbol`, `placeId` nebo `name`): slepý čárkovaný obrys se stejným symbolem tužkou, vybledle. Chodec vidí, že ho čeká most, ne který. Bez symbolu zůstává otazník.
+- **Pečeť etapy:** vosk s římským číslem a drobným symbolem cíle etapy (symbol posledního místa etapy, `stageSymbol`). Doplní se podle `stageIndex` nebo římského čísla, takže i karta zastavení a pohlednice ji mají bez úprav. Ve Sbírkách nahrazuje prázdný kroužek u dokončené etapy.
+- **Pečeť kapitoly** (`ChapterSeal`): Voraři = vor, Mosty a lávky = most, Ostrovy = ostrov, Počátky Čech = hradiště, Šlechtická sídla = zámek (podle id i názvu, `chapterSymbol` v `razitka.ts`). Uzavřená je vosk se symbolem, otevřená slepý obrys se stejným symbolem; kapitola bez symbolu má dál monogram a zámek.
+- **Sbírky:** mřížka razítek používá kompaktní `Seal` (48 px), monogramy a `PlaceStamp` zrušeny. Struktura obrazovky beze změny.
+- **Beze změny:** medailony na mapě (předgenerovaná PNG v `map/medallionFiles`), `SealBadge` na fotce místa, monogram na zástupném obrázku místa bez fotky (`PlaceHero`).
+- **Nota:** symbol `nota` je lyra s notou mezi strunami; v 28 px čte spíš jako lyra.
+- Neověřeno: vykreslení na telefonu (react-native-svg, `transform` u vnořené skupiny), tmavý vzhled.
+
+## 0033 Nový let přehrání cesty (balík K)
+Datum: 10. 11. 2026 · Stav: přijato; ověřeno testy a typovou kontrolou, na telefonu NEOVĚŘENO (plynulost se na webu ani v emulátoru posoudit nedá)
+
+Realizace navrh-v2.md § 1.2 a § 8 (bez haptiky). Nahrazuje časování z 0025 (zastavení 5/3/6 s, let 4–9 s); princip kamery z 0028 (pokyn po úsecích `SEG_MS` = 700 ms, plynulost počítá MapLibre) zůstává.
+
+**Časování (`src/navrat.ts`, `returnPlan`):**
+
+| Fáze | Délka | Poznámka |
+|---|---|---|
+| Úvodní záběr | 2,0 s | `fitBounds` na úsek a místo na obzoru (do 3 km za cílem), bez animace |
+| Ponoření | 1,0 s | `easeTo` na start úseku, zoom pro 2–3 km na šířku obrazovky |
+| Kreslení | pohyb 8–20 s podle délky (lineárně 1–15 km) + stání | pohyb pera má vlastní rozpočet `drawDurationMs`, stání zastávek a konců etap se k němu přičte (balík O); cestovní rychlost nejvýš 0,8 šířky záběru za sekundu |
+| Místo za letu (objev) | — | zpomalení na 25 %, rampy 0,6 s, pomalý průlet ≥ 1,2 s, štítek 2,5 s; let nezastaví |
+| Zastávka / konec etapy | 3,5 s / 5 s | plné zastavení, dojezd i rozjezd 0,8 s; přechod k zastavení či od něj trvá aspoň 2,5 s |
+| Přechod mezi kotvami | ≥ 1,5 s | kotvy: start, místo za letu, zastavení, cíl; krátký přechod se protáhne, místo aby zrychlil (balík O) |
+| Závěrečný záběr | 1,5 s | `fitBounds` na úsek nad souhrnem (spodní okraj = 40 % výšky) |
+
+- **Spojitá rychlost.** Rychlost je po částech kosinová (rampy mají spojitou rychlost i zrychlení), poloha hrotu je její integrál. Test vzorkuje rychlost po 16 ms přes celé přehrání a hlídá, že mezi snímky se nezmění o víc než 5 % cestovní (rampa 0,6 s dělá nejvýš ~3,1 %); totéž na denních úsecích celé Vltavské stezky. Místo za letu, na které není místo pro plynulý přechod (těsně u zastávky, startu nebo cíle), nezpomalí; dvě blízká místa za letu mají jedno společné zpomalení, nejvýš 2 × 1,2 s (balík O).
+- **Mnoho míst a rozpočet.** Od 6 míst v úseku dostanou objevy jen rychlé razítko (bez štítku a zpomalení, rozestup ≥ 250 ms). Přes 40 s se nejdřív zastávky (nejtěsněji u jiného místa) změní na místa za letu, pak místa za letu na rychlá razítka; konce etap zůstanou vždy. Teprve když ani to nestačí, smí cestovní rychlost překročit strop 0,8 šířky za sekundu (strop 40 s má přednost). Běžný denní úsek 10–25 km s pár místy trvá 20–25 s bez stání; každé zastavení přidá svých 3,5 s / 5 s (test).
+- **Kamera.** Přiblížení z šířky záběru `flightWidthM` (2 km do 2 km úseku, 3 km od 20 km) a skutečné šířky mapy (`zoomForWidth`), tj. zoom ≈ 13, ne 15. Předstih: střed je 20 % šířky před hrotem, úměrně rychlosti, takže při zastavení je kamera přesně na místě (razítko a pečeť dopadnou doprostřed). Při každém `easeTo` se posílá nulový `padding`, protože `fitBounds` ho jinak v kameře nechá.
+- **Náklon 0°** (`FLIGHT_PITCH`). Návrh zkouší 30°, ale vzory atlasu jsou rastrové a v náklonu se v horní části slévají, popisky IM Fell se zmenšují a hrot pera i předstih se počítají v rovinné projekci. Vizuálně jsme náklon nezkoušeli (nebylo na čem); ověří se na telefonu změnou konstanty (§ 11).
+- ~~**Hrot pera** (`PenTip`) je RN overlay. Jeho posun od středu se spočítá z plánu (`screenOffsetDp`, Web Mercator) na konci každého úseku a dojede tam nativní animací stejně dlouho a lineárně jako kamera.~~ Nahrazeno koncem čáry (balík P): overlay se animoval odděleně od mapy a s koncem čáry se rozjížděl. Konec čáry teď označuje malá inkoustová tečka, vrstva MapLibre ve stejném zdroji jako čára (`route-done`). Značka „vy“ se za letu nekreslí.
+- **Plynulé barvení: varianta „čára s `line-blur`“.** Maska `revealMask` se počítá jen jednou pro celý úsek (do `toM`); nevybarvenou část kryje široká papírová čára (`revealPendingLayers`, šířka 2,2 × 650 m v metrech přes exponenciální výraz, rozmazání 0,5 × 650 m) od kousku před hrotem do cíle. Za letu se tak posílá jen zkracující se čára (po 1/800 úseku), žádná polygonová unie. Varianta „maska kolem hrotu“ by kvůli obrácené masce (papír s dírou) potřebovala dělit krytí na disjunktní kusy a počítat polygonový rozdíl při každém kroku hodin v JS; to by na telefonu ubíralo snímky. Daň: kde se budoucí trasa vrací do 650 m k už vybarvené (meandry), je tam papír do průletu pera.
+- **Méně šumu.** Za letu se vzory (vrstvy s `fill-pattern`: šrafy, stromy, vinice, skica i kolorovaná) ztlumí na 50 % (`patternDimLayers`) úpravou existujících vrstev stylu (komponenta `Layer` se stejným id), po skončení se vrátí.
+- **Štítek místa za letu** (`FlyLabel`): nahoře, nejvýš 25 % výšky, razítko nebo fotka s razítkem, typ · km, název (zalomí se), krátká věta (`shortSentence`, nejvýš 110 znaků po celé části věty). Klepnutí otevře místo a pozastaví.
+- **Karta zastávky** (`HaltCard`): záhlaví bez uříznutí (konec etapy na vlastním řádku), razítko uvnitř karty (bez fotky je samo obrázkem, s fotkou v jejím rohu), menší fotka (72) a nižší karta, bez prázdného papírového rámečku.
+- **Pečeť konce etapy** (`StageWax`): `Seal` druhu `stage` z balíku M (rozhodnutí 0032) s římským číslem a symbolem cíle etapy. Při integraci přepnuto z druhu `wax`, kde M props `roman` a `symbol` ignoroval.
+- **Souhrn**: přes spodek mapy, nejvýš 40 % výšky (balík P: 44 %); místa jako vodorovná řada malých razítek s názvem pod nimi; „Na obzoru“ je jeden řádek v pevné patičce nad tlačítky (balík O), takže je vidět bez posouvání. Razítko přívozu otevře rovnou scénu převozu (balík O nahradil tlačítko „Přívoz v Podbabě: převezli jste se“, které se četlo jako podivný úspěch). „Přeskočit“ skočí na závěrečný záběr.
+- **Omezit pohyb:** kamera stojí od začátku na celém úseku (už s místem pro souhrn), razítka a karty se jen prolnou.
+- **Ověřit na telefonu:** plynulost kamery a barvení (60 fps), ~~shoda hrotu pera s koncem čáry~~ (balík P: pero nahrazeno tečkou ve vrstvě mapy), vzhled rozmazaného okraje barvy, náklon 30° proti 0°, čitelnost štítku a karty, zda je zoom 2–3 km správně.
+
+**Oprava rytmu (balík O).** Na telefonu byl let plynulý, ale rytmus špatný. Úsek 11 000 → 20 000 m (objevy Sedlecké skály a Přívoz v Podbabě, zastávka a konec I. etapy Zámek Roztoky, zastávka Levý Hradec): obě místa za letu se slila do jedné pomalé zóny 2,9 s, pak se pero rozjelo na 3 226 m/s (1,35 šířky záběru za sekundu) a 2,5 km do Roztok ujelo za 1,4 s, z Roztok do Levého Hradce jen rampa nahoru a hned dolů (1,6 s). Příčina: stání se počítalo do rozpočtu kreslení (`max(základ, stání + 0,6 · základ)`), takže na pohyb zbylo 8,9 s místo 14,9 s a cestovní rychlost se vyhnala nahoru. Nová pravidla:
+
+1. **Pohyb má vlastní rozpočet.** Doba pohybu = `drawDurationMs(deltaM)` (8–20 s); stání se přičte. Strop 40 s a degradace zastávka → místo za letu → rychlé razítko zůstávají.
+2. **Strop cestovní rychlosti** `MAX_SCREENS_PER_S` = 0,8 šířky záběru za sekundu (krajina přejede obrazovku za ~1,25 s). Pohyb pak trvá déle, než chce rozpočet; když by tím celek přesáhl 40 s, nejdřív se degradují místa a až potom smí rychlost strop překročit.
+3. **Žádný sprint mezi kotvami.** Přechod trvá aspoň 1,5 s, u zastávky či konce etapy aspoň 2,5 s. Když by běžný tvar (rampy 0,6/0,8 s a cestovní rychlost) byl kratší, nezvedá se špička, ale protáhnou se rampy: delší cesta = rampy delší a rovinka kratší při špičce = cestovní; kratší cesta = jeden kosinový „hrb“ dané délky se špičkou nižší než cestovní. Doba přechodu tak s rychlostí nikdy neroste a tvary na sebe navazují; rychlost i zrychlení zůstávají spojité. Přechod kratší než 1,5 s vzniká jen v těsné mezeře, kde se jede rychlostí pomalejší kotvy (špička = rychlost kotvy, tedy ≤ 2,5× pomalé zóny).
+4. **Sloučené zóny míst za letu** trvají nejvýš 2 × `FLYBY_SLOW_MS` (2,4 s). Další blízké místo, které by zónu protáhlo, se nezpomaluje (`slowed: false`, štítek a razítko dostane) – jednodušší než dělit zónu, protože krátké zrychlení mezi dvěma zónami by v těsné mezeře stejně splynulo s pomalou jízdou. Dvě zóny zůstanou oddělené, jen když se mezi ně vejde přechod se špičkou aspoň dvojnásobku pomalé rychlosti.
+
+| Úsek 11 → 20 km | před (0033) | po (balík O) |
+|---|---|---|
+| Cestovní rychlost | 3 248 m/s (1,36 šířky/s) | 985 m/s (0,41 šířky/s; strop 1 911) |
+| Pomalé zóny | jedna 2,9 s (Sedlec + Podbaba) | dvě po 1,2 s |
+| Průlet Sedlec / Podbaba | 5,0 s / 6,7 s | 5,5 s / 8,2 s |
+| Příjezd Roztoky | 8,7 s | 12,3 s |
+| Příjezd Levý Hradec | 15,3 s | 20,4 s |
+| Podbaba → Roztoky | 1,4 s, špička 3 226 m/s | 3,5 s, špička 985 m/s |
+| Roztoky → Levý Hradec | 1,6 s, špička 2 744 m/s | 3,0 s, špička 985 m/s |
+| Levý Hradec → cíl | 1,6 s | 2,5 s |
+| Pohyb bez stání | 8,9 s | 14,9 s (= `drawDurationMs(9000)`) |
+| Celé přehrání | 21,9 s | 27,9 s |
+
+Na všech denních úsecích Vltavské stezky (test „nejhorší sprint“): nejkratší přechod u zastavení dřív 1,4 s, nyní 2,5 s; nejvyšší cestovní rychlost dřív 2,1 šířky/s, nyní 0,65; nejdelší přehrání 32 s → 36,5 s (pod 40 s).
+
+Drobnosti přehrání (balík O): přehrání dne z Kroniky nemá v záhlaví dnešní datum (den říká nadpis „2. 11. jste ušli“, `returnDateLine`); rámeček mapy ukazuje etapu, ve které je hrot pera, a na další se přepne až po stání u pečeti konce etapy (`flightStageIndex`); hrot pera se při zastavení prolne pryč (200 ms), aby nepřekrýval razítko, a po rozjezdu se vrátí (balík P: pero odstraněno, tečka na konci čáry se při zastavení nekreslí).
+
+**Souhrn a konec čáry (balík P).** Z nahrávky letu na telefonu (Android, 412 dp):
+- **Konec čáry místo hrotu pera.** `PenTip` a `screenOffsetDp` jsou pryč. Úsek čáry (`route-done`) je teď FeatureCollection: čára a bod přesně v její poslední souřadnici; kruhová vrstva `route-done-tip` (filtr `geometry-type = Point`, poloměr 2,75 bodu = průměr 5,5, barva ušlé trasy, okraj 1 bod barvou lemu) kreslí jen bod, čárové vrstvy bod ignorují. Čára a tečka tak přicházejí do mapy v jedné aktualizaci zdroje a nemohou se rozjet. Tečku jsme nechali, i když má čára `line-cap: round`: kulatý konec je stejně široký jako čára (3,2 bodu) a od lomů trasy se neliší, takže za letu (kdy kamera s předstihem konec čáry nedrží uprostřed) oko nemá čeho se chytit; tečka je jen o málo širší než čára s lemem (7,5 proti 6,2 bodu), tedy nenápadná. Za stání (`activeHalt`) se nekreslí (je tam razítko), při „Omezit pohyb“ vůbec, mimo let ji střídá značka „vy“.
+- **Souhrn nejvýš 44 % výšky** (dřív 40 %) a zhuštěný: nadpis 24 místo 28, razítka 44 místo 52, mezery 8 místo 12, tlačítka nižší (`compact`, 46). Na 412 × 915 bodů se bez posouvání vejde nadpis, řada razítek, „Etapa … dokončena · pohlednice“, „Na obzoru“ a obě tlačítka i s dvouřádkovým názvem a spodní lištou systému. Když se obsah přesto nevejde (víc etap), posouvá se a končí na čáře nad pevnou patičkou, ne řezem přes tlačítko.
+- **Na obzoru** v patičce: popisek a vzdálenost na prvním řádku, název celý pod nimi (zalomí se, nezkracuje).
+- **Nadpis** (`flightHeading`) se nevykreslí, dokud se čtou data o dnech a den začátku úseku neznáme; pak se drží první platná hodnota. Dřív přeskočil z „Ten den jste ušli“ na „2. 11. jste ušli“.
+- **Úvodní záběr:** hodiny přehrání (`useClock`, nový parametr `hold`) se pustí až po `onDidFinishRenderingMapFully` mapy (MapLibre RN 11.5; při `onDidFailLoadingMap` hned), nejpozději po `MAP_WAIT_MS` = 1,5 s. Dřív let začínal ~0,5 s nad prázdným papírem.
+
+## 0034 Tři záložky a Mezitím
+Datum: 10. 11. 2026 · Stav: přijato (balík L, [navrh-v2.md](navrh-v2.md) § 3, 4, 4.1, 5 a 9); ověřeno testy a webovým exportem v Chromiu (390 dp, světlý vzhled, ukázkový postup), na zařízení NEOVĚŘENO
+
+- **Záložky Výprava, Atlas, Kronika.** Výprava se otevírá jako první (`unstable_settings.initialRouteName`). Domů a Objevovat zanikly; `/` (také `footatlas://`) přesměruje `app/index.tsx` na `/vyprava`, `/objevovat` přesměruje `app/objevovat.tsx` na `/atlas`, `/kronika?tab=sbirky` vede do Atlasu.
+- **Výprava bez výpravy:** výběr výpravy (dřívější „Vyrazit“ z Domů) a pod ním Životní cesta (`LifePathView`).
+- **Panel Výpravy** (mapa beze změny): tři polohy sbalený / poloviční (výchozí) / celý (`src/panel.ts`, s testy). Hlavička etapy je úchyt: táhnutí posouvá, klepnutí přepíná poloviční a celý. Obsah: hlavička etapy, **Další cíl**, **Před vámi**, kapitoly, „Nedávno odemčeno“ a místa po etapách. Komponenty z `HomeSections.tsx` se přesunuly do `PanelSections.tsx` (beze změny vnitřku, jen odkaz „Všechny kapitoly“ vede do Atlasu).
+- **Další cíl** (`src/cil.ts`, s testy): konec etapy do 3 km → uzavření kapitoly do 3 km (k poslednímu chybějícímu místu) → další zastávka. Hranice 3 km včetně.
+- **Před vámi** (`src/predvami.ts`, s testy; nahrazuje `WhereToday`): pás 8 km před chodcem se zamčenými razítky (`Seal`), tempo = průměr posledních 14 dní s pohybem (≥ 200 m) **před dneškem** z kroniky a výpravy (pro stejný den větší hodnota). Názvy míst v obsahu nemají 2. pád, proto věty „Za 2 dny vás čekají Zámek Veltrusy a Červený mlýn.“ a „Za 30 minut chůze (asi 2 700 kroků) vás čeká Zámek Veltrusy.“ místo „jste u Zámku …“. Odměna „Do pohlednice etapy III: 12,1 km.“ do 15 km. Táhnutím po pásu „Do sem: 4,0 km, asi 50 minut, 3 místa“; nic se neukládá. Slovo „dnes“ se nepoužívá (hlídá test).
+- **Mezitím** (`src/mezitim.ts`, s testy; nahrazuje `ReturnCard`): pruh nahoře na Výpravě „Mezitím · 23,4 km za 5 dní · 3 nová místa“, „Přehrát cestu“, „Zavřít“. Nadpis `mezitimHeading` („Mezitím přibylo“, „Od včerejška přibylo“, „Za 5 dní přibylo“, „Od 24. 10. přibylo“) je zatím jen v přístupném popisku pruhu; obrazovka `/navrat` (balík K) má vlastní `returnHeading`. Podmínka zobrazení a spotřebování beze změny (0022, 0024).
+- **Mezitím přes celou obrazovku:** `/navrat` se otevře samo, když se mezitím dokončila etapa nebo od posledního otevření uběhly ≥ 3 dny; nejvýš jednou za otevření. Čas otevření se ukládá při spuštění a při návratu z pozadí (`footatlas.lastopened.v1`, `useLastOpened`). Při prvním spuštění nové verze záznam chybí, takže jen pruh.
+- **Atlas:** výpravy (aktuální, dokončené, další), razítka a pečeti (`CollectionsView` beze změny, jen s rozjetou výpravou), pohlednice etap, Témata jako zástupná sekce pro balík N, druhy tras.
+- **Kronika:** bez Sbírek; dlaždice Dnes / Za 7 dní v hlavičce Deníku (`DiaryTiles`).
+- Neověřeno na zařízení: táhnutí panelu a pásu na Androidu (střet s posuvem panelu), automatické otevření po návratu z pozadí.

@@ -7,13 +7,14 @@ import { roman, stageProgress, stageStateLabel } from "../../kronika/collections
 import { ChapterSeal } from "../ChapterSeal";
 import { useTheme } from "../../theme/ThemeProvider";
 import { Card, T } from "../ui";
-import { uniqueMonograms } from "../../monogram";
-import { Seal } from "./parts";
-import { PlaceStamp } from "./PlaceStamp";
+import { Seal } from "../Seal";
+import { sealKm } from "../../seal";
 import { useChapterExplainer } from "../../state/useChapterExplainer";
 
 /** Buňka razítka s krátkým názvem pod ním: čtyři v řadě. */
 const STAMP_CELL = "25%";
+/** Razítko v mřížce: kompaktní podoba `Seal` (jen rámeček a symbol), čitelná od 28 px. */
+const STAMP_PX = 48;
 
 /**
  * Sbírky rozjeté výpravy: etapy (s pečetí a pohlednicí po dokončení), razítka míst seskupená po etapách
@@ -41,7 +42,6 @@ export function CollectionsView({
   }
   const places = vltavska.places;
   const got = places.filter((p) => p.atM <= walkedM).length;
-  const monograms = uniqueMonograms(places.map((p) => p.name));
   const stages = vltavska.plan.stages;
   const stampGroups = stages.map((stage) => {
     const items = places.map((place, i) => ({ place, i })).filter(({ place }) => (stage.index === 0 ? place.atM <= stage.endM : place.atM > stage.startM && place.atM <= stage.endM));
@@ -72,7 +72,7 @@ export function CollectionsView({
               style={{ width: "48%", flexGrow: 1, padding: 10, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line, gap: 6 }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                {st.state === "done" ? <Seal size={22} /> : null}
+                {st.state === "done" ? <Seal kind="stage" size={30} stageIndex={s.index} roman={roman(s.index + 1)} ringText="" /> : null}
                 <T variant="label" style={{ fontSize: 14 }}>
                   Etapa {roman(s.index + 1)}
                 </T>
@@ -105,17 +105,24 @@ export function CollectionsView({
               <T variant="small">{`${g.got} z ${g.items.length}`}</T>
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", rowGap: 10 }}>
-              {g.items.map(({ place: p, i }) => {
+              {g.items.map(({ place: p }) => {
                 const has = p.atM <= walkedM;
                 return (
                   <View key={p.id} style={{ width: STAMP_CELL, alignItems: "center", gap: 4 }}>
-                    <PlaceStamp
-                      monogram={monograms[i]!}
-                      name={p.name}
-                      got={has}
-                      seed={i * 7 + 3}
-                      onPress={() => router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })}
-                    />
+                    {has ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`${p.name}, razítko získáno`}
+                        accessibilityHint="Otevře detail místa"
+                        hitSlop={4}
+                        onPress={() => router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })}
+                        style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.92 : 1 }] })}
+                      >
+                        <Seal kind="stamp" size={STAMP_PX} placeId={p.id} name={p.name} expeditionName={vltavska.name} kmLabel={sealKm(p.atM)} dateLabel="" />
+                      </Pressable>
+                    ) : (
+                      <Seal kind="locked" size={STAMP_PX} placeId={p.id} />
+                    )}
                     <T
                       variant="small"
                       numberOfLines={1}
@@ -155,7 +162,7 @@ export function CollectionsView({
                 onPress={() => router.push({ pathname: "/kapitola/[id]", params: { id: c.id } })}
                 style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line }}
               >
-                <ChapterSeal title={c.title} closed={pr.closed} size={40} />
+                <ChapterSeal title={c.title} chapterId={c.id} closed={pr.closed} size={40} />
                 <View style={{ flex: 1 }}>
                   <T variant="title" style={{ fontSize: 19, lineHeight: 23 }}>
                     {c.title}

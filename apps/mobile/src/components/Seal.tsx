@@ -4,9 +4,25 @@ import Svg, { Circle, Defs, G, Path, RadialGradient, Stop, Text as SvgText, Text
 import { DROP_MS, REDUCED_FADE_MS, RING_MS, grungeDash, progressArcs, ringPath, wobblyCircle } from "../seal";
 import { useTheme } from "../theme/ThemeProvider";
 import { useReduceMotion } from "./useReduceMotion";
+import { vltavska } from "../data/vltavska";
+import { placeMonogram } from "../monogram";
+import { fromRoman, resolvePlaceSymbol, stageSymbol, type PlaceSymbol, type SymbolLookup } from "../razitka";
+import { SYMBOL_LABELS, SymbolAt } from "./stamps";
 
 /** Vosk je ve dne i v noci rumělkový; barvy odpovídají `Pecete.dc.html`. */
 const WAX = { light: "#C2463A", mid: "#9B2C22", dark: "#6A1A13", shadow: "#5A1610", text: "#F6D9CF", glint: "#E7A08F" };
+
+/** Pod touto velikostí razítko nekreslí text po obvodu ani km a datum, jen rámeček a symbol (mřížka Sbírek). */
+export const COMPACT_SEAL_PX = 64;
+
+/** Místa a etapy pilotní výpravy pro automatické doplnění symbolu podle `placeId`, jména nebo římského čísla. */
+const LOOKUP: SymbolLookup = { places: vltavska.places, stageEndsM: vltavska.plan.stages.map((s) => s.endM) };
+
+/**
+ * Symbol místa razítka. `symbol` má přednost; jinak se dohledá podle `placeId` nebo jména (navrh-v2 § 6.1).
+ * Bez symbolu se kreslí monogram názvu.
+ */
+type PlaceRef = { symbol?: string; placeId?: string };
 
 type Common = {
   /** Strana čtverce v bodech; kresba je navržená na 132. */
@@ -19,11 +35,13 @@ type Common = {
 
 export type SealProps = Common &
   (
-    | { kind: "wax"; name: string; kmLabel: string; dateLabel: string; photo?: ImageSourcePropType }
-    | { kind: "stamp"; name: string; expeditionName: string; kmLabel: string; dateLabel: string }
-    | { kind: "locked"; label?: string }
+    | ({ kind: "wax"; name: string; kmLabel: string; dateLabel: string; photo?: ImageSourcePropType } & PlaceRef)
+    | ({ kind: "stamp"; name: string; expeditionName: string; kmLabel: string; dateLabel: string } & PlaceRef)
+    /** Zamčené razítko: slepý obrys; se symbolem (nebo `placeId`/`name`) ukáže, jaký typ místa čeká. */
+    | ({ kind: "locked"; label?: string; name?: string } & PlaceRef)
     | { kind: "chapter"; title: string; expeditionName: string; done: number; total: number }
-    | { kind: "stage"; roman: string; ringText: string }
+    /** Pečeť etapy; drobný symbol cíle etapy se doplní podle `stageIndex` nebo římského čísla. */
+    | { kind: "stage"; roman: string; ringText: string; symbol?: string; stageIndex?: number }
   );
 
 /**
@@ -147,12 +165,33 @@ function describe(p: SealProps): string {
       return `Pečeť: ${p.name}, ${p.kmLabel}, ${p.dateLabel}`;
     case "stamp":
       return `Razítko: ${p.name}, ${p.kmLabel}, ${p.dateLabel}`;
-    case "locked":
-      return p.label ? `Zamčeno, ${p.label}` : "Zamčeno";
+    case "locked": {
+      const sym = sealSymbol(p);
+      const what = sym ? `, čeká ${SYMBOL_LABELS[sym]}` : "";
+      return p.label ? `Zamčeno, ${p.label}${what}` : `Zamčeno${what}`;
+    }
     case "chapter":
       return `Kapitola ${p.title}, ${p.done} z ${p.total}`;
     case "stage":
       return `Pečeť etapy ${p.roman}`;
+  }
+}
+
+/** Symbol, který razítko nakreslí (bez něj monogram nebo otazník). */
+export function sealSymbol(p: SealProps): PlaceSymbol | undefined {
+  switch (p.kind) {
+    case "wax":
+    case "stamp":
+      return resolvePlaceSymbol(LOOKUP, { symbol: p.symbol, placeId: p.placeId, name: p.name });
+    case "locked":
+      return p.symbol || p.placeId || p.name ? resolvePlaceSymbol(LOOKUP, { symbol: p.symbol, placeId: p.placeId, name: p.name }) : undefined;
+    case "stage": {
+      if (p.symbol !== undefined) return resolvePlaceSymbol(LOOKUP, { symbol: p.symbol });
+      const index = p.stageIndex ?? (fromRoman(p.roman) ?? 0) - 1;
+      return index >= 0 ? stageSymbol(LOOKUP, index) : undefined;
+    }
+    case "chapter":
+      return undefined;
   }
 }
 
@@ -182,6 +221,10 @@ function Body(p: SealProps & { size: number }) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, "");
   const { size } = p;
   const svg = { width: size, height: size, viewBox: "0 0 132 132" };
+  const compact = size < COMPACT_SEAL_PX;
+  const symbol = sealSymbol(p);
+  // V malém razítku je symbol větší a linka silnější, aby byl čitelný od 28 px.
+  const glyphStroke = compact ? 2 : 1.6;
 
   if (p.kind === "wax" || p.kind === "stage") {
     const gradient = `wax${id}`;
@@ -203,18 +246,35 @@ function Body(p: SealProps & { size: number }) {
           <Path d={wobblyCircle(66, 66, 56, stage ? 3.4 : 2.8, edgeSeed)} fill={`url(#${gradient})`} />
           <Circle cx={66} cy={66} r={stage ? 46 : 42} fill="none" stroke={WAX.shadow} strokeWidth={stage ? 2.5 : 3} opacity={0.6} />
           {!stage && <Circle cx={66} cy={66} r={44} fill="none" stroke={WAX.glint} strokeWidth={1} opacity={0.6} />}
-          <SvgText fontFamily={fonts.displaySC} fontSize={stage ? 10 : 9} letterSpacing={stage ? 2 : 1.6} fill={WAX.text}>
-            <TextPath href={`#${ringId}`} startOffset={stage ? "4%" : "2%"}>
-              {stage ? p.ringText : `${p.name} · ${p.kmLabel} · ${p.dateLabel} ·`}
-            </TextPath>
-          </SvgText>
-          {stage && (
-            <SvgText x={66} y={80} textAnchor="middle" fontFamily={fonts.display} fontSize={40} fill={WAX.text}>
-              {p.roman}
+          {!compact && (
+            <SvgText fontFamily={fonts.displaySC} fontSize={stage ? 10 : 9} letterSpacing={stage ? 2 : 1.6} fill={WAX.text}>
+              <TextPath href={`#${ringId}`} startOffset={stage ? "4%" : "2%"}>
+                {stage ? p.ringText : `${p.name} · ${p.kmLabel} · ${p.dateLabel} ·`}
+              </TextPath>
             </SvgText>
           )}
+          {stage ? (
+            <>
+              <SvgText
+                x={66}
+                y={symbol ? (compact ? 72 : 70) : compact ? 84 : 80}
+                textAnchor="middle"
+                fontFamily={fonts.display}
+                fontSize={compact ? 50 : 36}
+                fill={WAX.text}
+              >
+                {p.roman}
+              </SvgText>
+              {/* Drobná kresba cíle etapy pod číslem (§ 6.3). */}
+              {symbol && <SymbolAt symbol={symbol} x={compact ? 48 : 52} y={compact ? 76 : 74} size={compact ? 36 : 28} color={WAX.text} strokeWidth={compact ? 2.4 : 1.8} />}
+            </>
+          ) : symbol ? (
+            <SymbolAt symbol={symbol} x={compact ? 30 : 36} y={compact ? 30 : 36} size={compact ? 72 : 60} color={WAX.text} strokeWidth={glyphStroke} />
+          ) : (
+            !p.photo && <Monogram name={p.name} color={WAX.text} compact={compact} />
+          )}
         </Svg>
-        {!stage && p.photo && (
+        {!stage && !symbol && p.photo && (
           <View
             pointerEvents="none"
             style={{
@@ -243,24 +303,65 @@ function Body(p: SealProps & { size: number }) {
           <Path id={ringId} d={ringPath(66, 66, 40)} />
         </Defs>
         <G fill="none" stroke={ink} opacity={0.92}>
-          <Circle cx={66} cy={66} r={54} strokeWidth={3.5} strokeDasharray={grungeDash(2 * Math.PI * 54, 4)} />
-          <Circle cx={66} cy={66} r={48} strokeWidth={1.2} strokeDasharray={grungeDash(2 * Math.PI * 48, 9)} />
-          <Circle cx={66} cy={66} r={30} strokeWidth={1.2} strokeDasharray={grungeDash(2 * Math.PI * 30, 15)} />
+          <Circle cx={66} cy={66} r={54} strokeWidth={compact ? 5 : 3.5} strokeDasharray={grungeDash(2 * Math.PI * 54, 4)} />
+          <Circle cx={66} cy={66} r={48} strokeWidth={compact ? 2 : 1.2} strokeDasharray={grungeDash(2 * Math.PI * 48, 9)} />
+          {!compact && <Circle cx={66} cy={66} r={31} strokeWidth={1.2} strokeDasharray={grungeDash(2 * Math.PI * 31, 15)} />}
         </G>
-        <SvgText fontFamily={fonts.displaySC} fontSize={11} letterSpacing={2} fill={ink} opacity={0.92}>
-          <TextPath href={`#${ringId}`} startOffset="3%">{`${p.name} · ${p.expeditionName} ·`}</TextPath>
-        </SvgText>
-        <SvgText x={66} y={66} textAnchor="middle" fontFamily={fonts.display} fontSize={17} fill={ink} opacity={0.92}>
-          {p.kmLabel}
-        </SvgText>
-        <SvgText x={66} y={80} textAnchor="middle" fontFamily={fonts.displaySC} fontSize={9} letterSpacing={1} fill={ink} opacity={0.92}>
-          {p.dateLabel}
-        </SvgText>
+        {compact ? (
+          symbol ? (
+            <SymbolAt symbol={symbol} x={32} y={32} size={68} color={ink} strokeWidth={glyphStroke} opacity={0.92} />
+          ) : (
+            <Monogram name={p.name} color={ink} compact />
+          )
+        ) : (
+          <>
+            <SvgText fontFamily={fonts.displaySC} fontSize={11} letterSpacing={2} fill={ink} opacity={0.92}>
+              <TextPath href={`#${ringId}`} startOffset="3%">{`${p.name} · ${p.expeditionName} ·`}</TextPath>
+            </SvgText>
+            {/* Symbol nahoře uprostřed, pod ním km a datum (navrh-v2 § 6.1). */}
+            {symbol ? (
+              <SymbolAt symbol={symbol} x={51} y={34} size={30} color={ink} strokeWidth={glyphStroke} opacity={0.92} />
+            ) : (
+              <SvgText x={66} y={62} textAnchor="middle" fontFamily={fonts.display} fontSize={22} fill={ink} opacity={0.92}>
+                {placeMonogram(p.name)}
+              </SvgText>
+            )}
+            <SvgText x={66} y={77} textAnchor="middle" fontFamily={fonts.display} fontSize={13} fill={ink} opacity={0.92}>
+              {p.kmLabel}
+            </SvgText>
+            <SvgText x={66} y={87} textAnchor="middle" fontFamily={fonts.displaySC} fontSize={7} letterSpacing={0.4} fill={ink} opacity={0.92}>
+              {p.dateLabel}
+            </SvgText>
+          </>
+        )}
       </Svg>
     );
   }
 
   if (p.kind === "locked") {
+    if (symbol) {
+      // Slepý obrys: stejný rámeček a symbol jako odemčené razítko, ale tužkou a vybledle (navrh-v2 § 6.1).
+      return (
+        <Svg {...svg}>
+          <Circle cx={66} cy={66} r={54} fill="none" stroke={colors.muted} strokeWidth={compact ? 3 : 1.6} strokeDasharray={compact ? "4 7" : "2 5"} strokeLinecap="round" />
+          <Circle cx={66} cy={66} r={48} fill="none" stroke={colors.line} strokeWidth={compact ? 1.6 : 1} />
+          <SymbolAt
+            symbol={symbol}
+            x={compact ? 32 : p.label ? 48 : 40}
+            y={compact ? 32 : p.label ? 34 : 40}
+            size={compact ? 68 : p.label ? 36 : 52}
+            color={colors.muted}
+            strokeWidth={glyphStroke}
+            opacity={0.6}
+          />
+          {p.label && !compact && (
+            <SvgText x={66} y={88} textAnchor="middle" fontFamily={fonts.bodySemi} fontSize={12} fill={colors.fg}>
+              {p.label}
+            </SvgText>
+          )}
+        </Svg>
+      );
+    }
     return (
       <Svg {...svg}>
         <Circle cx={66} cy={66} r={50} fill="none" stroke={colors.muted} strokeWidth={1.4} strokeDasharray="2 4" strokeLinecap="round" />
@@ -294,5 +395,17 @@ function Body(p: SealProps & { size: number }) {
         {`${p.done} z ${p.total}`}
       </SvgText>
     </Svg>
+  );
+}
+
+/** Záloha pro místo bez symbolu: monogram názvu uprostřed razítka. */
+function Monogram({ name, color, compact }: { name: string; color: string; compact: boolean }) {
+  const { fonts } = useTheme();
+  const mono = placeMonogram(name);
+  const fontSize = compact ? (mono.length > 2 ? 40 : 52) : mono.length > 2 ? 30 : 38;
+  return (
+    <SvgText x={66} y={66 + fontSize * 0.34} textAnchor="middle" fontFamily={fonts.display} fontSize={fontSize} fill={color}>
+      {mono}
+    </SvgText>
   );
 }

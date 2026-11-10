@@ -1,16 +1,18 @@
 /**
- * Kapitoly výpravy: stav (kolik míst, uzavřená), nejbližší kapitola na Domů, seznam míst kapitoly
+ * Kapitoly výpravy: stav (kolik míst, uzavřená), nejbližší kapitola v panelu Výpravy, seznam míst kapitoly
  * a krátké texty. Čisté funkce bez Reactu. Kapitoly zatím patří jen k aktuální výpravě (rozhodnutí 0026).
  */
 import { pluralPlaces } from "./format";
 
-/** Věta pod nadpisem kapitol na Domů a ve Sbírkách. */
+/** Věta pod nadpisem kapitol v panelu Výpravy a v Atlasu. */
 export const CHAPTERS_EXPLAINER = "Kapitoly spojují místa jedním příběhem. Posbírejte všechna a kapitola se uzavře pečetí.";
 
 export interface KChapter {
   id: string;
   title: string;
   titleGenitive?: string;
+  /** Téma atlasu (rozhodnutí 0031). */
+  themeId?: string;
   /** Id míst v pořadí trasy. */
   placeIds: readonly string[];
 }

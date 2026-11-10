@@ -8,11 +8,6 @@ type IconProps = { color: ColorValue };
 
 const stroke = { fill: "none", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
-const HomeIcon = ({ color }: IconProps) => (
-  <Svg width={24} height={24} viewBox="0 0 24 24">
-    <Path d="M4 11l8-7 8 7v9H4z" stroke={color} {...stroke} />
-  </Svg>
-);
 const MapIcon = ({ color }: IconProps) => (
   <Svg width={24} height={24} viewBox="0 0 24 24">
     <Path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z M9 4v14 M15 6v14" stroke={color} {...stroke} />
@@ -30,6 +25,10 @@ const BookIcon = ({ color }: IconProps) => (
   </Svg>
 );
 
+/** Výprava se otevírá jako první (rozhodnutí 0034); `/` a staré `/objevovat` přesměrují `app/index.tsx` a `app/objevovat.tsx`. */
+export const unstable_settings = { initialRouteName: "vyprava" };
+
+/** Tři záložky: Výprava, Atlas, Kronika (docs/navrh-v2.md § 3). */
 export default function TabLayout() {
   const { colors, fonts } = useTheme();
   const insets = useSafeAreaInsets();
@@ -51,9 +50,8 @@ export default function TabLayout() {
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Domů", tabBarIcon: HomeIcon }} />
       <Tabs.Screen name="vyprava" options={{ title: "Výprava", tabBarIcon: MapIcon }} />
-      <Tabs.Screen name="objevovat" options={{ title: "Objevovat", tabBarIcon: CompassIcon }} />
+      <Tabs.Screen name="atlas" options={{ title: "Atlas", tabBarIcon: CompassIcon }} />
       <Tabs.Screen name="kronika" options={{ title: "Kronika", tabBarIcon: BookIcon }} />
     </Tabs>
   );

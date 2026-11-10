@@ -6,6 +6,7 @@ import {
   type RoutePoint,
 } from "@footatlas/core";
 import expeditionJson from "@footatlas/content/data/vltavska-stezka/expedition.json";
+import { isPlaceSymbol, type PlaceSymbol } from "@footatlas/content/src/symbols";
 import obsahJson from "@footatlas/content/data/vltavska-stezka/obsah.json";
 import routeJson from "@footatlas/content/data/vltavska-stezka/route.json";
 
@@ -20,6 +21,8 @@ export interface AppPlace {
   atM: number;
   draft: boolean;
   photo?: string;
+  /** Kreslený symbol na razítku (navrh-v2 § 6.1); chybí-li, razítko ukáže monogram. */
+  symbol?: PlaceSymbol;
   /** Obsah z obsah.json (chybí u míst bez příběhu). */
   hook?: string;
   teaser?: string;
@@ -41,6 +44,8 @@ export interface AppChapter {
   /** Název ve 2. pádě („Mostů a lávek“); chybí-li, použije se `title`. */
   titleGenitive?: string;
   blurb: string;
+  /** Téma atlasu, do kterého kapitola patří (rozhodnutí 0031). */
+  themeId?: string;
   /** Úvod kapitoly, začátek příběhu. */
   intro?: string;
   /** Závěr po uzavření kapitoly. */
@@ -74,6 +79,7 @@ interface RawPlace {
   unlockAtM: number;
   draft?: boolean;
   photo?: string;
+  symbol?: string;
 }
 
 /** Štítky typů trasy (spec 5.4); shodují se s `routeTypeLabel` v balíčku content. */
@@ -107,10 +113,20 @@ function load(): LoadedExpedition {
       atM: p.unlockAtM,
       draft: p.draft === true,
       photo: p.photo,
+      // Neznámá hodnota se zahodí: razítko pak ukáže monogram, ne prázdný střed.
+      symbol: isPlaceSymbol(p.symbol) ? p.symbol : undefined,
     }))
     .sort((a, b) => a.atM - b.atM);
   const obsah = obsahJson as unknown as {
-    chapters: Array<{ id: string; title: string; titleGenitive?: string; blurb: string; intro?: string; outro?: string }>;
+    chapters: Array<{
+      id: string;
+      title: string;
+      titleGenitive?: string;
+      blurb: string;
+      themeId?: string;
+      intro?: string;
+      outro?: string;
+    }>;
     stories: Array<{
       id: string;
       hook: string;
@@ -137,6 +153,7 @@ function load(): LoadedExpedition {
     title: c.title,
     titleGenitive: c.titleGenitive,
     blurb: c.blurb,
+    themeId: c.themeId,
     intro: c.intro,
     outro: c.outro,
     placeIds: places.filter((p) => p.chapterId === c.id).map((p) => p.id),

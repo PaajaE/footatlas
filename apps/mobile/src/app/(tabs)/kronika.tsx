@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
-import { CollectionsView } from "../../components/kronika/CollectionsView";
+import { DiaryTiles } from "../../components/kronika/DiaryTiles";
 import { DiaryView } from "../../components/kronika/DiaryView";
 import { LifeHero } from "../../components/kronika/LifeHero";
 import { LifePathView } from "../../components/kronika/LifePathView";
@@ -17,12 +17,11 @@ import { useExpedition } from "../../state/ExpeditionProvider";
 import { loadLifeCardSeen, saveLifeCardSeen } from "../../state/storage";
 import { localDateKey } from "@footatlas/core";
 
-type Tab = "denik" | "cesta" | "rok" | "sbirky";
+type Tab = "denik" | "cesta" | "rok";
 const TABS = [
   { key: "denik", label: "Deník" },
   { key: "cesta", label: "Cesta" },
   { key: "rok", label: "Rok" },
-  { key: "sbirky", label: "Sbírky" },
 ] as const;
 
 const MONTHS_GEN = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
@@ -32,18 +31,24 @@ function sinceLabel(day: string): string {
 }
 
 /**
- * Kronika: zeměkoule s ušlou vzdáleností a přepínač Deník / Cesta / Rok / Sbírky (docs/design-prototyp.md).
- * Velká karta se zeměkoulí je jen na Deníku, jinde jeden řádek (rozhodnutí 0029).
+ * Kronika: zeměkoule s ušlou vzdáleností a přepínač Deník / Cesta / Rok (docs/design-prototyp.md).
+ * Velká karta se zeměkoulí je jen na Deníku, jinde jeden řádek (rozhodnutí 0029). Sbírky se přestěhovaly do Atlasu
+ * (rozhodnutí 0034); starý odkaz `?tab=sbirky` vede tam.
  */
 export default function Chronicle() {
   const router = useRouter();
   const { ready, stats, days, lastReadAt, sync, syncNow } = useChronicle();
   const { active, walkedM, state, events, daySlices, stepLength } = useExpedition();
-  // `?tab=sbirky` otevře rovnou Sbírky (odkaz „Všechny kapitoly“ na Domů). Parametr se po použití smaže,
-  // aby další klepnutí na odkaz přepnulo záložku znovu, i když mezitím uživatel vybral jinou.
+  // `?tab=cesta` / `?tab=rok` otevře rovnou danou část. Parametr se po použití smaže, aby další klepnutí na odkaz
+  // přepnulo znovu. Starý `?tab=sbirky` (Sbírky jsou teď v Atlasu) přesměruje do Atlasu.
   const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState<Tab>(TABS.some((t) => t.key === tabParam) ? (tabParam as Tab) : "denik");
   useEffect(() => {
+    if (tabParam === "sbirky") {
+      router.setParams({ tab: undefined });
+      router.navigate("/atlas");
+      return;
+    }
     if (!TABS.some((t) => t.key === tabParam)) return;
     setTab(tabParam as Tab);
     router.setParams({ tab: undefined });
@@ -119,6 +124,7 @@ export default function Chronicle() {
 
       {tab === "denik" && (
         <>
+          <DiaryTiles />
           {active ? (
             <DiaryView cards={cards} scaleM={walkedM} />
           ) : (
@@ -131,13 +137,6 @@ export default function Chronicle() {
       )}
       {tab === "cesta" && <LifePathView route={route} firstDay={stats.firstDay} />}
       {tab === "rok" && <YearView days={days} by={stats.byConfidence} stepLengthM={stepLength.meters} />}
-      {tab === "sbirky" && (
-        <CollectionsView
-          active={active}
-          walkedM={walkedM}
-          nextStop={state.toNextM !== null ? { remainingM: state.toNextM } : null}
-        />
-      )}
 
       {!empty && ready && (
         <View style={{ gap: 6 }}>

@@ -1,4 +1,4 @@
-/** Čistá logika Domů: čísla do dlaždic, odhad chůze, popisky dnů. Bez Reactu, aby šla testovat. */
+/** Čistá logika panelu Výpravy a Deníku: čísla do dlaždic, odhad chůze, popisky dnů. Bez Reactu, aby šla testovat. */
 
 export interface DailyDistance {
   /** Den YYYY-MM-DD (místní čas). */
@@ -95,32 +95,6 @@ export function formatWhen(day: string, todayKey: string): string {
 /** „2026-10-24“ → „24. 10. 2026“. */
 export function formatDayNumeric(day: string): string {
   return `${Number(day.slice(8, 10))}. ${Number(day.slice(5, 7))}. ${day.slice(0, 4)}`;
-}
-
-export type ReachChoice = number | "stage";
-
-/** Kurzívní hláška pod výpisem „Kam dnes dojdu?“. Texty z prototypu; bez shody žádná hláška. */
-export function reachQuip(choice: ReachChoice, placeNames: readonly string[]): string | undefined {
-  if (choice === "stage") return "Na konci etapy na vás čeká pohlednice.";
-  if (choice === 1000) return "Krátká procházka, dlouhá historie.";
-  if (choice === 2000) return "Akorát na odpoledne s výhledem.";
-  if (choice === 4000 && placeNames.some((n) => n.toLowerCase().startsWith("přívoz"))) return "Drobné na převozníka mít nemusíte.";
-  return undefined;
-}
-
-/**
- * Věta „Kam dnes dojdu?“, když v dosahu nic není. Je-li nejbližší místo zároveň další zastávkou,
- * kterou Domů ukazuje v kartě nad tím, věta ji neopakuje.
- */
-export function reachEmptyText(
-  label: string,
-  nearest: { id: string; name: string } | undefined,
-  nearestDistance: string,
-  nextStopId: string | undefined,
-): string {
-  if (!nearest) return `Za ${label} už nic nezbývá.`;
-  if (nearest.id === nextStopId) return `Za ${label} nic nového. Další místo je o kus dál, zkuste delší procházku.`;
-  return `Za ${label} nic nového. Nejbližší místo, ${nearest.name}, je za ${nearestDistance}.`;
 }
 
 /** „4 z 5“, „3 ze 6“: předložka „ze“ před číslovkami, které začínají souhláskovou skupinou (dvou, tří, čtyř, šesti, sedmi …). */

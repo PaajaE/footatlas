@@ -1,4 +1,4 @@
-/** Čistá logika hádanek u míst a dosahu „Kam dnes dojdu?“; bez Reactu, aby šla testovat. */
+/** Čistá logika hádanek u míst a míst v úseku trasy; bez Reactu, aby šla testovat. */
 
 export type Tip = 0 | 1 | 2;
 export type TipOutcome = "none" | "correct" | "wrong";

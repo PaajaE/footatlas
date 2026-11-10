@@ -22,6 +22,7 @@
       "lat": 50.0645,
       "lon": 14.418,
       "unlockAtM": 0,
+      "symbol": "hradiste",
       "text": "Skalní ostroh nad řekou, start výpravy.",
       "draft": true,
       "photo": "vysehrad"
@@ -33,6 +34,7 @@
       "lat": 50.0688,
       "lon": 14.415,
       "unlockAtM": 625,
+      "symbol": "vor",
       "text": "Bývalá celnice, kde se platilo za dřevo plavené po řece.",
       "draft": true
     },
@@ -43,6 +45,7 @@
       "lat": 50.0745,
       "lon": 14.4135,
       "unlockAtM": 1288,
+      "symbol": "vor",
       "text": "Náplavka, kde kdysi kotvily vory.",
       "draft": true
     },
@@ -53,6 +56,7 @@
       "lat": 50.0865,
       "lon": 14.4114,
       "unlockAtM": 2576,
+      "symbol": "most",
       "text": "Kamenný most ze 14. století.",
       "draft": true,
       "photo": "karluv-most"
@@ -64,6 +68,7 @@
       "lat": 50.096,
       "lon": 14.433,
       "unlockAtM": 4936,
+      "symbol": "ostrov",
       "text": "Ostrov, kde se kdysi štvala zvěř.",
       "draft": true
     },
@@ -74,6 +79,7 @@
       "lat": 50.105,
       "lon": 14.447,
       "unlockAtM": 6611,
+      "symbol": "pristav",
       "text": "Přístav z doby, kdy po Vltavě jezdily nákladní lodě.",
       "draft": true
     },
@@ -84,6 +90,7 @@
       "lat": 50.102,
       "lon": 14.461,
       "unlockAtM": 6611,
+      "symbol": "most",
       "text": "Kubistický most přes řeku a ostrov.",
       "draft": true
     },
@@ -94,6 +101,7 @@
       "lat": 50.1133,
       "lon": 14.4439,
       "unlockAtM": 7562,
+      "symbol": "zdymadlo",
       "text": "Lodě tu překonávají jez.",
       "draft": true
     },
@@ -104,6 +112,7 @@
       "lat": 50.113,
       "lon": 14.416,
       "unlockAtM": 9832,
+      "symbol": "ostrov",
       "text": "Největší pražský ostrov.",
       "draft": true
     },
@@ -114,6 +123,7 @@
       "lat": 50.116,
       "lon": 14.418,
       "unlockAtM": 9832,
+      "symbol": "lavka",
       "text": "Lávka mezi Trojou a Císařským ostrovem.",
       "draft": true
     },
@@ -124,6 +134,7 @@
       "lat": 50.1165,
       "lon": 14.4115,
       "unlockAtM": 10477,
+      "symbol": "zamek",
       "text": "Barokní letohrádek s francouzskou zahradou.",
       "draft": true,
       "photo": "troja"
@@ -135,6 +146,7 @@
       "lat": 50.124,
       "lon": 14.396,
       "unlockAtM": 12364,
+      "symbol": "skala",
       "text": "Skalní stěny nad řekou, oblíbené lezci.",
       "draft": true
     },
@@ -145,6 +157,7 @@
       "lat": 50.135,
       "lon": 14.3955,
       "unlockAtM": 13756,
+      "symbol": "privoz",
       "text": "Přívoz, který převáží přes řeku už staletí.",
       "draft": true
     },
@@ -155,6 +168,7 @@
       "lat": 50.158,
       "lon": 14.398,
       "unlockAtM": 16745,
+      "symbol": "zamek",
       "text": "Zámek s muzeem, konec první etapy.",
       "draft": true,
       "photo": "roztoky"
@@ -166,6 +180,7 @@
       "lat": 50.163,
       "lon": 14.377,
       "unlockAtM": 18940,
+      "symbol": "hradiste",
       "text": "Hradiště, kde podle tradice stál první kostel v Čechách.",
       "draft": true,
       "photo": "vltava-levy-hradec"
@@ -177,6 +192,7 @@
       "lat": 50.178,
       "lon": 14.36,
       "unlockAtM": 22474,
+      "symbol": "skala",
       "text": "Údolí se tu zužuje mezi skalami.",
       "draft": true
     },
@@ -187,6 +203,7 @@
       "lat": 50.175,
       "lon": 14.408,
       "unlockAtM": 24753,
+      "symbol": "hradiste",
       "text": "Pravěké hradiště na druhém břehu.",
       "draft": true
     },
@@ -197,6 +214,7 @@
       "lat": 50.174,
       "lon": 14.372,
       "unlockAtM": 24753,
+      "symbol": "obec",
       "text": "Obec na pravém břehu naproti skalám.",
       "draft": true
     },
@@ -207,6 +225,7 @@
       "lat": 50.199,
       "lon": 14.36,
       "unlockAtM": 26521,
+      "symbol": "obec",
       "text": "Obec v údolí Vltavy, poprvé zmíněná roku 993. Odtud se otevírá výhled na skalnaté svahy nad řekou.",
       "draft": true,
       "photo": "libcice"
@@ -218,6 +237,7 @@
       "lat": 50.213,
       "lon": 14.353,
       "unlockAtM": 28537,
+      "symbol": "privoz",
       "text": "Přívoz převáží chodce a kola na druhý břeh.",
       "draft": true
     },
@@ -228,6 +248,7 @@
       "lat": 50.229,
       "lon": 14.335,
       "unlockAtM": 31206,
+      "symbol": "obec",
       "text": "Vesnice na pravém břehu kousek před Kralupy.",
       "draft": true
     },
@@ -238,6 +259,7 @@
       "lat": 50.24,
       "lon": 14.311,
       "unlockAtM": 33726,
+      "symbol": "obec",
       "text": "Město na řece, konec druhé etapy.",
       "draft": true
     },
@@ -248,6 +270,7 @@
       "lat": 50.252,
       "lon": 14.306,
       "unlockAtM": 35408,
+      "symbol": "obec",
       "text": "Čtvrť Kralup nad Vltavou na pravém břehu řeky.",
       "draft": true
     },
@@ -258,6 +281,7 @@
       "lat": 50.262,
       "lon": 14.299,
       "unlockAtM": 36901,
+      "symbol": "zamek",
       "text": "Renesanční zámek nad řekou s psaníčkovými sgrafity.",
       "draft": true,
       "photo": "nelahozeves2"
@@ -269,6 +293,7 @@
       "lat": 50.264,
       "lon": 14.2985,
       "unlockAtM": 36901,
+      "symbol": "nota",
       "text": "Skladatel se tu narodil roku 1841.",
       "draft": true
     },
@@ -279,6 +304,7 @@
       "lat": 50.272,
       "lon": 14.326,
       "unlockAtM": 40241,
+      "symbol": "zamek",
       "text": "Barokní zámek v rozlehlém parku nad Vltavou.",
       "draft": true,
       "photo": "veltrusy"
@@ -290,6 +316,7 @@
       "lat": 50.281,
       "lon": 14.333,
       "unlockAtM": 41888,
+      "symbol": "mlyn",
       "text": "Romantická stavba v zámeckém parku.",
       "draft": true
     },
@@ -300,6 +327,7 @@
       "lat": 50.297,
       "lon": 14.3257,
       "unlockAtM": 45636,
+      "symbol": "vyhled",
       "text": "Na obzoru se poprvé ukáže hora Říp.",
       "draft": true
     },
@@ -310,6 +338,7 @@
       "lat": 50.3108,
       "lon": 14.3231,
       "unlockAtM": 47396,
+      "symbol": "obec",
       "text": "Vesnička na okraji říční nivy.",
       "draft": true
     },
@@ -320,6 +349,7 @@
       "lat": 50.3189,
       "lon": 14.3392,
       "unlockAtM": 48955,
+      "symbol": "obec",
       "text": "Ves na levém břehu, kam kdysi jezdili obrozenci.",
       "draft": true
     },
@@ -330,6 +360,7 @@
       "lat": 50.312,
       "lon": 14.365,
       "unlockAtM": 50559,
+      "symbol": "rakos",
       "text": "Staré koryto, kde se zastavila voda.",
       "draft": true
     },
@@ -340,6 +371,7 @@
       "lat": 50.322,
       "lon": 14.372,
       "unlockAtM": 51486,
+      "symbol": "zdymadlo",
       "text": "Kanál, který zkracuje plavbu k Labi. Konec třetí etapy.",
       "draft": true
     },
@@ -350,6 +382,7 @@
       "lat": 50.3147,
       "lon": 14.3925,
       "unlockAtM": 54713,
+      "symbol": "lavka",
       "text": "Zavěšená lávka na místě bývalého přívozu.",
       "draft": true
     },
@@ -360,6 +393,7 @@
       "lat": 50.32,
       "lon": 14.399,
       "unlockAtM": 54898,
+      "symbol": "obec",
       "text": "Obec s kostelem na terase nad nivou.",
       "draft": true
     },
@@ -370,6 +404,7 @@
       "lat": 50.318,
       "lon": 14.4423,
       "unlockAtM": 58138,
+      "symbol": "rakos",
       "text": "Tůně, kde se v létě drží žáby a vážky.",
       "draft": true
     },
@@ -380,6 +415,7 @@
       "lat": 50.3247,
       "lon": 14.4737,
       "unlockAtM": 59417,
+      "symbol": "vyhled",
       "text": "Na ostrohu se objeví zámek a kostel.",
       "draft": true
     },
@@ -390,6 +426,7 @@
       "lat": 50.3409,
       "lon": 14.4686,
       "unlockAtM": 60550,
+      "symbol": "zdymadlo",
       "text": "Historické dvoukomorové zdymadlo z roku 1905.",
       "draft": true
     },
@@ -400,6 +437,7 @@
       "lat": 50.3396,
       "lon": 14.4783,
       "unlockAtM": 60593,
+      "symbol": "zamek",
       "text": "Zámek s parkem kousek před soutokem.",
       "draft": true
     },
@@ -410,6 +448,7 @@
       "lat": 50.353,
       "lon": 14.472,
       "unlockAtM": 62254,
+      "symbol": "soutok",
       "text": "Vltava se tu vlévá do Labe. Cíl výpravy.",
       "draft": true,
       "photo": "melnik"

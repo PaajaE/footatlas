@@ -66,7 +66,7 @@ export default function ChapterScreen() {
         <T style={{ fontFamily: fonts.displayItalic, fontSize: 19, lineHeight: 27, color: colors.fg }}>{chapter.intro ?? chapter.blurb}</T>
 
         <Card style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 14 }}>
-          <ChapterSeal title={chapter.title} closed={status.closed} size={64} />
+          <ChapterSeal title={chapter.title} chapterId={chapter.id} closed={status.closed} size={64} />
           <View style={{ flex: 1, gap: 6 }}>
             <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 28, color: colors.fg }}>{`${zOf(status.done, status.total)} míst`}</T>
             <View style={{ height: 5, borderRadius: 3, backgroundColor: colors.line, overflow: "hidden" }}>
@@ -111,7 +111,7 @@ export default function ChapterScreen() {
                   photo ? (
                     <Medallion photo={photo} size={52} />
                   ) : (
-                    <Seal kind="stamp" size={52} name={p.name} expeditionName={vltavska.name} kmLabel={sealKm(p.atM)} dateLabel={entry.reachedDay ? formatDay(entry.reachedDay) : ""} />
+                    <Seal kind="stamp" size={52} placeId={p.id} name={p.name} expeditionName={vltavska.name} kmLabel={sealKm(p.atM)} dateLabel={entry.reachedDay ? formatDay(entry.reachedDay) : ""} />
                   )
                 ) : (
                   <Medallion size={52} locked />

@@ -2,7 +2,7 @@ import type { StyleProp, ViewStyle } from "react-native";
 import { useTheme } from "../theme/ThemeProvider";
 import { Card, T } from "./ui";
 
-/** Okrový popisek v IM Fell SC („Kam dnes dojdu?“, „Až tam jednou půjdete“). */
+/** Okrový popisek v IM Fell SC („Před vámi“, „Až tam jednou půjdete“). */
 export function SectionLabel({ children, size = 14 }: { children: React.ReactNode; size?: number }) {
   const { colors, fonts } = useTheme();
   return (

@@ -1,33 +1,34 @@
 import { localDateKey } from "@footatlas/core";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, Platform, Pressable, ScrollView, View } from "react-native";
+import { Animated, Easing, Platform, Pressable, ScrollView, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlightMap } from "../components/FlightMap";
+import { FlyLabel } from "../components/FlyLabel";
 import { HaltCard } from "../components/HaltCard";
 import { SectionLabel } from "../components/LabeledCard";
 import { Seal } from "../components/Seal";
+import { StageWax } from "../components/StageWax";
 import { useClock } from "../components/useClock";
 import { useReduceMotion } from "../components/useReduceMotion";
 import { Button, T } from "../components/ui";
 import { placePhoto } from "../data/photos";
-import { vltavska } from "../data/vltavska";
-import { formatDayLong, formatDistance } from "../format";
+import { vltavska, type AppPlace } from "../data/vltavska";
+import { formatDistance, shortPlaceName } from "../format";
 import { formatDayNumeric, pluralNewPlaces, tileDistance } from "../home";
 import {
+  activeFlyby,
   activeHalt,
-  counterM,
-  dayHeading,
-  easeInOut,
-  flightAt,
-  flightDurationMs,
-  holdZoomAt,
+  flightHeading,
+  flightStageIndex,
+  MAP_WAIT_MS,
   planStampsLanded,
-  returnHeading,
+  returnDateLine,
   returnPlan,
   returnRouteLabel,
   returnSource,
   sinceDay,
+  tipAt,
   type Halt,
 } from "../navrat";
 import { isFerry } from "../privoz";
@@ -39,13 +40,19 @@ import { useTheme } from "../theme/ThemeProvider";
 const MAP_FALLBACK_H = 420;
 /** Kolik rychlých razítek je za letu vidět najednou; starší se sečtou do „+N“. */
 const QUICK_SHOWN = 4;
+/**
+ * Souhrn zabere nejvýš 44 % výšky (dřív 40 %): na 412 × 915 bodů se tak bez posouvání vejde nadpis, řada razítek,
+ * pohlednice etapy, „Na obzoru“ s názvem na dva řádky a obě tlačítka i se spodním okrajem systémové lišty.
+ */
+const SHEET_SHARE = 0.44;
 
 /**
- * Návrat „Inkoust“ (M1, docs/prototyp-snimky/01-navrat-inkoust.jpg): kamera letí po úseku, který přibyl od posledně,
- * počítadlo roste a razítka dopadají za letem. U míst se let zastaví a zespodu vyjede karta místa (rozhodnutí 0025,
- * plán v `returnPlan`): klepnutí otevře detail (návrat pozastaví), „Dál“ zastavení přeskočí, „Přeskočit vše“ skočí na
- * souhrn. Úsek přichází v parametrech `from` a `to` (metry), protože „od posledně“ se po odchodu z Domů maže.
- * Při „Omezit pohyb“ kamera stojí nad celým úsekem a karty se jen prolnou.
+ * Přehrání cesty, nový let (rozhodnutí 0033, docs/navrh-v2.md § 8): úvodní záběr na celý úsek, ponoření, kreslí se
+ * čára (s inkoustovou tečkou na konci) a papír se kolem ní barví, místa za letu dostanou štítek nahoře (let nezastaví), u zastávek a konců etap
+ * se plynule zastaví a zespodu vyjede karta. Závěrečný záběr ukáže celý vybarvený úsek nad souhrnem (nejvýš 44 %
+ * výšky). Hodiny přehrání se pustí, až mapa dokreslí úvodní záběr (nejpozději po `MAP_WAIT_MS`). Klepnutí na štítek nebo kartu otevře místo (a přehrání pozastaví), „Dál“ zastavení přeskočí, „Přeskočit“
+ * skočí na závěrečný záběr. Úsek přichází v parametrech `from` a `to` (metry). Při „Omezit pohyb“ kamera neletí
+ * (úvodní i závěrečný záběr bez pohybu) a razítka i karty se jen prolnou.
  */
 export default function Return() {
   const { from, to, zdroj } = useLocalSearchParams<{ from?: string; to?: string; zdroj?: string }>();
@@ -62,34 +69,38 @@ export default function Return() {
   const deltaM = toM - fromM;
   const places = useMemo(() => placesWithin(vltavska.places, fromM, toM), [fromM, toM]);
   const stages = vltavska.plan.stages.filter((s) => s.endM > fromM && s.endM <= toM);
-  const duration = flightDurationMs(deltaM);
-  const plan = useMemo(() => returnPlan(places, vltavska.plan.stages, fromM, toM, duration), [places, fromM, toM, duration]);
-  const clock = useClock(plan.totalMs);
+  const { height: windowH } = useWindowDimensions();
+  const plan = useMemo(() => returnPlan(places, vltavska.plan.stages, fromM, toM), [places, fromM, toM]);
+  // Let začne, až mapa dokreslí úvodní záběr (ne nad prázdným papírem); pojistka MAP_WAIT_MS, aby se nikdy nezasekl.
+  const [mapReady, setMapReady] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setMapReady(true), MAP_WAIT_MS);
+    return () => clearTimeout(id);
+  }, []);
+  const onMapReady = useCallback(() => setMapReady(true), []);
+  const clock = useClock(plan.totalMs, false, !mapReady);
   const t = clock.elapsedMs;
-  // Čas letu stojí během zastavení; poloha, počítadlo i kamera z něj počítají ze stejných hodin.
-  const flightMs = flightAt(plan, t);
-  const flightDone = t >= plan.motionEndMs;
-  const walkedNow = fromM + easeInOut(flightMs / duration) * deltaM;
+  const tipM = tipAt(plan, t);
   const landed = new Set(planStampsLanded(plan, t));
   const quickIds = new Set(plan.stamps.map((s) => s.id));
   const quickLanded = places.filter((p) => quickIds.has(p.id) && landed.has(p.id));
   const halt = clock.finished ? undefined : activeHalt(plan, t);
-  // Přiblížení u místa po dvacetinách, aby kamera nedostávala nový pokyn v každém kroku hodin, když se nic nemění.
-  const holdZoom = Math.round(holdZoomAt(plan, t) * 20) / 20;
+  const flyby = clock.finished ? undefined : activeFlyby(plan, t);
+  const flyPlace = flyby ? vltavska.places.find((p) => p.id === flyby.flyby.placeId) : undefined;
+  /** Souhrn zabere nejvýš SHEET_SHARE výšky; závěrečný záběr nechá úsek nad ním. */
+  const sheetMaxH = Math.round(windowH * SHEET_SHARE);
 
   const today = localDateKey(new Date());
   const since = sinceDay(ex.daySlices, fromM);
-  const heading = returnSource(zdroj) === "kronika" ? dayHeading(since, today) : returnHeading(since, today);
+  // Nadpis se ukáže, až jsou data o dnech přečtená, a pak se už nemění (nepřeskočí z „Ten den“ na „2. 11.“).
+  const heldHeading = useRef<string | undefined>(undefined);
+  heldHeading.current ??= flightHeading(returnSource(zdroj), since, today, !ex.ready || ex.status.kind === "loading");
+  const heading = heldHeading.current;
+  const dateLine = returnDateLine(returnSource(zdroj), new Date());
   const routeLabel = returnRouteLabel(vltavska.places, fromM, toM);
-  const counter = tileDistance(counterM(deltaM, duration, flightMs));
-  const stageNo = vltavska.plan.stages.findIndex((s) => toM <= s.endM);
-  const frame = `Etapa ${toRoman((stageNo < 0 ? vltavska.plan.stages.length - 1 : stageNo) + 1)} · ${vltavska.name}`;
-  // Kamera si z plánu bere polohu dopředu a pohyb nechá na mapě (FlightMap, SEG_MS).
-  const cameraAt = useCallback(
-    (ms: number) => ({ m: fromM + easeInOut(flightAt(plan, ms) / duration) * deltaM, holdZoom: holdZoomAt(plan, ms) }),
-    [plan, fromM, deltaM, duration],
-  );
-
+  const counter = tileDistance(Math.max(0, tipM - fromM));
+  // Rámeček ukazuje etapu, ve které je konec čáry; po pečeti konce etapy se přepne na další.
+  const frame = `Etapa ${toRoman(flightStageIndex(plan, vltavska.plan.stages, t) + 1)} · ${vltavska.name}`;
   // Návrat z Domů se spotřebuje, až dojede do konce; přehrání dne z Kroniky ne (rozhodnutí 0024).
   useEffect(() => {
     if (clock.finished && returnSource(zdroj) === "domu") ex.markSeen(toM);
@@ -144,28 +155,35 @@ export default function Return() {
       }
     }, [clock.resume]), // eslint-disable-line react-hooks/exhaustive-deps
   );
+  const openFlyby = () => {
+    if (!flyPlace) return;
+    clock.pause();
+    pausedForDetail.current = true;
+    router.push({ pathname: "/zastavka/[id]", params: { id: flyPlace.id } });
+  };
   const nextHalt = () => {
     if (halt) clock.seek(halt.halt.arriveMs + halt.halt.holdMs);
   };
 
-  const km = (m: number) => sealKm(m);
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 6, gap: 2, backgroundColor: colors.bg }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          {/* Přehrání dne z Kroniky dnešní datum nemá: den říká nadpis pod ním. */}
           <T variant="small" style={{ fontSize: 13 }}>
-            {formatDayLong(new Date())}
+            {dateLine ?? ""}
           </T>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={clock.finished ? "Zavřít přehrávání" : "Přeskočit na konec"}
-            onPress={clock.finished ? () => router.back() : clock.skip}
+            accessibilityLabel={clock.finished ? "Zavřít přehrávání" : "Přeskočit na závěrečný záběr"}
+            onPress={clock.finished ? () => router.back() : t < plan.drawEndMs ? () => clock.seek(plan.drawEndMs) : clock.skip}
             style={{ minHeight: 44, minWidth: 44, justifyContent: "center", alignItems: "flex-end" }}
           >
             <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>{clock.finished ? "Zavřít" : "Přeskočit"}</T>
           </Pressable>
         </View>
-        <T style={{ fontFamily: fonts.displaySC, fontSize: 15, letterSpacing: 0.6, color: colors.ochre, marginTop: -8 }}>{heading}</T>
+        {/* Místo pro nadpis je vyhrazené i před přečtením dat, aby se záhlaví neposunulo. */}
+        <T style={{ fontFamily: fonts.displaySC, fontSize: 15, lineHeight: 20, letterSpacing: 0.6, color: colors.ochre, marginTop: -8 }}>{heading ?? " "}</T>
         <View
           style={{ flexDirection: "row", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}
           accessible
@@ -185,21 +203,30 @@ export default function Return() {
           route={vltavska.route}
           cumulative={vltavska.cumulative}
           places={vltavska.places}
-          fromM={fromM}
-          toM={toM}
-          walkedM={walkedNow}
-          durationMs={duration}
-          runKey={clock.runKey}
-          finished={flightDone}
-          holdZoom={holdZoom}
+          plan={plan}
           elapsedMs={t}
-          cameraAt={cameraAt}
+          runKey={clock.runKey}
           horizonM={next?.atM}
           reduceMotion={reduce}
           height={mapH}
+          bottomInset={sheetMaxH}
           frame={frame}
+          onReady={onMapReady}
         />
-        {/* Rychlá razítka (místa bez zastavení) dopadají za letem; po skončení je převezme spodní panel. Jen poslední
+        {/* Místo za letu: štítek nahoře, nejvýš čtvrtina výšky; let nezastaví. */}
+        {flyPlace && !shown && (
+          <View key={`fly-${flyby!.index}-${clock.runKey}`} style={{ position: "absolute", left: 12, right: 12, top: 12 }}>
+            <FlyLabel
+              place={flyPlace}
+              photo={placePhoto(flyPlace.photo)}
+              expeditionName={vltavska.name}
+              dateLabel={formatDayNumeric(today)}
+              maxHeight={Math.round(windowH * 0.25)}
+              onOpen={openFlyby}
+            />
+          </View>
+        )}
+        {/* Rychlá razítka (při mnoha místech) dopadají za letem; po skončení je převezme souhrn. Jen poslední
             QUICK_SHOWN v jedné řadě, starší jako „+N“, aby razítka nezakryla mapu. */}
         {!clock.finished && !shown && quickLanded.length > 0 && (
           <View pointerEvents="none" style={{ position: "absolute", left: 14, right: 14, bottom: 14, flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -208,32 +235,23 @@ export default function Return() {
                 <T style={{ fontFamily: fonts.bodySemi, fontSize: 13, color: colors.accent }}>{`+${quickLanded.length - QUICK_SHOWN}`}</T>
               </View>
             )}
-            {quickLanded
-              .slice(-QUICK_SHOWN)
-              .map((p) =>
-                p.kind === "stop" ? (
-                  <Seal key={p.id} kind="wax" size={48} animate name={p.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} photo={placePhoto(p.photo)} />
-                ) : (
-                  <Seal key={p.id} kind="stamp" size={48} animate name={p.name} expeditionName={vltavska.name} kmLabel={km(p.atM)} dateLabel={formatDayNumeric(today)} />
-                ),
-              )}
+            {quickLanded.slice(-QUICK_SHOWN).map((p) => (
+              <PlaceSeal key={p.id} place={p} size={48} animate today={today} />
+            ))}
           </View>
         )}
-        {/* Zastavení: razítko dopadne na místo na mapě (kamera na něm stojí uprostřed; web má jen statický náčrt). */}
-        {halt && !reduce && shownPlace && Platform.OS !== "web" && (
-          <View
-            key={`map-${haltKey}`}
-            pointerEvents="none"
-            style={{ position: "absolute", left: 0, right: 0, top: mapH / 2 - 30, alignItems: "center" }}
-          >
-            {shownPlace.kind === "stop" ? (
-              <Seal kind="wax" size={60} animate name={shownPlace.name} kmLabel={km(shownPlace.atM)} dateLabel={formatDayNumeric(today)} photo={placePhoto(shownPlace.photo)} />
+        {/* Zastavení: kamera stojí na místě (předstih je při stání nulový), razítko nebo pečeť etapy dopadne na mapu.
+            Web má jen statický náčrt. */}
+        {halt && !reduce && Platform.OS !== "web" && (shownPlace || shown?.stageIndex !== undefined) && (
+          <View key={`map-${haltKey}`} pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: mapH / 2 - 30, alignItems: "center" }}>
+            {shown?.stageIndex !== undefined ? (
+              <StageWax stageIndex={shown.stageIndex} place={shownPlace} photo={placePhoto(shownPlace?.photo)} dateLabel={formatDayNumeric(today)} size={60} animate />
             ) : (
-              <Seal kind="stamp" size={60} animate name={shownPlace.name} expeditionName={vltavska.name} kmLabel={km(shownPlace.atM)} dateLabel={formatDayNumeric(today)} />
+              <PlaceSeal place={shownPlace!} size={60} animate today={today} />
             )}
           </View>
         )}
-        {/* Karta místa vyjede zespodu (při „Omezit pohyb“ se jen prolne). */}
+        {/* Karta zastávky vyjede zespodu (při „Omezit pohyb“ se jen prolne). */}
         {shown && !clock.finished && (
           <Animated.View
             key={`card-${shown.arriveMs}-${clock.runKey}`}
@@ -243,7 +261,7 @@ export default function Return() {
               right: 12,
               bottom: Math.max(insets.bottom, 12),
               opacity: card,
-              transform: reduce ? [] : [{ translateY: card.interpolate({ inputRange: [0, 1], outputRange: [220, 0] }) }],
+              transform: reduce ? [] : [{ translateY: card.interpolate({ inputRange: [0, 1], outputRange: [200, 0] }) }],
             }}
           >
             <HaltCard
@@ -258,121 +276,152 @@ export default function Return() {
             />
           </Animated.View>
         )}
-      </View>
 
-      {clock.finished && (
-        <Animated.View
-          style={{
-            opacity: sheet,
-            transform: reduce ? [] : [{ translateY: sheet.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
-            maxHeight: "62%",
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: 26,
-            borderTopRightRadius: 26,
-            borderTopWidth: 1,
-            borderColor: colors.line,
-            shadowColor: "#2B2118",
-            shadowOpacity: 0.3,
-            shadowRadius: 3,
-            shadowOffset: { width: 0, height: -1 },
-            elevation: 6,
-          }}
-        >
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: Math.max(insets.bottom, 20), gap: 14 }} showsVerticalScrollIndicator={false}>
-            <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: colors.line }} />
-            {places.length > 0 || !next ? (
-              <View style={{ gap: 2 }}>
-                <SectionLabel size={15}>Cestou jste odemkli</SectionLabel>
-                <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
-              </View>
-            ) : (
-              // Bez nového místa: neříkat „nic“, ukázat, co je na obzoru.
-              <View style={{ gap: 4 }}>
-                <SectionLabel size={15}>Na obzoru</SectionLabel>
-                <T style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 40, color: colors.fg }}>{next.name}</T>
-                <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, color: colors.accent }}>
-                  {`ještě ${formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}`}
-                </T>
-                {(next.riddle?.question ?? next.teaser) && (
-                  <T style={{ fontFamily: fonts.displayItalic, fontSize: 17, lineHeight: 23, color: colors.fgSoft }}>{next.riddle?.question ?? next.teaser}</T>
-                )}
-              </View>
-            )}
-            {places.length > 0 && (
-              <View style={{ flexDirection: "row", flexWrap: "wrap", rowGap: 10 }}>
-                {places.slice(0, 10).map((p) => (
-                  <Pressable
-                    key={p.id}
-                    accessibilityRole="button"
-                    onPress={() => router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })}
-                    style={{ width: "50%", flexDirection: "row", alignItems: "center", gap: 10, minHeight: 32, paddingRight: 8 }}
-                  >
-                    <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.accent, backgroundColor: colors.accent + "22", alignItems: "center", justifyContent: "center" }}>
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent }} />
-                    </View>
-                    <T style={{ flex: 1, fontSize: 16, color: colors.fg }} numberOfLines={1}>
-                      {p.name}
-                    </T>
-                  </Pressable>
-                ))}
-                {places.length > 10 && (
-                  <T variant="small" style={{ fontSize: 14, width: "100%" }}>
-                    a {places.length - 10} dalších
-                  </T>
-                )}
-              </View>
-            )}
-            {stages.length > 0 && (
-              <View style={{ gap: 8 }}>
-                {stages.map((s) => (
-                  <Button
-                    key={s.index}
-                    kind="secondary"
-                    label={`Etapa ${toRoman(s.index + 1)} dokončena · pohlednice`}
-                    onPress={() => router.push({ pathname: "/pohlednice", params: { stage: String(s.index) } })}
-                  />
-                ))}
-              </View>
-            )}
-            {ferry && (
-              <Button kind="secondary" label={`${ferry.name}: převezli jste se`} onPress={() => router.push({ pathname: "/privoz", params: { id: ferry.id } })} />
-            )}
-            {next && places.length > 0 && (
-              <View style={{ borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 12, gap: 4 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
-                  <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 26, lineHeight: 30, color: colors.fg }}>{next.name}</T>
-                  <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>
-                    {formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}
-                  </T>
+        {/* Souhrn: nejvýš SHEET_SHARE výšky přes spodek mapy; nad ním je vidět celý vybarvený úsek se všemi razítky. */}
+        {clock.finished && (
+          <Animated.View
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              opacity: sheet,
+              transform: reduce ? [] : [{ translateY: sheet.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
+              maxHeight: sheetMaxH,
+              backgroundColor: colors.surface,
+              borderTopLeftRadius: 26,
+              borderTopRightRadius: 26,
+              borderTopWidth: 1,
+              borderColor: colors.line,
+              shadowColor: "#2B2118",
+              shadowOpacity: 0.3,
+              shadowRadius: 3,
+              shadowOffset: { width: 0, height: -1 },
+              elevation: 6,
+            }}
+          >
+            {/* Obsah se posouvá, „Na obzoru“ a tlačítka jsou pevně dole: vždy vidět bez posouvání. Obsah je zhuštěný,
+                aby se na běžný telefon vešel celý; když ne, posouvá se a končí na čáře nad pevnou částí (ne řezem přes
+                tlačítko uprostřed). */}
+            <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10, gap: 8 }} showsVerticalScrollIndicator={false}>
+              <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line }} />
+              {places.length > 0 || !next ? (
+                <View style={{ gap: 0 }}>
+                  <SectionLabel size={13}>Cestou jste odemkli</SectionLabel>
+                  <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 28, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
                 </View>
-                {(next.riddle?.question ?? next.teaser) && (
-                  <T style={{ fontFamily: fonts.displayItalic, fontSize: 17, lineHeight: 23, color: colors.fgSoft }}>{next.riddle?.question ?? next.teaser}</T>
-                )}
-              </View>
-            )}
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <View style={{ flex: 1 }}>
-                <Button
-                  kind="secondary"
-                  label="Přehrát znovu"
-                  onPress={() => {
-                    sheet.setValue(0);
-                    clock.restart();
-                  }}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                {storyIds.length > 0 ? (
-                  <Button label="Projít objevy" onPress={() => router.push({ pathname: "/objevy", params: { ids: storyIds.join(",") } })} />
-                ) : (
-                  <Button label="Hotovo" onPress={() => router.back()} />
-                )}
+              ) : (
+                // Bez nového místa: neříkat „nic“, ukázat, co je na obzoru.
+                <View style={{ gap: 4 }}>
+                  <SectionLabel size={14}>Na obzoru</SectionLabel>
+                  <T style={{ fontFamily: fonts.display, fontSize: 28, lineHeight: 32, color: colors.fg }}>{next.name}</T>
+                  <T style={{ fontFamily: fonts.bodySemi, fontSize: 15, color: colors.accent }}>
+                    {`ještě ${formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}`}
+                  </T>
+                  {(next.riddle?.question ?? next.teaser) && (
+                    <T style={{ fontFamily: fonts.displayItalic, fontSize: 16, lineHeight: 21, color: colors.fgSoft }}>{next.riddle?.question ?? next.teaser}</T>
+                  )}
+                </View>
+              )}
+              {places.length > 0 && (
+                // Místa jako řada malých razítek s názvem pod nimi (ne useknutý text ve dvou sloupcích).
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingRight: 8 }} style={{ marginHorizontal: -6 }}>
+                  {places.map((p) => (
+                    <Pressable
+                      key={p.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${p.kind === "stop" ? "Zastávka" : "Objev"} ${p.name}${p === ferry ? ", scéna převozu" : ""}`}
+                      // Přívoz: razítko otevře rovnou scénu převozu (dřív samostatné tlačítko „…: převezli jste se“).
+                      onPress={() =>
+                        p === ferry
+                          ? router.push({ pathname: "/privoz", params: { id: p.id } })
+                          : router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })
+                      }
+                      style={{ width: 72, alignItems: "center", gap: 2, paddingVertical: 2 }}
+                    >
+                      <PlaceSeal place={p} size={44} today={today} />
+                      <T style={{ fontSize: 12, lineHeight: 15, color: colors.fg, textAlign: "center" }} numberOfLines={2}>
+                        {shortPlaceName(p.name, 22)}
+                      </T>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              )}
+              {stages.length > 0 && (
+                <View style={{ gap: 8 }}>
+                  {stages.map((s) => (
+                    <Button
+                      key={s.index}
+                      compact
+                      kind="secondary"
+                      label={`Etapa ${toRoman(s.index + 1)} dokončena · pohlednice`}
+                      onPress={() => router.push({ pathname: "/pohlednice", params: { stage: String(s.index) } })}
+                    />
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+            <View
+              style={{
+                paddingHorizontal: 20,
+                paddingTop: 8,
+                paddingBottom: Math.max(insets.bottom, 12),
+                gap: 8,
+                borderTopWidth: 1,
+                borderTopColor: colors.line,
+              }}
+            >
+              {next && places.length > 0 && (
+                // Na obzoru nad tlačítky: popisek a vzdálenost na jednom řádku, celý název pod nimi (zalomí se, nezkracuje).
+                <View
+                  accessible
+                  accessibilityLabel={`Na obzoru ${next.name}, ${formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}`}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+                    <SectionLabel size={13}>Na obzoru</SectionLabel>
+                    <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 19, color: colors.accent }}>
+                      {formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}
+                    </T>
+                  </View>
+                  <T style={{ fontFamily: fonts.display, fontSize: 19, lineHeight: 23, color: colors.fg }}>{next.name}</T>
+                </View>
+              )}
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    compact
+                    kind="secondary"
+                    label="Přehrát znovu"
+                    onPress={() => {
+                      sheet.setValue(0);
+                      clock.restart();
+                    }}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  {storyIds.length > 0 ? (
+                    <Button compact label="Projít objevy" onPress={() => router.push({ pathname: "/objevy", params: { ids: storyIds.join(",") } })} />
+                  ) : (
+                    <Button compact label="Hotovo" onPress={() => router.back()} />
+                  )}
+                </View>
               </View>
             </View>
-          </ScrollView>
-        </Animated.View>
-      )}
+          </Animated.View>
+        )}
+      </View>
     </View>
+  );
+}
+
+/** Razítko místa: zastávka vosk (s fotkou), objev razítko. Symbol typu místa doplní `Seal` z balíku M. */
+function PlaceSeal({ place, size, animate = false, today }: { place: AppPlace; size: number; animate?: boolean; today: string }) {
+  const km = sealKm(place.atM);
+  const date = formatDayNumeric(today);
+  return place.kind === "stop" ? (
+    <Seal kind="wax" size={size} animate={animate} name={place.name} kmLabel={km} dateLabel={date} photo={placePhoto(place.photo)} />
+  ) : (
+    <Seal kind="stamp" size={size} animate={animate} name={place.name} expeditionName={vltavska.name} kmLabel={km} dateLabel={date} />
   );
 }
 
