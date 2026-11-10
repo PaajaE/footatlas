@@ -9,18 +9,22 @@ import {
   drawDurationMs,
   firstSentence,
   flightCamera,
+  flightStageIndex,
   flightWidthM,
   FLYBY_SLOW,
+  FLYBY_SLOW_MS,
   HOLD_STAGE_MS,
   HOLD_STOP_MS,
   INTRO_MS,
   LABEL_MS,
+  MAX_SCREENS_PER_S,
   OUTRO_MS,
   phaseAt,
   planStampsLanded,
   RETURN_MAX_MS,
   RETURN_TARGET_MAX_MS,
   RETURN_TARGET_MIN_MS,
+  returnDateLine,
   returnHeading,
   returnPlan,
   returnRouteLabel,
@@ -35,6 +39,8 @@ import {
   speedAt,
   stampsLanded,
   tipAt,
+  TRANSITION_HALT_MIN_MS,
+  TRANSITION_MIN_MS,
   zoomForWidth,
   type ReturnPlan,
 } from "./navrat";
@@ -104,6 +110,39 @@ describe("nadpis a úsek", () => {
     const total = cum.at(-1)!;
     const b = sectionBounds(route, cum, 0, total);
     expect(b).toEqual([14, 50, 14.1, 50.2]);
+  });
+});
+
+describe("záhlaví a rámeček přehrání (balík O)", () => {
+  it("dnešní datum jen u návratu z Domů, ne u přehrání dne z Kroniky", () => {
+    const monday = new Date(2026, 10, 9);
+    expect(returnDateLine("domu", monday)).toBe("Pondělí 9. listopadu");
+    expect(returnDateLine("kronika", monday)).toBeUndefined();
+    expect(returnDateLine(returnSource(undefined), monday)).toBe("Pondělí 9. listopadu");
+    expect(returnDateLine(returnSource("kronika"), monday)).toBeUndefined();
+  });
+
+  it("rámeček etapy sleduje hrot pera a přepne se až po pečeti konce etapy", () => {
+    const places = vltavska.places.map((p) => ({ id: p.id, kind: p.kind, atM: p.atM }));
+    const stages = vltavska.plan.stages;
+    const plan = returnPlan(places, stages, 11_000, 20_000);
+    const seal = plan.halts.find((h) => h.stageIndex === 0)!;
+    expect(seal.placeId).toBe("roztoky");
+    expect(flightStageIndex(plan, stages, 0)).toBe(0);
+    expect(flightStageIndex(plan, stages, seal.arriveMs - 100)).toBe(0);
+    // Pero stojí na konci etapy I a pečeť dopadá: pořád etapa I.
+    expect(flightStageIndex(plan, stages, seal.arriveMs + 10)).toBe(0);
+    expect(flightStageIndex(plan, stages, seal.arriveMs + seal.holdMs - 10)).toBe(0);
+    // Po rozjezdu etapa II, i v souhrnu.
+    expect(flightStageIndex(plan, stages, seal.arriveMs + seal.holdMs + 200)).toBe(1);
+    expect(flightStageIndex(plan, stages, plan.totalMs + 1000)).toBe(1);
+    // Úsek končící přesně na konci etapy: do konce stání etapa I.
+    const toEnd = returnPlan(places, stages, 11_000, 16_745);
+    const last = toEnd.halts[toEnd.halts.length - 1]!;
+    expect(flightStageIndex(toEnd, stages, last.arriveMs + 100)).toBe(0);
+    // Za koncem výpravy zůstane poslední etapa.
+    const whole = returnPlan(places, stages, 60_000, vltavska.totalM);
+    expect(flightStageIndex(whole, stages, whole.totalMs + 1)).toBe(stages.length - 1);
   });
 });
 
@@ -235,6 +274,60 @@ function maxJump(plan: ReturnPlan): number {
   for (let i = 1; i < v.length; i++) max = Math.max(max, Math.abs(v[i]! - v[i - 1]!));
   return max;
 }
+/** Doba pohybu (ms): kreslení bez stání zastávek a konců etap. */
+function movingMs(plan: ReturnPlan): number {
+  return plan.drawEndMs - plan.drawStartMs - plan.halts.reduce((sum, h) => sum + h.holdMs, 0);
+}
+
+type AnchorKind = "start" | "halt" | "flyby" | "end";
+interface Transition {
+  from: AnchorKind;
+  to: AnchorKind;
+  ms: number;
+  fromMps: number;
+  peakMps: number;
+}
+/**
+ * Přechody mezi kotvami podle úseků plánu: kotva je stání (v = 0) nebo pomalý průlet (v = čtvrtina cestovní,
+ * aspoň FLYBY_SLOW_MS), přechod je souvislá řada ostatních úseků mezi nimi.
+ */
+function transitions(plan: ReturnPlan): Transition[] {
+  const slow = FLYBY_SLOW * plan.cruiseMps;
+  const eps = 1e-6 * plan.cruiseMps;
+  const bodyKind = (s: ReturnPlan["segments"][number]): AnchorKind | undefined =>
+    Math.abs(s.v0 - s.v1) > eps
+      ? undefined
+      : s.v0 <= eps
+        ? "halt"
+        : Math.abs(s.v0 - slow) <= eps && s.t1 - s.t0 >= FLYBY_SLOW_MS - 1
+          ? "flyby"
+          : undefined;
+  const out: Transition[] = [];
+  let from: AnchorKind = "start";
+  let run: ReturnPlan["segments"] = [];
+  const close = (to: AnchorKind) => {
+    if (run.length) {
+      out.push({
+        from,
+        to,
+        ms: run[run.length - 1]!.t1 - run[0]!.t0,
+        fromMps: run[0]!.v0,
+        peakMps: Math.max(...run.map((s) => Math.max(s.v0, s.v1))),
+      });
+    }
+    run = [];
+  };
+  for (const s of plan.segments) {
+    const k = bodyKind(s);
+    if (k) {
+      close(k);
+      from = k;
+    } else run.push(s);
+  }
+  close("end");
+  return out;
+}
+
 /** Rychlost se mezi snímky smí změnit nejvýš o 5 % cestovní (kosinová rampa 0,6 s dělá nejvýš ~3,1 %). */
 const MAX_JUMP = 0.05;
 
@@ -367,7 +460,7 @@ describe("nový let: střih a spojitá rychlost (rozhodnutí 0033)", () => {
     expect(stampsLanded(plan.stamps, 0)).toEqual([]);
   });
 
-  it("běžný denní úsek (10–25 km, pár míst) trvá 20–25 s", () => {
+  it("běžný denní úsek (10–25 km, pár míst) trvá 20–25 s a stání se k tomu přičte", () => {
     const cases = [
       returnPlan([], [], 0, 23_400),
       returnPlan([disc("a", 4000), stop("b", 11_000)], [], 0, 15_000),
@@ -375,8 +468,10 @@ describe("nový let: střih a spojitá rychlost (rozhodnutí 0033)", () => {
       returnPlan([disc("a", 3000), disc("b", 9000)], [{ index: 0, endM: 18_000 }], 0, 18_000),
     ];
     for (const plan of cases) {
-      expect(returnTotalMs(plan)).toBeGreaterThanOrEqual(RETURN_TARGET_MIN_MS);
-      expect(returnTotalMs(plan)).toBeLessThanOrEqual(RETURN_TARGET_MAX_MS);
+      const held = plan.halts.reduce((sum, h) => sum + h.holdMs, 0);
+      expect(returnTotalMs(plan) - held).toBeGreaterThanOrEqual(RETURN_TARGET_MIN_MS);
+      expect(returnTotalMs(plan) - held).toBeLessThanOrEqual(RETURN_TARGET_MAX_MS);
+      expect(movingMs(plan)).toBeGreaterThanOrEqual(0.9 * drawDurationMs(plan.toM - plan.fromM));
       expect(maxJump(plan)).toBeLessThan(MAX_JUMP);
     }
   });
@@ -406,6 +501,76 @@ describe("nový let: střih a spojitá rychlost (rozhodnutí 0033)", () => {
         expect(tipAt(plan, plan.drawEndMs)).toBe(to);
       }
     }
+  });
+
+  it("místa za letu: sloučená pomalá zóna trvá nejvýš 2 × FLYBY_SLOW_MS, další místo už nezpomalí", () => {
+    // Tři objevy po 150 m: první dva se slijí, třetí by zónu protáhl přes 2,4 s.
+    const plan = returnPlan([disc("a", 9000), disc("b", 9150), disc("c", 9300), disc("d", 9450)], [], 0, 20_000);
+    const slow = FLYBY_SLOW * plan.cruiseMps;
+    const zones = plan.segments.filter((s) => s.v0 === s.v1 && Math.abs(s.v0 - slow) < 1e-6 * plan.cruiseMps);
+    for (const z of zones) expect(z.t1 - z.t0).toBeLessThanOrEqual(2 * FLYBY_SLOW_MS + 1);
+    expect(plan.flybys.some((f) => !f.slowed)).toBe(true);
+    expect(plan.flybys[0]!.slowed).toBe(true);
+    expect(maxJump(plan)).toBeLessThan(MAX_JUMP);
+  });
+
+  it("krátký přechod nezrychlí do sprintu: u zastávky trvá aspoň 2,5 s, mezi místy aspoň 1,5 s", () => {
+    // Dvě zastávky 400 m od sebe uprostřed dlouhého úseku: dřív rampa 0,8 s nahoru a hned dolů.
+    const plan = returnPlan([stop("a", 10_000), stop("b", 10_400)], [], 0, 20_000);
+    const [a, b] = plan.halts;
+    expect(b!.arriveMs - (a!.arriveMs + a!.holdMs)).toBeGreaterThanOrEqual(TRANSITION_HALT_MIN_MS - 1);
+    for (const tr of transitions(plan)) {
+      expect(tr.peakMps).toBeLessThanOrEqual(plan.cruiseMps * (1 + 1e-9));
+      if (tr.from === "halt" || tr.to === "halt") expect(tr.ms).toBeGreaterThanOrEqual(TRANSITION_HALT_MIN_MS - 1);
+    }
+    expect(maxJump(plan)).toBeLessThan(MAX_JUMP);
+  });
+
+  it("úsek 11 → 20 km Vltavské stezky (měření z telefonu): bez sprintu, pohyb má vlastní rozpočet", () => {
+    const places = vltavska.places.map((p) => ({ id: p.id, kind: p.kind, atM: p.atM }));
+    const plan = returnPlan(places, vltavska.plan.stages, 11_000, 20_000);
+    expect(plan.halts.map((h) => h.placeId)).toEqual(["roztoky", "levy-hradec"]);
+    expect(plan.flybys.map((f) => f.placeId)).toEqual(["sedlec", "podmorani"]);
+    // Cestovní rychlost ≤ strop v šířkách záběru a nikde rychleji než cestovní.
+    expect(plan.cruiseMps).toBeLessThanOrEqual(MAX_SCREENS_PER_S * plan.widthM);
+    for (let t = 0; t <= plan.totalMs; t += 16) expect(speedAt(plan, t)).toBeLessThanOrEqual(plan.cruiseMps * (1 + 1e-9));
+    // Roztoky → Levý Hradec není skok.
+    const [roztoky, hradec] = plan.halts;
+    expect(hradec!.arriveMs - (roztoky!.arriveMs + roztoky!.holdMs)).toBeGreaterThanOrEqual(2500);
+    // Pohyb (bez stání) má aspoň 90 % svého rozpočtu; stání ho nezkracuje.
+    expect(movingMs(plan)).toBeGreaterThanOrEqual(0.9 * drawDurationMs(9000));
+    expect(returnTotalMs(plan)).toBeLessThanOrEqual(RETURN_MAX_MS);
+    // Sloučená zóna z měření (2,9 s) se nevrátí.
+    const slow = FLYBY_SLOW * plan.cruiseMps;
+    for (const s of plan.segments) {
+      if (s.v0 === s.v1 && Math.abs(s.v0 - slow) < 1e-6 * plan.cruiseMps) expect(s.t1 - s.t0).toBeLessThanOrEqual(2 * FLYBY_SLOW_MS + 1);
+    }
+    expect(maxJump(plan)).toBeLessThan(MAX_JUMP);
+  });
+
+  it("nejhorší sprint: na žádném denním úseku Vltavské stezky", () => {
+    const places = vltavska.places.map((p) => ({ id: p.id, kind: p.kind, atM: p.atM }));
+    let worstShortRatio = 0;
+    let shortestHaltMs = Infinity;
+    for (let from = 0; from + 5000 <= vltavska.totalM; from += 3700) {
+      for (const len of [3000, 9000, 16_000]) {
+        const to = Math.min(vltavska.totalM, from + len);
+        const plan = returnPlan(places, vltavska.plan.stages, from, to);
+        expect(returnTotalMs(plan)).toBeLessThanOrEqual(RETURN_MAX_MS);
+        // Pohyb má vlastní rozpočet a strop rychlosti; obojí smí ustoupit jen stropu 40 s.
+        if (returnTotalMs(plan) < RETURN_MAX_MS - 100) {
+          expect(plan.cruiseMps).toBeLessThanOrEqual(MAX_SCREENS_PER_S * plan.widthM);
+          expect(movingMs(plan)).toBeGreaterThanOrEqual(0.9 * drawDurationMs(to - from));
+        }
+        for (const tr of transitions(plan)) {
+          expect(tr.peakMps).toBeLessThanOrEqual(plan.cruiseMps * (1 + 1e-9));
+          if (tr.from === "halt" || tr.to === "halt") shortestHaltMs = Math.min(shortestHaltMs, tr.ms);
+          if (tr.ms < TRANSITION_MIN_MS - 1) worstShortRatio = Math.max(worstShortRatio, tr.fromMps > 0 ? tr.peakMps / tr.fromMps : Infinity);
+        }
+      }
+    }
+    expect(shortestHaltMs).toBeGreaterThanOrEqual(TRANSITION_HALT_MIN_MS - 1);
+    expect(worstShortRatio).toBeLessThanOrEqual(2.5);
   });
 
   it("bez postupu se nekreslí", () => {

@@ -14,13 +14,15 @@ import { useReduceMotion } from "../components/useReduceMotion";
 import { Button, T } from "../components/ui";
 import { placePhoto } from "../data/photos";
 import { vltavska, type AppPlace } from "../data/vltavska";
-import { formatDayLong, formatDistance, shortPlaceName } from "../format";
+import { formatDistance, shortPlaceName } from "../format";
 import { formatDayNumeric, pluralNewPlaces, tileDistance } from "../home";
 import {
   activeFlyby,
   activeHalt,
   dayHeading,
+  flightStageIndex,
   planStampsLanded,
+  returnDateLine,
   returnHeading,
   returnPlan,
   returnRouteLabel,
@@ -79,10 +81,11 @@ export default function Return() {
   const today = localDateKey(new Date());
   const since = sinceDay(ex.daySlices, fromM);
   const heading = returnSource(zdroj) === "kronika" ? dayHeading(since, today) : returnHeading(since, today);
+  const dateLine = returnDateLine(returnSource(zdroj), new Date());
   const routeLabel = returnRouteLabel(vltavska.places, fromM, toM);
   const counter = tileDistance(Math.max(0, tipM - fromM));
-  const stageNo = vltavska.plan.stages.findIndex((s) => toM <= s.endM);
-  const frame = `Etapa ${toRoman((stageNo < 0 ? vltavska.plan.stages.length - 1 : stageNo) + 1)} · ${vltavska.name}`;
+  // Rámeček ukazuje etapu, ve které je hrot pera; po pečeti konce etapy se přepne na další.
+  const frame = `Etapa ${toRoman(flightStageIndex(plan, vltavska.plan.stages, t) + 1)} · ${vltavska.name}`;
   // Návrat z Domů se spotřebuje, až dojede do konce; přehrání dne z Kroniky ne (rozhodnutí 0024).
   useEffect(() => {
     if (clock.finished && returnSource(zdroj) === "domu") ex.markSeen(toM);
@@ -151,8 +154,9 @@ export default function Return() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 6, gap: 2, backgroundColor: colors.bg }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          {/* Přehrání dne z Kroniky dnešní datum nemá: den říká nadpis pod ním. */}
           <T variant="small" style={{ fontSize: 13 }}>
-            {formatDayLong(new Date())}
+            {dateLine ?? ""}
           </T>
           <Pressable
             accessibilityRole="button"
@@ -279,7 +283,8 @@ export default function Return() {
               elevation: 6,
             }}
           >
-            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: Math.max(insets.bottom, 16), gap: 12 }} showsVerticalScrollIndicator={false}>
+            {/* Obsah se posouvá, „Na obzoru“ a tlačítka jsou pevně dole: vždy vidět bez posouvání. */}
+            <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4, gap: 12 }} showsVerticalScrollIndicator={false}>
               <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: colors.line }} />
               {places.length > 0 || !next ? (
                 <View style={{ gap: 0 }}>
@@ -306,8 +311,13 @@ export default function Return() {
                     <Pressable
                       key={p.id}
                       accessibilityRole="button"
-                      accessibilityLabel={`${p.kind === "stop" ? "Zastávka" : "Objev"} ${p.name}`}
-                      onPress={() => router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })}
+                      accessibilityLabel={`${p.kind === "stop" ? "Zastávka" : "Objev"} ${p.name}${p === ferry ? ", scéna převozu" : ""}`}
+                      // Přívoz: razítko otevře rovnou scénu převozu (dřív samostatné tlačítko „…: převezli jste se“).
+                      onPress={() =>
+                        p === ferry
+                          ? router.push({ pathname: "/privoz", params: { id: p.id } })
+                          : router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })
+                      }
                       style={{ width: 76, alignItems: "center", gap: 2, paddingVertical: 2 }}
                     >
                       <PlaceSeal place={p} size={52} today={today} />
@@ -330,18 +340,22 @@ export default function Return() {
                   ))}
                 </View>
               )}
-              {ferry && (
-                <Button kind="secondary" label={`${ferry.name}: převezli jste se`} onPress={() => router.push({ pathname: "/privoz", params: { id: ferry.id } })} />
-              )}
+            </ScrollView>
+            <View style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 16), gap: 10 }}>
               {next && places.length > 0 && (
-                <View style={{ borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 10, gap: 2 }}>
+                // Na obzoru jako jeden řádek nad tlačítky.
+                <View
+                  accessible
+                  accessibilityLabel={`Na obzoru ${next.name}, ${formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}`}
+                  style={{ flexDirection: "row", alignItems: "baseline", gap: 8, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 8 }}
+                >
                   <SectionLabel size={13}>Na obzoru</SectionLabel>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
-                    <T style={{ flex: 1, fontFamily: fonts.display, fontSize: 22, lineHeight: 26, color: colors.fg }}>{next.name}</T>
-                    <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>
-                      {formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}
-                    </T>
-                  </View>
+                  <T numberOfLines={1} style={{ flex: 1, fontFamily: fonts.display, fontSize: 19, lineHeight: 23, color: colors.fg }}>
+                    {next.name}
+                  </T>
+                  <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>
+                    {formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}
+                  </T>
                 </View>
               )}
               <View style={{ flexDirection: "row", gap: 12 }}>
@@ -363,7 +377,7 @@ export default function Return() {
                   )}
                 </View>
               </View>
-            </ScrollView>
+            </View>
           </Animated.View>
         )}
       </View>

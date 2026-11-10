@@ -4,6 +4,7 @@
  * Bez Reactu a MapLibre, aby šla testovat (rozhodnutí 0022).
  */
 import { positionAt, type RoutePoint } from "@footatlas/core";
+import { formatDayLong } from "./format";
 import { MIN_STAMP_GAP_MS } from "./seal";
 
 /** Od kolika metrů nového postupu se nabízí návrat (nebo dřív, když přibylo místo či etapa). */
@@ -66,15 +67,27 @@ export function dayReplayParams(d: { fromM: number; toM: number }): { from: stri
 export const INTRO_MS = 2000;
 export const DIVE_MS = 1000;
 export const OUTRO_MS = 1500;
-/** Kreslení trvá 8 až 20 s podle délky úseku (bez míst); místa a zastavení se vejdou do toho, pokud to jde. */
+/**
+ * Pohyb pera (kreslení bez stání) trvá 8 až 20 s podle délky úseku. Stání zastávek a konců etap se k tomu PŘIČÍTÁ
+ * (balík O): dřív se vešlo do stejného rozpočtu a pohyb mezi nimi se zkracoval do sprintu.
+ */
 export const DRAW_MIN_MS = 8000;
 export const DRAW_MAX_MS = 20_000;
 const DRAW_SHORT_UNTIL_M = 1000;
 const DRAW_FULL_AT_M = 15_000;
-/** Pohyb (bez stání) zabere aspoň tuto část cílové doby kreslení, aby se kvůli zastavením neletělo moc rychle. */
-const MOVING_MIN_SHARE = 0.6;
-/** … a nikdy méně než tolik (i při mnoha koncích etap). */
-const MOVING_MIN_MS = 6000;
+/**
+ * Strop cestovní rychlosti v šířkách záběru za sekundu. Záběr je jen 2–3 km široký; při 0,8 šířky za sekundu
+ * projede krajina obrazovkou zhruba za 1,25 s, což oko ještě čte (3,2 km/s z měření byla víc než celá obrazovka
+ * za sekundu a mapa se slila). Ustoupí jen stropu 40 s, a to až když nepomůže změnit zastávky na místa za letu.
+ */
+export const MAX_SCREENS_PER_S = 0.8;
+/**
+ * Nejkratší přechod mezi dvěma kotvami (start, místo za letu, cíl). Kratší přechod se nezrychlí na špičku,
+ * ale protáhne se na tuto dobu se sníženou špičkou (jeden plynulý „hrb“), viz `transition`.
+ */
+export const TRANSITION_MIN_MS = 1500;
+/** Nejkratší přechod, který začíná nebo končí zastavením (zastávka, konec etapy). */
+export const TRANSITION_HALT_MIN_MS = 2500;
 /** Zastávka a konec etapy: plné zastavení, dojezd i rozjezd 0,8 s. */
 export const HOLD_STOP_MS = 3500;
 export const HOLD_STAGE_MS = 5000;
@@ -86,7 +99,7 @@ export const FLYBY_SLOW_MS = 1200;
 export const LABEL_MS = 2500;
 /** Od kolika míst v úseku dostanou objevy jen rychlé razítko (bez zpomalení a štítku). */
 export const QUICK_FROM_PLACES = 6;
-/** Cíl celého přehrání 20–25 s pro běžný denní úsek, nikdy přes 40 s. */
+/** Cíl celého přehrání 20–25 s pro běžný denní úsek bez zastavení (stání se přičte), nikdy přes 40 s. */
 export const RETURN_TARGET_MIN_MS = 20_000;
 export const RETURN_TARGET_MAX_MS = 25_000;
 export const RETURN_MAX_MS = 40_000;
@@ -222,6 +235,57 @@ function segAt(s: Segment, x: number): { m: number; v: number } {
   };
 }
 
+/**
+ * Přechod mezi dvěma kotvami: ujet `G` metrů z rychlosti `va` do `vb` (kosinové rampy, rychlost i zrychlení navazují)
+ * se špičkou nejvýš `V`. Vrací posloupnost ramp a rovinek jako [doba s, v0, v1].
+ *
+ * Pravidlo proti sprintu (balík O): přechod nikdy netrvá kratší dobu než `minS`. Když by běžný tvar (rampy
+ * `Ta` a `Tb`, mezi nimi cestovní rychlost) byl kratší, NEzvyšuje se špička, ale protáhnou se rampy:
+ *  - je-li cesta delší, než stihne jeden hrb se špičkou `V` za `minS`, rampy se protáhnou a rovinka zkrátí tak,
+ *    aby přechod trval přesně `minS` (špička zůstane `V`);
+ *  - jinak je přechod jeden hrb délky `minS` se špičkou nižší než `V` (čím kratší cesta, tím nižší);
+ *  - když by i ta špička klesla pod rychlost kotvy (velmi krátká mezera), jede se rychlostí pomalejší kotvy
+ *    a přechod je kratší (rychlost se tu ale nezvedá nad rychlost kotev).
+ * Doba přechodu tak s rostoucí `V` nikdy neroste (půlení intervalu v `solveCruise` zůstane správné) a všechny tři
+ * tvary na sebe navazují bez skoku.
+ */
+function transition(G: number, va: number, vb: number, V: number, Ta: number, Tb: number, minS: number): Array<[number, number, number]> {
+  const Rb = Ta + Tb;
+  const fa = Ta / Rb;
+  const fb = Tb / Rb;
+  const w = fa * va + fb * vb;
+  const Tmin = Math.max(minS, Rb);
+  const full = (Rb * (w + V)) / 2;
+  if (G >= full && Rb + (G - full) / V >= Tmin) {
+    return [
+      [Ta, va, V],
+      [(G - full) / V, V, V],
+      [Tb, V, vb],
+    ];
+  }
+  if (G >= (Tmin * (w + V)) / 2) {
+    const R = (2 * (V * Tmin - G)) / (V - w);
+    return [
+      [fa * R, va, V],
+      [Tmin - R, V, V],
+      [fb * R, V, vb],
+    ];
+  }
+  const u = (2 * G) / Tmin - w;
+  if (u >= Math.max(va, vb) * (1 - 1e-9)) {
+    return [
+      [fa * Tmin, va, u],
+      [fb * Tmin, u, vb],
+    ];
+  }
+  const top = Math.max(va, vb);
+  const T = w + top > 0 ? (2 * G) / (w + top) : 0;
+  return [
+    [fa * T, va, top],
+    [fb * T, top, vb],
+  ];
+}
+
 /** Sestaví úseky kreslení pro cestovní rychlost `V` (m/s). Vrací i zastavení a místa za letu (časy od 0). */
 function buildDraw(items: readonly Item[], fromM: number, toM: number, V: number) {
   if (!(toM > fromM) || !(V > 0)) return { segments: [] as Segment[], halts: [] as Halt[], flybys: [] as Flyby[], drawMs: 0 };
@@ -235,30 +299,38 @@ function buildDraw(items: readonly Item[], fromM: number, toM: number, V: number
   }
   const last = zeros[zeros.length - 1]!;
   if (!(last.halt && toM - last.m0 < SAME_POINT_M)) zeros.push({ m0: toM, m1: toM, v: 0, rampS: HALT_RAMP_MS / 1000, holdMs: 0, flybys: [] });
+  const minS = (a: Anchor, b: Anchor) => (a.holdMs > 0 || b.holdMs > 0 ? TRANSITION_HALT_MIN_MS : TRANSITION_MIN_MS) / 1000;
 
-  // Místa za letu: zpomalit jen tam, kde se plynulý dojezd z nuly (nebo do nuly) a pomalý průlet vejdou.
-  const zeroClearM = slow * (HALT_RAMP_MS / 2000 + FLYBY_RAMP_MS / 1000) + halfSlowM;
-  const slowGapM = (2 * slow * FLYBY_RAMP_MS) / 1000;
+  // Místa za letu: zpomalit jen tam, kde se mezi zastavením (startem, cílem) a pomalým průletem vejde celý
+  // přechod, který z nuly vystoupá aspoň na pomalou rychlost (jinak by se jen plazil).
+  const flyRampS = FLYBY_RAMP_MS / 1000;
+  const zeroClearM = (z: Anchor) => {
+    const T = Math.max(minS(z, z), z.rampS + flyRampS);
+    const w = (flyRampS / (z.rampS + flyRampS)) * slow;
+    return halfSlowM + (T * (w + slow)) / 2;
+  };
+  // Dvě pomalé zóny se oddělí, jen když se mezi ně vejde přechod se špičkou aspoň dvojnásobku pomalé rychlosti.
+  const zoneGapM = (TRANSITION_MIN_MS / 1000) * 1.5 * slow;
+  // Sloučená zóna trvá nejvýš 2 × FLYBY_SLOW_MS; další místo se už nezpomaluje (štítek a razítko dostane).
+  const maxZoneM = (2 * slow * FLYBY_SLOW_MS) / 1000;
   const zones: Anchor[] = [];
   const unslowed = new Set<string>();
   for (const f of items.filter((i) => i.treat === "flyby")) {
-    const free = V > 0 && zeros.every((z) => Math.abs(f.atM - z.m0) >= zeroClearM);
+    const free = zeros.every((z) => Math.abs(f.atM - z.m0) >= zeroClearM(z));
+    const prev = zones[zones.length - 1];
     if (!free) {
       unslowed.add(f.placeId!);
-      continue;
-    }
-    const prev = zones[zones.length - 1];
-    if (prev && f.atM - halfSlowM - prev.m1 < slowGapM) {
-      prev.m1 = f.atM + halfSlowM;
-      prev.flybys.push(f);
+    } else if (prev && f.atM - halfSlowM - prev.m1 < zoneGapM) {
+      const m1 = Math.max(prev.m1, f.atM + halfSlowM);
+      if (m1 - prev.m0 <= maxZoneM * (1 + 1e-9)) {
+        prev.m1 = m1;
+        prev.flybys.push(f);
+      } else {
+        unslowed.add(f.placeId!);
+      }
     } else {
-      zones.push({ m0: f.atM - halfSlowM, m1: f.atM + halfSlowM, v: slow, rampS: FLYBY_RAMP_MS / 1000, holdMs: 0, flybys: [f] });
+      zones.push({ m0: f.atM - halfSlowM, m1: f.atM + halfSlowM, v: slow, rampS: flyRampS, holdMs: 0, flybys: [f] });
     }
-  }
-  // Sloučená pomalá zóna nesmí dojet k zastavení blíž, než kolik potřebuje dojezd.
-  for (const z of zones) {
-    const after = zeros.find((a) => a.m0 >= z.m1);
-    if (after && after.m0 - z.m1 < zeroClearM - halfSlowM) z.m1 = Math.max(z.m0, after.m0 - (zeroClearM - halfSlowM));
   }
   const anchors = [...zeros, ...zones].sort((a, b) => a.m0 - b.m0 || a.v - b.v);
 
@@ -287,31 +359,8 @@ function buildDraw(items: readonly Item[], fromM: number, toM: number, V: number
     if (!b) break;
     // Přechod: rozjezd z rychlosti kotvy, jízda, dojezd na rychlost další kotvy.
     const G = Math.max(0, b.m0 - m);
-    const va = a.v;
-    const vb = b.v;
-    const Ta = a.rampS;
-    const Tb = b.rampS;
-    const full = (Ta * (va + V)) / 2 + (Tb * (V + vb)) / 2;
-    if (G >= full) {
-      push(Ta, va, V);
-      push((G - full) / V, V, V);
-      push(Tb, V, vb);
-    } else {
-      let u = (2 * G - Ta * va - Tb * vb) / (Ta + Tb);
-      let k = 1;
-      if (u < Math.max(va, vb)) {
-        u = Math.max(va, vb);
-        const need = Ta * (va + u) + Tb * (u + vb);
-        k = need > 0 ? (2 * G) / need : 0;
-      }
-      push(Ta * k, va, u);
-      push(Tb * k, u, vb);
-    }
+    for (const [dt, v0, v1] of transition(G, a.v, b.v, V, a.rampS, b.rampS, minS(a, b))) push(dt, v0, v1);
     m = b.m0;
-  }
-  if (segments.length) {
-    // Zaokrouhlení: poslední úsek končí přesně v cíli.
-    m = toM;
   }
   const flybyOut = items
     .filter((i) => i.treat === "flyby")
@@ -337,32 +386,31 @@ function timeAtM(segments: readonly Segment[], m: number): number {
   return segments.length ? segments[segments.length - 1]!.t1 : 0;
 }
 
-/** Cílová doba kreslení: podle délky, ale pohyb aspoň 60 % (a 6 s) vedle stání; celek se vejde do 40 s. */
-function drawTarget(deltaM: number, holdsMs: number): number {
-  const base = drawDurationMs(deltaM);
-  const want = Math.max(base, holdsMs + MOVING_MIN_SHARE * base);
-  const cap = RETURN_MAX_MS - INTRO_MS - DIVE_MS - OUTRO_MS;
-  return Math.max(holdsMs + Math.min(MOVING_MIN_MS, base), Math.min(want, cap));
-}
+/** Nejdelší kreslení, aby se celé přehrání vešlo do 40 s. */
+const DRAW_CAP_MS = RETURN_MAX_MS - INTRO_MS - DIVE_MS - OUTRO_MS;
 
-/** Cestovní rychlost, při které kreslení trvá `targetMs` (doba s rychlostí klesá; půlení intervalu). */
-function solveCruise(items: readonly Item[], fromM: number, toM: number, targetMs: number): number {
-  const delta = toM - fromM;
-  if (!(delta > 0)) return 0;
+/**
+ * Cestovní rychlost, při které `cost(V)` (doba s rychlostí neroste) klesne na `targetMs` (půlení intervalu).
+ * Doba není všude spojitá (podle rychlosti se mění, která místa za letu se stihnou zpomalit), proto `atLeast`
+ * vybere stranu skoku: `true` pomalejší (doba ≥ cíl), `false` rychlejší (doba ≤ cíl, pro strop 40 s).
+ */
+function solveCruise(cost: (V: number) => number, targetMs: number, atLeast = false): number {
   let lo = Math.log(0.5);
   let hi = Math.log(1e6);
   for (let i = 0; i < 60; i++) {
     const mid = (lo + hi) / 2;
-    if (buildDraw(items, fromM, toM, Math.exp(mid)).drawMs > targetMs) lo = mid;
+    if (cost(Math.exp(mid)) > targetMs) lo = mid;
     else hi = mid;
   }
-  return Math.exp(hi);
+  return Math.exp(atLeast ? lo : hi);
 }
 
 /**
  * Plán nového letu. Zastávky a konce etap stojí (3,5 s / 5 s), objevy se míjejí za letu se štítkem; od 6 míst v úseku
- * dostanou objevy jen rychlé razítko. Kdyby celek přesáhl 40 s, změní se nejdřív zastávky (nejtěsněji u jiného místa)
- * na místa za letu, pak místa za letu na rychlá razítka. Konce etap zůstanou vždy.
+ * dostanou objevy jen rychlé razítko. Pohyb pera trvá `drawDurationMs` (8–20 s) a stání se k němu přičte; cestovní
+ * rychlost nepřekročí `MAX_SCREENS_PER_S` šířek záběru za sekundu (pak pohyb trvá déle). Kdyby celek přesáhl 40 s,
+ * změní se nejdřív zastávky (nejtěsněji u jiného místa) na místa za letu, pak místa za letu na rychlá razítka; konce
+ * etap zůstanou vždy. Teprve když ani to nestačí, smí cestovní rychlost strop překročit.
  */
 export function returnPlan(
   places: readonly PlanPlace[],
@@ -389,8 +437,17 @@ export function returnPlan(
 
   const holds = (list: readonly Item[]) =>
     list.reduce((sum, i) => sum + (i.treat !== "halt" ? 0 : i.stageIndex !== undefined ? HOLD_STAGE_MS : HOLD_STOP_MS), 0);
-  const solve = (list: readonly Item[]) => {
-    const V = solveCruise(list, fromM, toM, drawTarget(deltaM, holds(list)));
+  const widthM = flightWidthM(deltaM);
+  const maxV = MAX_SCREENS_PER_S * widthM;
+  const moveTarget = drawDurationMs(deltaM);
+  const solve = (list: readonly Item[], allowFast = false) => {
+    if (!(deltaM > 0)) return { V: 0, draw: buildDraw(list, fromM, toM, 0) };
+    const held = holds(list);
+    // Pohyb má vlastní rozpočet; stání se přičte.
+    let V = Math.min(maxV, solveCruise((v) => buildDraw(list, fromM, toM, v).drawMs - held, moveTarget, true));
+    if (allowFast && buildDraw(list, fromM, toM, V).drawMs > DRAW_CAP_MS) {
+      V = Math.max(V, solveCruise((v) => buildDraw(list, fromM, toM, v).drawMs, DRAW_CAP_MS));
+    }
     return { V, draw: buildDraw(list, fromM, toM, V) };
   };
   const fixedMs = INTRO_MS + DIVE_MS + OUTRO_MS;
@@ -413,6 +470,8 @@ export function returnPlan(
       built = solve(items);
     }
   }
+  // Až když nepomohlo nic jiného, má strop 40 s přednost před stropem rychlosti.
+  if (fixedMs + built.draw.drawMs > RETURN_MAX_MS) built = solve(items, true);
 
   const { V, draw } = built;
   const drawStartMs = deltaM > 0 ? INTRO_MS + DIVE_MS : INTRO_MS;
@@ -425,7 +484,7 @@ export function returnPlan(
     fromM,
     toM,
     cruiseMps: V,
-    widthM: flightWidthM(deltaM),
+    widthM,
     drawStartMs,
     drawEndMs,
     totalMs: Math.round(drawEndMs + OUTRO_MS),
@@ -509,6 +568,27 @@ export function activeFlyby(plan: ReturnPlan, t: number): { index: number; flyby
     if (t >= f.passMs && t < f.passMs + LABEL_MS) return { index: i, flyby: f };
   }
   return undefined;
+}
+
+/**
+ * Etapa v rámečku mapy za letu: ta, ve které je hrot pera. Konec etapy patří ještě jí, dokud u něj pero stojí
+ * (pečeť dopadá); po rozjezdu se rámeček přepne na další etapu. Za koncem výpravy zůstane poslední etapa.
+ */
+export function flightStageIndex(plan: ReturnPlan, stages: ReadonlyArray<{ index: number; endM: number }>, t: number): number {
+  if (!stages.length) return 0;
+  const tip = tipAt(plan, t);
+  const sealing = (s: { index: number }) =>
+    plan.halts.some((h) => h.stageIndex === s.index && t < h.arriveMs + h.holdMs);
+  const current = stages.find((s) => tip < s.endM || (tip - s.endM < SAME_POINT_M && sealing(s)));
+  return (current ?? stages[stages.length - 1]!).index;
+}
+
+/**
+ * Horní řádek záhlaví přehrání: dnešní datum jen u návratu z Domů. Přehrání dne z Kroniky ho nemá, protože den
+ * už říká nadpis pod ním („2. 11. jste ušli“) a dnešní datum by se s ním pletlo.
+ */
+export function returnDateLine(source: ReturnSource, now: Date): string | undefined {
+  return source === "kronika" ? undefined : formatDayLong(now);
 }
 
 /** Celková délka přehrání v ms (bez souhrnu). */

@@ -22,7 +22,7 @@ import {
   youLayers,
 } from "@footatlas/map-style";
 import { positionAt } from "@footatlas/core";
-import { flightCamera, phaseAt, screenOffsetDp, sectionBounds, SCREEN_DP, tipAt, zoomForWidth } from "../navrat";
+import { activeHalt, flightCamera, phaseAt, screenOffsetDp, sectionBounds, SCREEN_DP, tipAt, zoomForWidth } from "../navrat";
 import { placeProps } from "../map/atlasPlaces";
 import { MEDALLIONS } from "../map/medallionFiles";
 import { PATTERNS } from "../map/patternFiles";
@@ -63,6 +63,8 @@ const HORIZON_MAX_M = 3_000;
  * na telefonu (navrh-v2.md § 11), stačí změnit tuto konstantu; pero se pak posune jen přibližně.
  */
 export const FLIGHT_PITCH = 0;
+/** Prolnutí hrotu pera při zastavení a rozjezdu. */
+const PEN_FADE_MS = 200;
 /** Krytí vzorů za letu (1 = jak je ve stylu); po skončení se vrátí. */
 const PATTERN_DIM = 0.5;
 /** Okraje záběrů na celý úsek. */
@@ -262,6 +264,20 @@ function Live({
     return () => anim.stop();
   }, [cue, flying]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Při zastavení hrot pera překrývá razítko: prolne se pryč (200 ms) a po rozjezdu se vrátí. Při „Omezit pohyb“
+  // se pero nekreslí vůbec (`flying`), takže se nic neprolíná.
+  const halted = activeHalt(plan, t) !== undefined;
+  const penOpacity = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (reduceMotion) {
+      penOpacity.setValue(halted ? 0 : 1);
+      return;
+    }
+    const anim = Animated.timing(penOpacity, { toValue: halted ? 0 : 1, duration: PEN_FADE_MS, easing: Easing.inOut(Easing.quad), useNativeDriver: true });
+    anim.start();
+    return () => anim.stop();
+  }, [halted, reduceMotion, penOpacity]);
+
   // Značka „vy“ se v mapě kreslí jen mimo let (za letu je na jejím místě pero).
   const you = useMemo(() => positionAt(route, cumulative, stepM), [route, cumulative, stepM]);
   const pointData = useMemo(
@@ -337,6 +353,7 @@ function Live({
             top: height / 2 - PEN_NIB.y,
             width: PEN_SIZE,
             height: PEN_SIZE,
+            opacity: penOpacity,
             transform: [{ translateX: pen.x }, { translateY: pen.y }],
           }}
         >

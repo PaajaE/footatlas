@@ -325,13 +325,14 @@ Realizace navrh-v2.md § 1.2 a § 8 (bez haptiky). Nahrazuje časování z 0025 
 |---|---|---|
 | Úvodní záběr | 2,0 s | `fitBounds` na úsek a místo na obzoru (do 3 km za cílem), bez animace |
 | Ponoření | 1,0 s | `easeTo` na start úseku, zoom pro 2–3 km na šířku obrazovky |
-| Kreslení | 8–20 s podle délky (lineárně 1–15 km) | cestovní rychlost se dopočítá tak, aby se do toho vešla i místa; pohyb aspoň 60 % (a 6 s) |
+| Kreslení | pohyb 8–20 s podle délky (lineárně 1–15 km) + stání | pohyb pera má vlastní rozpočet `drawDurationMs`, stání zastávek a konců etap se k němu přičte (balík O); cestovní rychlost nejvýš 0,8 šířky záběru za sekundu |
 | Místo za letu (objev) | — | zpomalení na 25 %, rampy 0,6 s, pomalý průlet ≥ 1,2 s, štítek 2,5 s; let nezastaví |
-| Zastávka / konec etapy | 3,5 s / 5 s | plné zastavení, dojezd i rozjezd 0,8 s |
+| Zastávka / konec etapy | 3,5 s / 5 s | plné zastavení, dojezd i rozjezd 0,8 s; přechod k zastavení či od něj trvá aspoň 2,5 s |
+| Přechod mezi kotvami | ≥ 1,5 s | kotvy: start, místo za letu, zastavení, cíl; krátký přechod se protáhne, místo aby zrychlil (balík O) |
 | Závěrečný záběr | 1,5 s | `fitBounds` na úsek nad souhrnem (spodní okraj = 40 % výšky) |
 
-- **Spojitá rychlost.** Rychlost je po částech kosinová (rampy mají spojitou rychlost i zrychlení), poloha hrotu je její integrál. Test vzorkuje rychlost po 16 ms přes celé přehrání a hlídá, že mezi snímky se nezmění o víc než 5 % cestovní (rampa 0,6 s dělá nejvýš ~3,1 %); totéž na denních úsecích celé Vltavské stezky. Místo za letu, na které není místo pro plynulý dojezd (těsně u zastávky, startu nebo cíle), nezpomalí; dvě blízká místa za letu mají jedno společné zpomalení.
-- **Mnoho míst a rozpočet.** Od 6 míst v úseku dostanou objevy jen rychlé razítko (bez štítku a zpomalení, rozestup ≥ 250 ms). Přes 40 s se nejdřív zastávky (nejtěsněji u jiného místa) změní na místa za letu, pak místa za letu na rychlá razítka; konce etap zůstanou vždy. Běžný denní úsek 10–25 km s pár místy trvá 20–25 s (test).
+- **Spojitá rychlost.** Rychlost je po částech kosinová (rampy mají spojitou rychlost i zrychlení), poloha hrotu je její integrál. Test vzorkuje rychlost po 16 ms přes celé přehrání a hlídá, že mezi snímky se nezmění o víc než 5 % cestovní (rampa 0,6 s dělá nejvýš ~3,1 %); totéž na denních úsecích celé Vltavské stezky. Místo za letu, na které není místo pro plynulý přechod (těsně u zastávky, startu nebo cíle), nezpomalí; dvě blízká místa za letu mají jedno společné zpomalení, nejvýš 2 × 1,2 s (balík O).
+- **Mnoho míst a rozpočet.** Od 6 míst v úseku dostanou objevy jen rychlé razítko (bez štítku a zpomalení, rozestup ≥ 250 ms). Přes 40 s se nejdřív zastávky (nejtěsněji u jiného místa) změní na místa za letu, pak místa za letu na rychlá razítka; konce etap zůstanou vždy. Teprve když ani to nestačí, smí cestovní rychlost překročit strop 0,8 šířky za sekundu (strop 40 s má přednost). Běžný denní úsek 10–25 km s pár místy trvá 20–25 s bez stání; každé zastavení přidá svých 3,5 s / 5 s (test).
 - **Kamera.** Přiblížení z šířky záběru `flightWidthM` (2 km do 2 km úseku, 3 km od 20 km) a skutečné šířky mapy (`zoomForWidth`), tj. zoom ≈ 13, ne 15. Předstih: střed je 20 % šířky před hrotem, úměrně rychlosti, takže při zastavení je kamera přesně na místě (razítko a pečeť dopadnou doprostřed). Při každém `easeTo` se posílá nulový `padding`, protože `fitBounds` ho jinak v kameře nechá.
 - **Náklon 0°** (`FLIGHT_PITCH`). Návrh zkouší 30°, ale vzory atlasu jsou rastrové a v náklonu se v horní části slévají, popisky IM Fell se zmenšují a hrot pera i předstih se počítají v rovinné projekci. Vizuálně jsme náklon nezkoušeli (nebylo na čem); ověří se na telefonu změnou konstanty (§ 11).
 - **Hrot pera** (`PenTip`) je RN overlay. Jeho posun od středu se spočítá z plánu (`screenOffsetDp`, Web Mercator) na konci každého úseku a dojede tam nativní animací stejně dlouho a lineárně jako kamera. Značka „vy“ se za letu nekreslí.
@@ -340,9 +341,33 @@ Realizace navrh-v2.md § 1.2 a § 8 (bez haptiky). Nahrazuje časování z 0025 
 - **Štítek místa za letu** (`FlyLabel`): nahoře, nejvýš 25 % výšky, razítko nebo fotka s razítkem, typ · km, název (zalomí se), krátká věta (`shortSentence`, nejvýš 110 znaků po celé části věty). Klepnutí otevře místo a pozastaví.
 - **Karta zastávky** (`HaltCard`): záhlaví bez uříznutí (konec etapy na vlastním řádku), razítko uvnitř karty (bez fotky je samo obrázkem, s fotkou v jejím rohu), menší fotka (72) a nižší karta, bez prázdného papírového rámečku.
 - **Pečeť konce etapy** (`StageWax`): `Seal` druhu `stage` z balíku M (rozhodnutí 0032) s římským číslem a symbolem cíle etapy. Při integraci přepnuto z druhu `wax`, kde M props `roman` a `symbol` ignoroval.
-- **Souhrn**: přes spodek mapy, nejvýš 40 % výšky; místa jako vodorovná řada malých razítek s názvem pod nimi; „Na obzoru“ zůstává. „Přeskočit“ skočí na závěrečný záběr.
+- **Souhrn**: přes spodek mapy, nejvýš 40 % výšky; místa jako vodorovná řada malých razítek s názvem pod nimi; „Na obzoru“ je jeden řádek v pevné patičce nad tlačítky (balík O), takže je vidět bez posouvání. Razítko přívozu otevře rovnou scénu převozu (balík O nahradil tlačítko „Přívoz v Podbabě: převezli jste se“, které se četlo jako podivný úspěch). „Přeskočit“ skočí na závěrečný záběr.
 - **Omezit pohyb:** kamera stojí od začátku na celém úseku (už s místem pro souhrn), razítka a karty se jen prolnou.
 - **Ověřit na telefonu:** plynulost kamery a barvení (60 fps), shoda hrotu pera s koncem čáry, vzhled rozmazaného okraje barvy, náklon 30° proti 0°, čitelnost štítku a karty, zda je zoom 2–3 km správně.
+
+**Oprava rytmu (balík O).** Na telefonu byl let plynulý, ale rytmus špatný. Úsek 11 000 → 20 000 m (objevy Sedlecké skály a Přívoz v Podbabě, zastávka a konec I. etapy Zámek Roztoky, zastávka Levý Hradec): obě místa za letu se slila do jedné pomalé zóny 2,9 s, pak se pero rozjelo na 3 226 m/s (1,35 šířky záběru za sekundu) a 2,5 km do Roztok ujelo za 1,4 s, z Roztok do Levého Hradce jen rampa nahoru a hned dolů (1,6 s). Příčina: stání se počítalo do rozpočtu kreslení (`max(základ, stání + 0,6 · základ)`), takže na pohyb zbylo 8,9 s místo 14,9 s a cestovní rychlost se vyhnala nahoru. Nová pravidla:
+
+1. **Pohyb má vlastní rozpočet.** Doba pohybu = `drawDurationMs(deltaM)` (8–20 s); stání se přičte. Strop 40 s a degradace zastávka → místo za letu → rychlé razítko zůstávají.
+2. **Strop cestovní rychlosti** `MAX_SCREENS_PER_S` = 0,8 šířky záběru za sekundu (krajina přejede obrazovku za ~1,25 s). Pohyb pak trvá déle, než chce rozpočet; když by tím celek přesáhl 40 s, nejdřív se degradují místa a až potom smí rychlost strop překročit.
+3. **Žádný sprint mezi kotvami.** Přechod trvá aspoň 1,5 s, u zastávky či konce etapy aspoň 2,5 s. Když by běžný tvar (rampy 0,6/0,8 s a cestovní rychlost) byl kratší, nezvedá se špička, ale protáhnou se rampy: delší cesta = rampy delší a rovinka kratší při špičce = cestovní; kratší cesta = jeden kosinový „hrb“ dané délky se špičkou nižší než cestovní. Doba přechodu tak s rychlostí nikdy neroste a tvary na sebe navazují; rychlost i zrychlení zůstávají spojité. Přechod kratší než 1,5 s vzniká jen v těsné mezeře, kde se jede rychlostí pomalejší kotvy (špička = rychlost kotvy, tedy ≤ 2,5× pomalé zóny).
+4. **Sloučené zóny míst za letu** trvají nejvýš 2 × `FLYBY_SLOW_MS` (2,4 s). Další blízké místo, které by zónu protáhlo, se nezpomaluje (`slowed: false`, štítek a razítko dostane) – jednodušší než dělit zónu, protože krátké zrychlení mezi dvěma zónami by v těsné mezeře stejně splynulo s pomalou jízdou. Dvě zóny zůstanou oddělené, jen když se mezi ně vejde přechod se špičkou aspoň dvojnásobku pomalé rychlosti.
+
+| Úsek 11 → 20 km | před (0033) | po (balík O) |
+|---|---|---|
+| Cestovní rychlost | 3 248 m/s (1,36 šířky/s) | 985 m/s (0,41 šířky/s; strop 1 911) |
+| Pomalé zóny | jedna 2,9 s (Sedlec + Podbaba) | dvě po 1,2 s |
+| Průlet Sedlec / Podbaba | 5,0 s / 6,7 s | 5,5 s / 8,2 s |
+| Příjezd Roztoky | 8,7 s | 12,3 s |
+| Příjezd Levý Hradec | 15,3 s | 20,4 s |
+| Podbaba → Roztoky | 1,4 s, špička 3 226 m/s | 3,5 s, špička 985 m/s |
+| Roztoky → Levý Hradec | 1,6 s, špička 2 744 m/s | 3,0 s, špička 985 m/s |
+| Levý Hradec → cíl | 1,6 s | 2,5 s |
+| Pohyb bez stání | 8,9 s | 14,9 s (= `drawDurationMs(9000)`) |
+| Celé přehrání | 21,9 s | 27,9 s |
+
+Na všech denních úsecích Vltavské stezky (test „nejhorší sprint“): nejkratší přechod u zastavení dřív 1,4 s, nyní 2,5 s; nejvyšší cestovní rychlost dřív 2,1 šířky/s, nyní 0,65; nejdelší přehrání 32 s → 36,5 s (pod 40 s).
+
+Drobnosti přehrání (balík O): přehrání dne z Kroniky nemá v záhlaví dnešní datum (den říká nadpis „2. 11. jste ušli“, `returnDateLine`); rámeček mapy ukazuje etapu, ve které je hrot pera, a na další se přepne až po stání u pečeti konce etapy (`flightStageIndex`); hrot pera se při zastavení prolne pryč (200 ms), aby nepřekrýval razítko, a po rozjezdu se vrátí.
 
 ## 0034 Tři záložky a Mezitím
 Datum: 10. 11. 2026 · Stav: přijato (balík L, [navrh-v2.md](navrh-v2.md) § 3, 4, 4.1, 5 a 9); ověřeno testy a webovým exportem v Chromiu (390 dp, světlý vzhled, ukázkový postup), na zařízení NEOVĚŘENO
