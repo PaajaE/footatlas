@@ -2,35 +2,56 @@ import { IMFellEnglish_400Regular, IMFellEnglish_400Regular_Italic } from "@expo
 import { IMFellEnglishSC_400Regular } from "@expo-google-fonts/im-fell-english-sc";
 import { WorkSans_400Regular, WorkSans_500Medium, WorkSans_600SemiBold } from "@expo-google-fonts/work-sans";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRootNavigationState, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ArrivalHost } from "../components/ArrivalHost";
 import { ChronicleProvider } from "../db/ChronicleProvider";
 import { ExpeditionProvider } from "../state/ExpeditionProvider";
+import { OnboardingProvider } from "../state/OnboardingProvider";
+import { useOnboardingGate } from "../state/useOnboardingGate";
 import { ThemeProvider, useTheme, useThemeReady } from "../theme/ThemeProvider";
 
 SplashScreen.preventAutoHideAsync();
 
-/** Skryje splash screen, až jsou písma i uložená volba vzhledu; jinak by při tmavé volbě blikl světlý. */
-function SplashGate({ fontsDone }: { fontsDone: boolean }) {
-  const themeReady = useThemeReady();
-  useEffect(() => {
-    if (fontsDone && themeReady) SplashScreen.hideAsync();
-  }, [fontsDone, themeReady]);
-  return null;
-}
+/** Splash screen se skryje až po písmech, uložené volbě vzhledu a rozhodnutí o úvodu; jinak by blikla Výprava nebo světlé téma. */
+const SPLASH_MAX_MS = 6000;
 
 function Shell() {
   const theme = useTheme();
+  const themeReady = useThemeReady();
+  const decision = useOnboardingGate();
+  const router = useRouter();
+  const navReady = useRootNavigationState()?.key != null;
+  const redirected = useRef(false);
+
+  // Nový uživatel začíná úvodem (rozhodnutí 0035); přesměruje se jen jednou, i kdyby se podmínky později změnily.
+  useEffect(() => {
+    if (decision === "show" && navReady && !redirected.current) {
+      redirected.current = true;
+      router.replace("/onboarding");
+    }
+  }, [decision, navReady, router]);
+
+  useEffect(() => {
+    const ready = themeReady && navReady && (decision === "skip" || (decision === "show" && redirected.current));
+    if (ready) void SplashScreen.hideAsync();
+  }, [themeReady, navReady, decision]);
+
+  useEffect(() => {
+    const id = setTimeout(() => SplashScreen.hideAsync(), SPLASH_MAX_MS);
+    return () => clearTimeout(id);
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style={theme.name === "dark" ? "light" : "dark"} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.bg } }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" options={{ animation: "fade", gestureEnabled: false }} />
         <Stack.Screen name="zastavka/[id]" />
         <Stack.Screen name="kapitola/[id]" />
         <Stack.Screen name="delka-kroku" />
@@ -64,12 +85,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <SplashGate fontsDone={loaded || !!error} />
-        <ExpeditionProvider>
-          <ChronicleProvider>
-            <Shell />
-          </ChronicleProvider>
-        </ExpeditionProvider>
+        <OnboardingProvider>
+          <ExpeditionProvider>
+            <ChronicleProvider>
+              <Shell />
+            </ChronicleProvider>
+          </ExpeditionProvider>
+        </OnboardingProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

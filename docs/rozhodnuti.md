@@ -389,3 +389,16 @@ Datum: 10. 11. 2026 · Stav: přijato (balík L, [navrh-v2.md](navrh-v2.md) § 3
 - **Atlas:** výpravy (aktuální, dokončené, další), razítka a pečeti (`CollectionsView` beze změny, jen s rozjetou výpravou), pohlednice etap, Témata jako zástupná sekce pro balík N, druhy tras.
 - **Kronika:** bez Sbírek; dlaždice Dnes / Za 7 dní v hlavičce Deníku (`DiaryTiles`).
 - Neověřeno na zařízení: táhnutí panelu a pásu na Androidu (střet s posuvem panelu), automatické otevření po návratu z pozadí.
+
+## 0035 Úvod (onboarding)
+Datum: 10. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chromiu (390 dp, světlý vzhled), na zařízení NEOVĚŘENO
+
+- **Čtyři obrazovky, asi 40 sekund** (`app/onboarding.tsx`, mimo záložky): 1 Úvod (trasa po břehu Vltavy se nakreslí inkoustem, kolem ní se odkryje barva a dopadne razítko), 2 Tři věci (mapa se odkrývá, místa si musíte došlapat, Mezitím bez výčitek), 3 Vaše kroky, 4 První výprava. Kroky 1 a 2 jdou přeskočit (vedou na krok 3), zpět na Androidu vrací o krok.
+- **Jediné oprávnění je v kroku 3** (`Načíst historii ze zdravotních dat` → `ChronicleProvider.syncNow(true)`). Výsledek ukáže Kartu života (`kronika/earth.ts`, čísla z kroniky), při odmítnutí, nedostupných datech nebo chybě nabídne pokračování bez historie a „Zkusit znovu“. Karta života se tím označí za viděnou, aby Kronika nevyskočila podruhé. Notifikace se nežádají.
+- **Ruční odhad** ze spec § 9.1 v úvodu **není**: v aplikaci zatím neexistuje, jen délka kroku. Volba přibude s funkcí.
+- **Krok 4** má jedinou výpravu (Vltavská stezka); `Vyrazit` volá `start()` (při startu se případně žádá o oprávnění, pokud se nežádalo v kroku 3), pak dopadne razítko Vyšehradu. `Nejdřív se rozhlédnout` vede do Atlasu. Při opakovaném zobrazení s rozjetou výpravou je tlačítko jen `Zpět do Výpravy`, výprava se nerestartuje.
+- **Kdy se ukáže** (`src/onboarding.ts`, s testy): jen když příznak `footatlas.onboarding.v1` chybí a zároveň není uložená relace výpravy ani načtená historie. Existující uživatelé se tiše poznačí jako hotoví. Rozhodnutí řídí `useOnboardingGate`; splash screen se skryje až po něm (nejvýš 6 s, na kroniku se čeká nejvýš 2,5 s), aby nebliklo Výprava před úvodem. Přesměrování proběhne jednou za spuštění.
+- **Znovu zobrazit úvod:** Nastavení → Úvod.
+- **Úvodní mapa** (`components/onboarding/IntroMap.tsx`) je ilustrace, ne data: šedá skica všude, barevná vrstva (budovy, stromy, řeka) odkrytá maskou podél inkoustové trasy; vzory a barvy z palety atlasu. Trasa nikde nepřekročí řeku (hlídá `onboarding.test.ts`). Při „Omezit pohyb“ se ukáže hotový stav.
+- Mock: artifact „FootAtlas onboarding“ (plátno Claude), jen jako vzor, v repu není.
+- Neověřeno na zařízení: vykreslení masky a vzorů `react-native-svg` na Androidu a iOS, výkon kreslení, systémový dialog oprávnění a texty na reálném Health Connect / HealthKit.
