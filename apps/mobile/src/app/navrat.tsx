@@ -19,11 +19,11 @@ import { formatDayNumeric, pluralNewPlaces, tileDistance } from "../home";
 import {
   activeFlyby,
   activeHalt,
-  dayHeading,
+  flightHeading,
   flightStageIndex,
+  MAP_WAIT_MS,
   planStampsLanded,
   returnDateLine,
-  returnHeading,
   returnPlan,
   returnRouteLabel,
   returnSource,
@@ -40,12 +40,17 @@ import { useTheme } from "../theme/ThemeProvider";
 const MAP_FALLBACK_H = 420;
 /** Kolik rychlých razítek je za letu vidět najednou; starší se sečtou do „+N“. */
 const QUICK_SHOWN = 4;
+/**
+ * Souhrn zabere nejvýš 44 % výšky (dřív 40 %): na 412 × 915 bodů se tak bez posouvání vejde nadpis, řada razítek,
+ * pohlednice etapy, „Na obzoru“ s názvem na dva řádky a obě tlačítka i se spodním okrajem systémové lišty.
+ */
+const SHEET_SHARE = 0.44;
 
 /**
- * Přehrání cesty, nový let (rozhodnutí 0033, docs/navrh-v2.md § 8): úvodní záběr na celý úsek, ponoření, pero kreslí
- * čáru a papír se kolem ní barví, místa za letu dostanou štítek nahoře (let nezastaví), u zastávek a konců etap
- * se plynule zastaví a zespodu vyjede karta. Závěrečný záběr ukáže celý vybarvený úsek nad souhrnem (nejvýš 40 %
- * výšky). Klepnutí na štítek nebo kartu otevře místo (a přehrání pozastaví), „Dál“ zastavení přeskočí, „Přeskočit“
+ * Přehrání cesty, nový let (rozhodnutí 0033, docs/navrh-v2.md § 8): úvodní záběr na celý úsek, ponoření, kreslí se
+ * čára (s inkoustovou tečkou na konci) a papír se kolem ní barví, místa za letu dostanou štítek nahoře (let nezastaví), u zastávek a konců etap
+ * se plynule zastaví a zespodu vyjede karta. Závěrečný záběr ukáže celý vybarvený úsek nad souhrnem (nejvýš 44 %
+ * výšky). Hodiny přehrání se pustí, až mapa dokreslí úvodní záběr (nejpozději po `MAP_WAIT_MS`). Klepnutí na štítek nebo kartu otevře místo (a přehrání pozastaví), „Dál“ zastavení přeskočí, „Přeskočit“
  * skočí na závěrečný záběr. Úsek přichází v parametrech `from` a `to` (metry). Při „Omezit pohyb“ kamera neletí
  * (úvodní i závěrečný záběr bez pohybu) a razítka i karty se jen prolnou.
  */
@@ -66,7 +71,14 @@ export default function Return() {
   const stages = vltavska.plan.stages.filter((s) => s.endM > fromM && s.endM <= toM);
   const { height: windowH } = useWindowDimensions();
   const plan = useMemo(() => returnPlan(places, vltavska.plan.stages, fromM, toM), [places, fromM, toM]);
-  const clock = useClock(plan.totalMs);
+  // Let začne, až mapa dokreslí úvodní záběr (ne nad prázdným papírem); pojistka MAP_WAIT_MS, aby se nikdy nezasekl.
+  const [mapReady, setMapReady] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setMapReady(true), MAP_WAIT_MS);
+    return () => clearTimeout(id);
+  }, []);
+  const onMapReady = useCallback(() => setMapReady(true), []);
+  const clock = useClock(plan.totalMs, false, !mapReady);
   const t = clock.elapsedMs;
   const tipM = tipAt(plan, t);
   const landed = new Set(planStampsLanded(plan, t));
@@ -75,16 +87,19 @@ export default function Return() {
   const halt = clock.finished ? undefined : activeHalt(plan, t);
   const flyby = clock.finished ? undefined : activeFlyby(plan, t);
   const flyPlace = flyby ? vltavska.places.find((p) => p.id === flyby.flyby.placeId) : undefined;
-  /** Souhrn zabere nejvýš 40 % výšky; závěrečný záběr nechá úsek nad ním. */
-  const sheetMaxH = Math.round(windowH * 0.4);
+  /** Souhrn zabere nejvýš SHEET_SHARE výšky; závěrečný záběr nechá úsek nad ním. */
+  const sheetMaxH = Math.round(windowH * SHEET_SHARE);
 
   const today = localDateKey(new Date());
   const since = sinceDay(ex.daySlices, fromM);
-  const heading = returnSource(zdroj) === "kronika" ? dayHeading(since, today) : returnHeading(since, today);
+  // Nadpis se ukáže, až jsou data o dnech přečtená, a pak se už nemění (nepřeskočí z „Ten den“ na „2. 11.“).
+  const heldHeading = useRef<string | undefined>(undefined);
+  heldHeading.current ??= flightHeading(returnSource(zdroj), since, today, !ex.ready || ex.status.kind === "loading");
+  const heading = heldHeading.current;
   const dateLine = returnDateLine(returnSource(zdroj), new Date());
   const routeLabel = returnRouteLabel(vltavska.places, fromM, toM);
   const counter = tileDistance(Math.max(0, tipM - fromM));
-  // Rámeček ukazuje etapu, ve které je hrot pera; po pečeti konce etapy se přepne na další.
+  // Rámeček ukazuje etapu, ve které je konec čáry; po pečeti konce etapy se přepne na další.
   const frame = `Etapa ${toRoman(flightStageIndex(plan, vltavska.plan.stages, t) + 1)} · ${vltavska.name}`;
   // Návrat z Domů se spotřebuje, až dojede do konce; přehrání dne z Kroniky ne (rozhodnutí 0024).
   useEffect(() => {
@@ -167,7 +182,8 @@ export default function Return() {
             <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>{clock.finished ? "Zavřít" : "Přeskočit"}</T>
           </Pressable>
         </View>
-        <T style={{ fontFamily: fonts.displaySC, fontSize: 15, letterSpacing: 0.6, color: colors.ochre, marginTop: -8 }}>{heading}</T>
+        {/* Místo pro nadpis je vyhrazené i před přečtením dat, aby se záhlaví neposunulo. */}
+        <T style={{ fontFamily: fonts.displaySC, fontSize: 15, lineHeight: 20, letterSpacing: 0.6, color: colors.ochre, marginTop: -8 }}>{heading ?? " "}</T>
         <View
           style={{ flexDirection: "row", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}
           accessible
@@ -195,6 +211,7 @@ export default function Return() {
           height={mapH}
           bottomInset={sheetMaxH}
           frame={frame}
+          onReady={onMapReady}
         />
         {/* Místo za letu: štítek nahoře, nejvýš čtvrtina výšky; let nezastaví. */}
         {flyPlace && !shown && (
@@ -260,7 +277,7 @@ export default function Return() {
           </Animated.View>
         )}
 
-        {/* Souhrn: nejvýš 40 % výšky přes spodek mapy; nad ním je vidět celý vybarvený úsek se všemi razítky. */}
+        {/* Souhrn: nejvýš SHEET_SHARE výšky přes spodek mapy; nad ním je vidět celý vybarvený úsek se všemi razítky. */}
         {clock.finished && (
           <Animated.View
             style={{
@@ -283,13 +300,15 @@ export default function Return() {
               elevation: 6,
             }}
           >
-            {/* Obsah se posouvá, „Na obzoru“ a tlačítka jsou pevně dole: vždy vidět bez posouvání. */}
-            <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4, gap: 12 }} showsVerticalScrollIndicator={false}>
-              <View style={{ alignSelf: "center", width: 40, height: 5, borderRadius: 3, backgroundColor: colors.line }} />
+            {/* Obsah se posouvá, „Na obzoru“ a tlačítka jsou pevně dole: vždy vidět bez posouvání. Obsah je zhuštěný,
+                aby se na běžný telefon vešel celý; když ne, posouvá se a končí na čáře nad pevnou částí (ne řezem přes
+                tlačítko uprostřed). */}
+            <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 10, gap: 8 }} showsVerticalScrollIndicator={false}>
+              <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line }} />
               {places.length > 0 || !next ? (
                 <View style={{ gap: 0 }}>
-                  <SectionLabel size={14}>Cestou jste odemkli</SectionLabel>
-                  <T style={{ fontFamily: fonts.display, fontSize: 28, lineHeight: 32, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
+                  <SectionLabel size={13}>Cestou jste odemkli</SectionLabel>
+                  <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 28, color: colors.fg }}>{newPlacesTitle(places.length)}</T>
                 </View>
               ) : (
                 // Bez nového místa: neříkat „nic“, ukázat, co je na obzoru.
@@ -318,9 +337,9 @@ export default function Return() {
                           ? router.push({ pathname: "/privoz", params: { id: p.id } })
                           : router.push({ pathname: "/zastavka/[id]", params: { id: p.id } })
                       }
-                      style={{ width: 76, alignItems: "center", gap: 2, paddingVertical: 2 }}
+                      style={{ width: 72, alignItems: "center", gap: 2, paddingVertical: 2 }}
                     >
-                      <PlaceSeal place={p} size={52} today={today} />
+                      <PlaceSeal place={p} size={44} today={today} />
                       <T style={{ fontSize: 12, lineHeight: 15, color: colors.fg, textAlign: "center" }} numberOfLines={2}>
                         {shortPlaceName(p.name, 22)}
                       </T>
@@ -333,6 +352,7 @@ export default function Return() {
                   {stages.map((s) => (
                     <Button
                       key={s.index}
+                      compact
                       kind="secondary"
                       label={`Etapa ${toRoman(s.index + 1)} dokončena · pohlednice`}
                       onPress={() => router.push({ pathname: "/pohlednice", params: { stage: String(s.index) } })}
@@ -341,26 +361,35 @@ export default function Return() {
                 </View>
               )}
             </ScrollView>
-            <View style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: Math.max(insets.bottom, 16), gap: 10 }}>
+            <View
+              style={{
+                paddingHorizontal: 20,
+                paddingTop: 8,
+                paddingBottom: Math.max(insets.bottom, 12),
+                gap: 8,
+                borderTopWidth: 1,
+                borderTopColor: colors.line,
+              }}
+            >
               {next && places.length > 0 && (
-                // Na obzoru jako jeden řádek nad tlačítky.
+                // Na obzoru nad tlačítky: popisek a vzdálenost na jednom řádku, celý název pod nimi (zalomí se, nezkracuje).
                 <View
                   accessible
                   accessibilityLabel={`Na obzoru ${next.name}, ${formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}`}
-                  style={{ flexDirection: "row", alignItems: "baseline", gap: 8, borderTopWidth: 1, borderTopColor: colors.line, paddingTop: 8 }}
                 >
-                  <SectionLabel size={13}>Na obzoru</SectionLabel>
-                  <T numberOfLines={1} style={{ flex: 1, fontFamily: fonts.display, fontSize: 19, lineHeight: 23, color: colors.fg }}>
-                    {next.name}
-                  </T>
-                  <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, color: colors.accent }}>
-                    {formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}
-                  </T>
+                  <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+                    <SectionLabel size={13}>Na obzoru</SectionLabel>
+                    <T style={{ fontFamily: fonts.bodySemi, fontSize: 14, lineHeight: 19, color: colors.accent }}>
+                      {formatDistance(Math.max(0, next.atM - nowM), { stepLengthM: ex.stepLength.meters })}
+                    </T>
+                  </View>
+                  <T style={{ fontFamily: fonts.display, fontSize: 19, lineHeight: 23, color: colors.fg }}>{next.name}</T>
                 </View>
               )}
               <View style={{ flexDirection: "row", gap: 12 }}>
                 <View style={{ flex: 1 }}>
                   <Button
+                    compact
                     kind="secondary"
                     label="Přehrát znovu"
                     onPress={() => {
@@ -371,9 +400,9 @@ export default function Return() {
                 </View>
                 <View style={{ flex: 1 }}>
                   {storyIds.length > 0 ? (
-                    <Button label="Projít objevy" onPress={() => router.push({ pathname: "/objevy", params: { ids: storyIds.join(",") } })} />
+                    <Button compact label="Projít objevy" onPress={() => router.push({ pathname: "/objevy", params: { ids: storyIds.join(",") } })} />
                   ) : (
-                    <Button label="Hotovo" onPress={() => router.back()} />
+                    <Button compact label="Hotovo" onPress={() => router.back()} />
                   )}
                 </View>
               </View>

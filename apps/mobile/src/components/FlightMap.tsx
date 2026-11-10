@@ -1,6 +1,6 @@
 import { Camera, GeoJSONSource, Images, Layer, Map, type CameraRef } from "@maplibre/maplibre-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, View } from "react-native";
+import { View } from "react-native";
 import {
   ATLAS_PATTERNS,
   ATLAS_SKETCH_START,
@@ -22,7 +22,7 @@ import {
   youLayers,
 } from "@footatlas/map-style";
 import { positionAt } from "@footatlas/core";
-import { activeHalt, flightCamera, phaseAt, screenOffsetDp, sectionBounds, SCREEN_DP, tipAt, zoomForWidth } from "../navrat";
+import { activeHalt, flightCamera, phaseAt, sectionBounds, SCREEN_DP, tipAt, zoomForWidth } from "../navrat";
 import { placeProps } from "../map/atlasPlaces";
 import { MEDALLIONS } from "../map/medallionFiles";
 import { PATTERNS } from "../map/patternFiles";
@@ -30,7 +30,6 @@ import { prepareMapAssets, type MapAssets } from "../map/mapAssets";
 import { useTheme } from "../theme/ThemeProvider";
 import { AtlasFrame } from "./AtlasFrame";
 import type { FlightMapProps } from "./flightMapProps";
-import { PEN_NIB, PEN_SIZE, PenTip } from "./PenTip";
 import { RouteSketch } from "./RouteSketch";
 import { T } from "./ui";
 
@@ -42,7 +41,7 @@ const REVEAL_INNER_M = 380;
 const REVEAL_OUTER_M = 650;
 /**
  * Nevybarvená část úseku (papírová čára) začíná kus před hrotem: kulatý konec čáry má poloměr ~1,1 × vnější okraj
- * masky, takže barva se rozlévá těsně za perem, ne až o 650 m za ním.
+ * masky, takže barva se rozlévá těsně za koncem čáry, ne až o 650 m za ním.
  */
 const PENDING_LEAD_M = 0.6 * REVEAL_OUTER_M;
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
@@ -59,12 +58,18 @@ const HORIZON_MAX_M = 3_000;
 /**
  * Náklon kamery za letu. Návrh (§ 8.1) zkouší 30°, ale necháváme 0°: vzory atlasu (šrafy, stromy, vinice) jsou
  * rastrové obrázky a v náklonu se v horní části obrazovky slévají v šedou plochu, popisky IM Fell se zmenšují
- * a rozmazávají a hrot pera i předstih kamery se počítají v rovinné projekci (`screenOffsetDp`). Až se náklon ověří
- * na telefonu (navrh-v2.md § 11), stačí změnit tuto konstantu; pero se pak posune jen přibližně.
+ * a rozmazávají a předstih kamery se počítá v rovinné projekci. Až se náklon ověří na telefonu (navrh-v2.md § 11),
+ * stačí změnit tuto konstantu; konec čáry je vrstva mapy, takže s náklonem jde vždy přesně.
  */
 export const FLIGHT_PITCH = 0;
-/** Prolnutí hrotu pera při zastavení a rozjezdu. */
-const PEN_FADE_MS = 200;
+/**
+ * Konec kreslené čáry (balík P, místo hrotu pera): inkoustová tečka o průměru 5,5 bodu se světlým okrajem 1 bod.
+ * Je to vrstva mapy na stejném zdroji jako čára (`route-done`), takže s koncem čáry jde vždy přesně.
+ */
+const TIP_RADIUS = 2.75;
+const TIP_STROKE = 1;
+/** Bod v FeatureCollection čáry: čárové vrstvy ho nekreslí, tečka nic jiného. */
+const IS_POINT = ["==", ["geometry-type"], "Point"];
 /** Krytí vzorů za letu (1 = jak je ve stylu); po skončení se vrátí. */
 const PATTERN_DIM = 0.5;
 /** Okraje záběrů na celý úsek. */
@@ -73,7 +78,7 @@ const NO_PAD = { top: 0, right: 0, bottom: 0, left: 0 };
 
 /**
  * Mapa přehrání cesty (rozhodnutí 0033). Úvodní záběr ukáže celý úsek s místem na obzoru, kamera se ponoří na start
- * (≈ 2–3 km na šířku), pak sleduje hrot pera s předstihem (pokyn po `SEG_MS`, plynulost počítá MapLibre), čára se
+ * (≈ 2–3 km na šířku), pak sleduje konec čáry s předstihem (pokyn po `SEG_MS`, plynulost počítá MapLibre), čára se
  * kreslí a papír se kolem ní plynule barví, a závěrečný záběr ukáže celý vybarvený úsek nad souhrnem.
  */
 export function FlightMap(props: FlightMapProps) {
@@ -88,6 +93,11 @@ export function FlightMap(props: FlightMapProps) {
       live = false;
     };
   }, []);
+  // Bez mapy (chyba podkladů) není na co čekat: náčrt je hned vidět.
+  const { onReady } = props;
+  useEffect(() => {
+    if (state.kind === "failed") onReady?.();
+  }, [state.kind]); // eslint-disable-line react-hooks/exhaustive-deps
   if (state.kind !== "ready") {
     return (
       <View>
@@ -117,6 +127,7 @@ function Live({
   height,
   bottomInset,
   frame,
+  onReady,
   assets,
 }: FlightMapProps & { assets: MapAssets }) {
   const { name, colors } = useTheme();
@@ -139,8 +150,19 @@ function Live({
 
   const phase = phaseAt(plan, t);
   const flying = !reduceMotion && (phase === "dive" || phase === "draw");
+  // Při zastavení je na konci čáry razítko: tečka se nekreslí. Při „Omezit pohyb“ se nekreslí vůbec (`flying`).
+  const halted = activeHalt(plan, t) !== undefined;
+  const showTip = flying && !halted;
 
-  // Hrot pera a čára: po 1/LINE_STEPS úseku, do mapy se posílá jen při změně.
+  // Hodiny přehrání se pustí, až mapa poprvé dokreslí úvodní záběr (ne prázdný papír); pojistku drží obrazovka.
+  const readySent = useRef(false);
+  const ready = () => {
+    if (readySent.current) return;
+    readySent.current = true;
+    onReady?.();
+  };
+
+  // Konec čáry: po 1/LINE_STEPS úseku, do mapy se posílá jen při změně.
   const tipM = tipAt(plan, t);
   const step = Math.round(((tipM - fromM) / span) * LINE_STEPS);
   const stepM = fromM + (step / LINE_STEPS) * span;
@@ -149,12 +171,18 @@ function Live({
     const a = positionAt(route, cumulative, fromM);
     return line([...coords.slice(0, Math.max(1, a.segment + 1)), [a.lon, a.lat]]);
   }, [route, cumulative, coords, fromM]);
+  // Čára a tečka na jejím konci jsou v jednom zdroji: bod je přesně poslední souřadnice čáry a mění se s ní.
   const sectionData = useMemo(() => {
     if (stepM <= fromM) return EMPTY;
     const a = positionAt(route, cumulative, fromM);
     const b = positionAt(route, cumulative, stepM);
-    return line([[a.lon, a.lat], ...coords.slice(a.segment + 1, b.segment + 1), [b.lon, b.lat]]);
-  }, [route, cumulative, coords, fromM, stepM]);
+    const end: [number, number] = [b.lon, b.lat];
+    const features: Array<ReturnType<typeof line> | { type: "Feature"; properties: {}; geometry: { type: "Point"; coordinates: [number, number] } }> = [
+      line([[a.lon, a.lat], ...coords.slice(a.segment + 1, b.segment + 1), end]),
+    ];
+    if (showTip) features.push({ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: end } });
+    return { type: "FeatureCollection" as const, features };
+  }, [route, cumulative, coords, fromM, stepM, showTip]);
   // Nevybarvená část úseku: od kousku před hrotem do cíle. Maska se počítá jen jednou pro celý úsek (do `toM`),
   // plynulé barvení dělá zkracující se papírová čára (`revealPendingLayers`), viz rozhodnutí 0033.
   const pendingData = useMemo(() => {
@@ -242,43 +270,7 @@ function Live({
     }
   }, [cue]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Hrot pera: za letu je kamera o předstih před ním, takže pero není uprostřed. Jeho posun od středu se spočítá
-  // z plánu na konci každého úseku a dojede tam stejně dlouho a lineárně jako kamera (nativní animace).
-  const pen = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  useEffect(() => {
-    if (!flying) return;
-    const offsetAt = (ms: number) => {
-      const c = flightCamera(plan, ms);
-      const a = positionAt(route, cumulative, c.centerM);
-      const b = positionAt(route, cumulative, c.tipM);
-      return screenOffsetDp({ lon: a.lon, lat: a.lat }, { lon: b.lon, lat: b.lat }, zoom);
-    };
-    if (phase === "dive") {
-      pen.setValue({ x: 0, y: 0 });
-      return;
-    }
-    const endMs = Math.min(plan.drawEndMs, plan.drawStartMs + (drawSeg + 1) * SEG_MS);
-    pen.setValue(offsetAt(t));
-    const anim = Animated.timing(pen, { toValue: offsetAt(endMs), duration: Math.max(16, endMs - t), easing: Easing.linear, useNativeDriver: true });
-    anim.start();
-    return () => anim.stop();
-  }, [cue, flying]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Při zastavení hrot pera překrývá razítko: prolne se pryč (200 ms) a po rozjezdu se vrátí. Při „Omezit pohyb“
-  // se pero nekreslí vůbec (`flying`), takže se nic neprolíná.
-  const halted = activeHalt(plan, t) !== undefined;
-  const penOpacity = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    if (reduceMotion) {
-      penOpacity.setValue(halted ? 0 : 1);
-      return;
-    }
-    const anim = Animated.timing(penOpacity, { toValue: halted ? 0 : 1, duration: PEN_FADE_MS, easing: Easing.inOut(Easing.quad), useNativeDriver: true });
-    anim.start();
-    return () => anim.stop();
-  }, [halted, reduceMotion, penOpacity]);
-
-  // Značka „vy“ se v mapě kreslí jen mimo let (za letu je na jejím místě pero).
+  // Značka „vy“ se v mapě kreslí jen mimo let (za letu je na jejím místě konec čáry).
   const you = useMemo(() => positionAt(route, cumulative, stepM), [route, cumulative, stepM]);
   const pointData = useMemo(
     () => (flying ? EMPTY : { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [you.lon, you.lat] } }),
@@ -310,6 +302,8 @@ function Live({
         doubleTapZoom={false}
         tintColor={mapTheme.palette.road}
         onRegionDidChange={(e) => setView({ zoom: e.nativeEvent.zoom, lat: e.nativeEvent.center[1]! })}
+        onDidFinishRenderingMapFully={ready}
+        onDidFailLoadingMap={ready}
       >
         <Images images={images} />
         <Camera ref={camera} initialViewState={{ bounds: overview, padding: PAD }} />
@@ -336,6 +330,17 @@ function Live({
         </GeoJSONSource>
         <GeoJSONSource id="route-done" data={sectionData}>
           {toLayers(routeLayers(mapTheme), "route-done")}
+          <Layer
+            id="route-done-tip"
+            type="circle"
+            filter={IS_POINT as never}
+            paint={{
+              "circle-radius": TIP_RADIUS,
+              "circle-color": mapTheme.route.done,
+              "circle-stroke-width": TIP_STROKE,
+              "circle-stroke-color": mapTheme.route.halo,
+            }}
+          />
         </GeoJSONSource>
         <GeoJSONSource id="places" data={placesData}>
           {toLayers(placeLayers(mapTheme), PLACES_SOURCE)}
@@ -344,22 +349,6 @@ function Live({
           {toLayers(youLayers(mapTheme), YOU_SOURCE)}
         </GeoJSONSource>
       </Map>
-      {flying && (
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            left: width / 2 - PEN_NIB.x,
-            top: height / 2 - PEN_NIB.y,
-            width: PEN_SIZE,
-            height: PEN_SIZE,
-            opacity: penOpacity,
-            transform: [{ translateX: pen.x }, { translateY: pen.y }],
-          }}
-        >
-          <PenTip ink={mapTheme.route.done} metal={colors.ochre} paper={mapTheme.atlas.paper} />
-        </Animated.View>
-      )}
       <AtlasFrame title={frame} zoom={view.zoom} lat={view.lat} />
       <View
         pointerEvents="none"

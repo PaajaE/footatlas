@@ -3,9 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * Hodiny přehrávání: `elapsedMs` roste od 0 do `totalMs` (krok ≈ 50 ms), `skip` skočí na konec, `restart` začne znovu.
  * `pause` a `resume` hodiny zastaví a pustí dál od stejného času (návrat z detailu místa), `seek` skočí na daný čas
- * (tlačítko „Dál“ u zastavení). S `instant` (hotové hned) se nepřehrává vůbec.
+ * (tlačítko „Dál“ u zastavení). S `instant` (hotové hned) se nepřehrává vůbec. S `hold` hodiny stojí, dokud
+ * není co přehrávat (návrat: dokud mapa nedokreslí úvodní záběr); pak se rozběhnou od místa, kde stály.
  */
-export function useClock(totalMs: number, instant = false) {
+export function useClock(totalMs: number, instant = false, hold = false) {
   const [elapsed, setElapsed] = useState(instant ? totalMs : 0);
   const [runKey, setRunKey] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -23,7 +24,7 @@ export function useClock(totalMs: number, instant = false) {
   }, [totalMs, instant, runKey]);
 
   useEffect(() => {
-    if (paused || at.current >= totalMs) return;
+    if (paused || hold || at.current >= totalMs) return;
     const origin = Date.now() - at.current;
     const timer = setInterval(() => {
       const e = Math.min(totalMs, Date.now() - origin);
@@ -32,7 +33,7 @@ export function useClock(totalMs: number, instant = false) {
       if (e >= totalMs) clearInterval(timer);
     }, 50);
     return () => clearInterval(timer);
-  }, [paused, epoch, totalMs]);
+  }, [paused, hold, epoch, totalMs]);
 
   const seek = useCallback(
     (ms: number) => {

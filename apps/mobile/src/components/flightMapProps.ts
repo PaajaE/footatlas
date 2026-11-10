@@ -3,7 +3,7 @@ import type { AppPlace } from "../data/vltavska";
 import type { ReturnPlan } from "../navrat";
 
 /**
- * Mapa přehrání cesty (rozhodnutí 0033): úvodní záběr, ponoření, kreslení perem, závěrečný záběr. Všechno se řídí
+ * Mapa přehrání cesty (rozhodnutí 0033): úvodní záběr, ponoření, kreslení čáry, závěrečný záběr. Všechno se řídí
  * plánem `plan` a časem hodin `elapsedMs`.
  */
 export interface FlightMapProps {
@@ -24,4 +24,9 @@ export interface FlightMapProps {
   bottomInset: number;
   /** Titulek rámečku („Etapa III · …“). */
   frame: string;
+  /**
+   * Zavolá se jednou, až mapa poprvé dokreslí úvodní záběr (nebo se načíst nepodaří); obrazovka teprve pak pustí
+   * hodiny přehrání, aby let nezačínal nad prázdným papírem.
+   */
+  onReady?: () => void;
 }

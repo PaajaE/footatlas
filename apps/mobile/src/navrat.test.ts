@@ -4,6 +4,7 @@ import {
   activeFlyby,
   activeHalt,
   dayHeading,
+  flightHeading,
   dayReplayParams,
   DIVE_MS,
   drawDurationMs,
@@ -30,7 +31,6 @@ import {
   returnRouteLabel,
   returnSource,
   returnTotalMs,
-  screenOffsetDp,
   sectionBounds,
   seenAfter,
   shortSentence,
@@ -83,6 +83,17 @@ describe("nadpis a úsek", () => {
     expect(dayHeading("2026-10-30", today)).toBe("V pátek jste ušli");
     expect(dayHeading("2026-10-28", today)).toBe("Ve středu jste ušli");
     expect(dayHeading("2026-10-24", today)).toBe("24. 10. jste ušli");
+  });
+  it("nadpis se neukáže, dokud se data o dnech čtou (aby nepřeskočil)", () => {
+    const today = "2026-11-10";
+    expect(flightHeading("kronika", undefined, today, true)).toBeUndefined();
+    expect(flightHeading("domu", undefined, today, true)).toBeUndefined();
+    // Den je známý: nadpis platí hned, i když se zrovna čte znovu.
+    expect(flightHeading("kronika", "2026-11-02", today, true)).toBe("2. 11. jste ušli");
+    expect(flightHeading("domu", "2026-11-09", today, false)).toBe("Od včerejška přibylo");
+    // Přečteno, a den přesto chybí: náhradní znění.
+    expect(flightHeading("kronika", undefined, today, false)).toBe("Ten den jste ušli");
+    expect(flightHeading("domu", undefined, today, false)).toBe("Od posledně přibylo");
   });
   it("den, kdy začal sbíraný úsek", () => {
     const slices = [
@@ -248,16 +259,6 @@ describe("kamera a obrazovka", () => {
     expect(z).toBeGreaterThan(12.5);
     expect(z).toBeLessThan(13.5);
     expect(zoomForWidth(500, 411, 50.2) - z).toBeCloseTo(Math.log2(5), 6);
-  });
-  it("posun bodu na obrazovce odpovídá šířce záběru", () => {
-    const z = zoomForWidth(2000, 400, 50);
-    // 1000 m na východ je čtvrt šířky obrazovky (100 bodů) na stejné šířce.
-    const dLon = 1000 / (111_320 * Math.cos((50 * Math.PI) / 180));
-    const o = screenOffsetDp({ lon: 14, lat: 50 }, { lon: 14 + dLon, lat: 50 }, z);
-    expect(o.x).toBeCloseTo(200, 0);
-    expect(Math.abs(o.y)).toBeLessThan(1e-6);
-    // Na sever je y záporné (nahoru).
-    expect(screenOffsetDp({ lon: 14, lat: 50 }, { lon: 14, lat: 50.01 }, z).y).toBeLessThan(0);
   });
 });
 

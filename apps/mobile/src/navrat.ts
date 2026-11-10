@@ -107,6 +107,11 @@ export const RETURN_MAX_MS = 40_000;
 export const CAMERA_LEAD = 0.2;
 /** Dvě místa blíž než tolik metrů od sebe (konec etapy u zastávky) jsou jedno zastavení. */
 const SAME_POINT_M = 1;
+/**
+ * Nejdéle tak dlouho (ms) se po otevření čeká, než mapa dokreslí úvodní záběr; pak se hodiny přehrání pustí i bez
+ * ní, aby se přehrání nikdy nezaseklo.
+ */
+export const MAP_WAIT_MS = 1500;
 /** Rovník v metrech (Web Mercator) a velikost dlaždice MapLibre v bodech. */
 const EARTH_CIRCUMFERENCE_M = 40_075_016.686;
 const TILE_DP = 512;
@@ -130,24 +135,6 @@ export function flightWidthM(deltaM: number): number {
 export function zoomForWidth(widthM: number, screenDp = SCREEN_DP, lat = 50): number {
   const mPerDpZ0 = (EARTH_CIRCUMFERENCE_M * Math.cos((lat * Math.PI) / 180)) / TILE_DP;
   return Math.log2((Math.max(1, screenDp) * mPerDpZ0) / Math.max(1, widthM));
-}
-
-/**
- * O kolik bodů je `point` na obrazovce od středu mapy `center` při přiblížení `zoom` (Web Mercator, mapa bez náklonu
- * a otočení). Podle toho se kreslí hrot pera, když je kamera o předstih před ním.
- */
-export function screenOffsetDp(
-  center: { lon: number; lat: number },
-  point: { lon: number; lat: number },
-  zoom: number,
-): { x: number; y: number } {
-  const world = TILE_DP * 2 ** zoom;
-  const mx = (lon: number) => ((lon + 180) / 360) * world;
-  const my = (lat: number) => {
-    const s = Math.sin((Math.max(-85, Math.min(85, lat)) * Math.PI) / 180);
-    return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * world;
-  };
-  return { x: mx(point.lon) - mx(center.lon), y: my(point.lat) - my(center.lat) };
 }
 
 export interface PlanPlace {
@@ -674,6 +661,17 @@ export function dayHeading(day: string | undefined, today: string): string {
   if (back === 1) return "Včera jste ušli";
   if (back <= 6) return `${WEEKDAYS_ON[parseDay(day).getDay()]} jste ušli`;
   return `${Number(day.slice(8, 10))}. ${Number(day.slice(5, 7))}. jste ušli`;
+}
+
+/**
+ * Nadpis přehrání (Domů: „Od … přibylo“, Kronika: „… jste ušli“). Dokud se data o dnech ještě čtou (`loading`)
+ * a den začátku úseku neznáme, vrátí `undefined`: obrazovka nadpis nevykreslí, místo aby ukázala náhradní „Ten den
+ * jste ušli“ a za chvíli ho přepsala na „2. 11. jste ušli“. Když jsou data přečtená a den přesto chybí, platí
+ * náhradní znění.
+ */
+export function flightHeading(source: ReturnSource, since: string | undefined, today: string, loading: boolean): string | undefined {
+  if (since === undefined && loading) return undefined;
+  return source === "kronika" ? dayHeading(since, today) : returnHeading(since, today);
 }
 
 /**

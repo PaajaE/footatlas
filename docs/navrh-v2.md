@@ -172,11 +172,11 @@ Cíl: obřad o 20–25 s (max. 40 s), během kterého se atlas **kreslí**.
 |---|---|---|
 | **Úvodní záběr** | 2,0 s | Kamera ukáže celý úsek (start, cíl, další zastávka na obzoru), vlevo nahoře „Mezitím · 23,4 km“. |
 | **Ponoření** | 1,0 s | Plynulý přesun na start úseku, oddálení přiměřené délce úseku (≈ 2–3 km na šířku obrazovky, ne 500 m), mírný náklon (pitch 30°). |
-| **Kreslení** | podle délky (8–20 s) | Kamera sleduje cestu s předstihem (střed ~20 % před hrotem), čáru kreslí **hrot pera** (malá kresba pera na konci čáry), papír se kolem cesty barví **plynule** (bez skoků po šestinách). |
+| **Kreslení** | podle délky (8–20 s) | Kamera sleduje cestu s předstihem (střed ~20 % před hrotem), čáru kreslí **hrot pera** (malá kresba pera na konci čáry; *nahrazeno koncem čáry s inkoustovou tečkou, balík P, rozhodnutí 0033*), papír se kolem cesty barví **plynule** (bez skoků po šestinách). |
 | **Místo za letu** | — | Kamera zpomalí na ~25 % rychlosti (rozjezd i dojezd 0,6 s s easingem), razítko dopadne (600 ms, přestřel, haptika), nahoře vyjede **štítek místa** (symbol nebo fotka, typ, název, jedna věta; max. 25 % výšky). Let **nezastaví**. Štítek zůstane 2,5 s. |
 | **Zastávka a konec etapy** | 3,5 s / 5 s | Plné zastavení s plynulým dojezdem a rozjezdem (0,8 s), větší karta (fotka, háček), u konce etapy pečeť etapy (§ 6.3). Klepnutí otevře místo. |
 | **Závěrečný záběr** | 1,5 s | Oddálení na celý úsek s vybarvenou cestou a všemi razítky na mapě. |
-| **Souhrn** | — | Panel vyjede jen do 40 % výšky; mapa zůstává vidět. Místa jako řada razítek se symboly (ne useknutý text ve dvou sloupcích). Bez nového místa „Na obzoru“ (už je). |
+| **Souhrn** | — | Panel vyjede jen do 40 % výšky (*balík P: 44 %, rozhodnutí 0033*); mapa zůstává vidět. Místa jako řada razítek se symboly (ne useknutý text ve dvou sloupcích). Bez nového místa „Na obzoru“ (už je). |
 
 ### 8.2 Pravidla
 
