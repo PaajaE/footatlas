@@ -1,5 +1,5 @@
 /**
- * Připravované výpravy pro Objevovat a seznam přání. Obsah je koncept (`verified: false`):
+ * Připravované výpravy pro Atlas (sekce Další výpravy) a seznam přání. Obsah je koncept (`verified: false`):
  * délky a popisy se před vydáním ověřují, v UI se to nijak neoznačuje.
  */
 

@@ -10,7 +10,7 @@ import { useTheme } from "../theme/ThemeProvider";
 
 /**
  * Příběhy objevů: celoobrazovkové listování nově odemčenými místy (návrh M2), vlastním tempem.
- * Místa přicházejí v parametru `ids`, protože „od posledně“ se po odchodu z Domů smaže.
+ * Místa přicházejí v parametru `ids`, protože „od posledně“ se po odchodu z Výpravy smaže.
  */
 export default function Discoveries() {
   const { ids } = useLocalSearchParams<{ ids?: string }>();

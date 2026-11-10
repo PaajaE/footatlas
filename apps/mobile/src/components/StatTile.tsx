@@ -2,7 +2,7 @@ import { View } from "react-native";
 import { useTheme } from "../theme/ThemeProvider";
 import { T } from "./ui";
 
-/** Dlaždice čísla: popisek, velké číslo s jednotkou v IM Fell a drobný podpis. Tři vedle sebe na Domů. */
+/** Dlaždice čísla: popisek, velké číslo s jednotkou v IM Fell a drobný podpis. Vedle sebe v hlavičce Deníku. */
 export function StatTile({ label, value, unit, note }: { label: string; value: string; unit?: string; note?: string }) {
   const { colors, fonts } = useTheme();
   return (

@@ -48,7 +48,7 @@ export function Screen({
   scroll?: boolean;
   refreshing?: boolean;
   onRefresh?: () => void;
-  /** Odsazení nahoře a mezera mezi sekcemi; Domů má podle prototypu 16 a 16. */
+  /** Odsazení nahoře a mezera mezi sekcemi (výchozí 24 a 18). */
   top?: number;
   gap?: number;
 }) {
@@ -120,7 +120,7 @@ export function Button({
   onPress: () => void;
   kind?: "primary" | "secondary";
   disabled?: boolean;
-  /** Nižší tlačítko s menším písmem (46 px, 15), jako v kartách na Domů. */
+  /** Nižší tlačítko s menším písmem (46 px, 15), jako v kartách panelu Výpravy. */
   compact?: boolean;
 }) {
   const { colors, fonts, radius } = useTheme();

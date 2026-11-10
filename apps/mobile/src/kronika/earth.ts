@@ -224,7 +224,7 @@ export function lifeRoute(days: ReadonlyArray<{ date: string; distanceM: number 
   return { stations, totalKm };
 }
 
-/** Další město na životní cestě pro banner v Objevovat: „Za 200 km Sapporo.“ */
+/** Další město na životní cestě pro banner životní cesty: „Za 200 km Sapporo.“ */
 export function nextLifeStop(totalM: number): { name: string; remainingKm: number } | null {
   if (!(totalM > 0)) return null;
   const km = totalM / 1000;

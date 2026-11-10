@@ -129,10 +129,10 @@ export default function LifeCard() {
         {!empty && (
           <Button
             label={active ? "Pokračovat ve výpravě" : "Vybrat první výpravu"}
-            onPress={() => router.replace(active ? "/vyprava" : "/objevovat")}
+            onPress={() => router.replace(active ? "/vyprava" : "/atlas")}
           />
         )}
-        <Button kind="secondary" label={empty ? "Zpět" : "Zavřít"} onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))} />
+        <Button kind="secondary" label={empty ? "Zpět" : "Zavřít"} onPress={() => (router.canGoBack() ? router.back() : router.replace("/vyprava"))} />
       </View>
       <T variant="small" style={{ textAlign: "center" }}>
         Data zůstávají ve vašem telefonu. Kroky nikam neodcházejí, jen vy.
