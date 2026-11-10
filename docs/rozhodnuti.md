@@ -339,7 +339,7 @@ Realizace navrh-v2.md § 1.2 a § 8 (bez haptiky). Nahrazuje časování z 0025 
 - **Méně šumu.** Za letu se vzory (vrstvy s `fill-pattern`: šrafy, stromy, vinice, skica i kolorovaná) ztlumí na 50 % (`patternDimLayers`) úpravou existujících vrstev stylu (komponenta `Layer` se stejným id), po skončení se vrátí.
 - **Štítek místa za letu** (`FlyLabel`): nahoře, nejvýš 25 % výšky, razítko nebo fotka s razítkem, typ · km, název (zalomí se), krátká věta (`shortSentence`, nejvýš 110 znaků po celé části věty). Klepnutí otevře místo a pozastaví.
 - **Karta zastávky** (`HaltCard`): záhlaví bez uříznutí (konec etapy na vlastním řádku), razítko uvnitř karty (bez fotky je samo obrázkem, s fotkou v jejím rohu), menší fotka (72) a nižší karta, bez prázdného papírového rámečku.
-- **Pečeť konce etapy** (`StageWax`): `Seal` druhu `wax` s `roman` a `symbol` cíle etapy; kresbu čísla a symbolu dodá balík M (do té doby `Seal` tyto props ignoruje).
+- **Pečeť konce etapy** (`StageWax`): `Seal` druhu `stage` z balíku M (rozhodnutí 0032) s římským číslem a symbolem cíle etapy. Při integraci přepnuto z druhu `wax`, kde M props `roman` a `symbol` ignoroval.
 - **Souhrn**: přes spodek mapy, nejvýš 40 % výšky; místa jako vodorovná řada malých razítek s názvem pod nimi; „Na obzoru“ zůstává. „Přeskočit“ skočí na závěrečný záběr.
 - **Omezit pohyb:** kamera stojí od začátku na celém úseku (už s místem pro souhrn), razítka a karty se jen prolnou.
 - **Ověřit na telefonu:** plynulost kamery a barvení (60 fps), shoda hrotu pera s koncem čáry, vzhled rozmazaného okraje barvy, náklon 30° proti 0°, čitelnost štítku a karty, zda je zoom 2–3 km správně.
