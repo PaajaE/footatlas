@@ -1,23 +1,22 @@
 import type { ImageSourcePropType } from "react-native";
 import type { AppPlace } from "../data/vltavska";
-import { sealKm, toRoman } from "../seal";
+import { vltavska } from "../data/vltavska";
+import { toRoman } from "../seal";
 import { Seal } from "./Seal";
 
 /**
- * Pečeť konce etapy (navrh-v2.md § 6.3, rozhodnutí 0033): vosk (`Seal` druhu `wax`) s římským číslem etapy
- * a symbolem cíle etapy, žádný plný červený kruh. Kresbu čísla a symbolu dodává `Seal` z balíku M; tady se jen
- * předají props (`roman`, `symbol`). Spread obchází kontrolu přebytečných props, dokud je `Seal` nezná.
+ * Pečeť konce etapy (navrh-v2.md § 6.3, rozhodnutí 0033): vosková pečeť etapy (`Seal` druhu `stage`)
+ * s římským číslem a symbolem cíle etapy, žádný plný červený kruh. Symbol se doplní podle `stageIndex`.
+ * `photo` a `dateLabel` pečeť etapy nekreslí; zůstávají kvůli volajícím.
  */
 export function StageWax({
   stageIndex,
   place,
-  photo,
-  dateLabel,
   size,
   animate = false,
 }: {
   stageIndex: number;
-  /** Místo, u kterého etapa končí (jeho symbol a fotka); chybí, když etapa končí mimo místo. */
+  /** Místo, u kterého etapa končí (jeho symbol); chybí, když etapa končí mimo místo. */
   place?: AppPlace;
   photo?: ImageSourcePropType;
   dateLabel: string;
@@ -25,16 +24,15 @@ export function StageWax({
   animate?: boolean;
 }) {
   const roman = toRoman(stageIndex + 1);
-  const props = {
-    kind: "wax" as const,
-    name: `Etapa ${roman}`,
-    kmLabel: place ? sealKm(place.atM) : "",
-    dateLabel,
-    photo,
-    roman,
-    symbol: (place as (AppPlace & { symbol?: string }) | undefined)?.symbol,
-    size,
-    animate,
-  };
-  return <Seal {...props} />;
+  return (
+    <Seal
+      kind="stage"
+      size={size}
+      animate={animate}
+      roman={roman}
+      ringText={`ETAPA ${roman} · ${vltavska.name.toUpperCase()}`}
+      symbol={place?.symbol}
+      stageIndex={stageIndex}
+    />
+  );
 }
