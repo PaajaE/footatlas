@@ -300,3 +300,24 @@ describe("nový let: plynulé barvení a ztlumené vzory (rozhodnutí 0033)", ()
     expect(patternDimLayers(style, 1).every((d) => d.paint["fill-opacity"] > 0.8)).toBe(true);
   });
 });
+
+// Vrstvy, které aplikace předává komponentě <Layer> z @maplibre/maplibre-react-native. Na iOS knihovna převede posun
+// (icon-offset, text-offset) a odsazení (icon-text-fit-padding) jen z holého pole čísel; výraz ["literal", [..]] na
+// nejvyšší úrovni předá nativní vrstvě beze změny a aplikace spadne (EXC_CRASH, -[MLRNStyle setIconOffset:…]).
+describe.each(Object.values(themes))("vrstvy pro aplikaci $id", (theme) => {
+  const layers = [
+    ...placeLayers(theme),
+    ...youLayers(theme),
+    ...routeLayers(theme),
+    ...revealLayers(theme),
+    ...revealPendingLayers(theme, 50, 650),
+  ];
+  it("nemají na nejvyšší úrovni layoutu ani paintu výraz literal", () => {
+    const bad = layers.flatMap((l) =>
+      Object.entries({ ...(l.layout ?? {}), ...(l.paint ?? {}) })
+        .filter(([, v]) => Array.isArray(v) && v[0] === "literal")
+        .map(([k]) => `${l.id}.${k}`),
+    );
+    expect(bad).toEqual([]);
+  });
+});
