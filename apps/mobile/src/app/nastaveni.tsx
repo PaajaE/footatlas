@@ -70,6 +70,11 @@ export default function Nastaveni() {
         <Button kind="secondary" label="Zdroje a licence" onPress={() => router.push("/zdroje")} />
       </Card>
 
+      <Card style={{ gap: 10 }}>
+        <T variant="label">Úvod</T>
+        <Button kind="secondary" label="Znovu zobrazit úvod" onPress={() => router.push("/onboarding")} />
+      </Card>
+
       {__DEV__ && (
         <Card style={{ gap: 10 }}>
           <T variant="label">Vývoj</T>

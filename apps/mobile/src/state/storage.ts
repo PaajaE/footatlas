@@ -190,3 +190,19 @@ export async function saveLastOpened(ms: number): Promise<void> {
     // příště se počítá od dřívějšího otevření
   }
 }
+
+const ONBOARDING_KEY = "footatlas.onboarding.v1";
+
+/** Úvod (rozhodnutí 0035) už proběhl nebo ho uživatel přeskočil. */
+export async function loadOnboardingDone(): Promise<boolean> {
+  return (await readJson(ONBOARDING_KEY)) === true;
+}
+
+export async function saveOnboardingDone(done: boolean): Promise<void> {
+  try {
+    if (done) await AsyncStorage.setItem(ONBOARDING_KEY, JSON.stringify(true));
+    else await AsyncStorage.removeItem(ONBOARDING_KEY);
+  } catch {
+    // příště se úvod může ukázat znovu
+  }
+}

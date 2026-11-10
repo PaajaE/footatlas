@@ -35,6 +35,8 @@ Po testu APK 1.4.0 na telefonu majitel produktu chtěl výrazně lepší prožit
 
 Tři záložky v `apps/mobile/src/app/(tabs)/`: **Výprava** (`vyprava.tsx`, otevírá se jako první: mapa, pruh Mezitím, panel se třemi polohami; bez výpravy výběr výpravy a Životní cesta), **Atlas** (`atlas.tsx`: výpravy, razítka a pečeti, pohlednice, témata) a **Kronika** (`kronika.tsx`: Deník s dlaždicemi Dnes / Za 7 dní, Cesta, Rok). Domů a Objevovat zanikly; `/` → `/vyprava` (`app/index.tsx`), `/objevovat` → `/atlas` (`app/objevovat.tsx`), `/kronika?tab=sbirky` → `/atlas`. Sekce panelu jsou v `components/PanelSections.tsx`, „Před vámi“ v `components/PredVami.tsx` + `src/predvami.ts`, Mezitím v `components/MezitimStrip.tsx` + `src/mezitim.ts`, další cíl v `src/cil.ts`, polohy panelu v `src/panel.ts`. Starší zmínky o Domů a Objevovat níže jsou historické.
 
+**Úvod (rozhodnutí 0035):** čtyři obrazovky v `app/onboarding.tsx` (+ `components/onboarding/`), logika a testy v `src/onboarding.ts`, brána spuštění `state/useOnboardingGate.ts`. Znovu ho otevře Nastavení → Úvod. Na zařízení neověřeno.
+
 ## 3. Hotovo v aplikaci (na `main`)
 
 | Rozhodnutí | Co | Hlavní soubory |
