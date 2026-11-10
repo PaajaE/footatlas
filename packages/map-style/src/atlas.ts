@@ -350,7 +350,7 @@ export function placeLayers(theme: MapTheme): StyleLayer[] {
       {
         "icon-image": ["concat", "drawing-", ["get", "drawing"]],
         "icon-size": ["interpolate", ["linear"], ["zoom"], 11.5, 0.5, 15, 0.85],
-        "icon-offset": ["literal", [0, -34]],
+        "icon-offset": [0, -34],
         "icon-allow-overlap": true,
         "symbol-sort-key": ["get", "rank"],
       },
@@ -368,7 +368,7 @@ export function placeLayers(theme: MapTheme): StyleLayer[] {
         "text-font": ATLAS_LABEL_FONT,
         "text-size": 13,
         "text-anchor": "left",
-        "text-offset": ["literal", [1.5, 0]],
+        "text-offset": [1.5, 0],
         "text-optional": true,
       },
       labelPaint(1.8),
@@ -396,7 +396,7 @@ export function placeLayers(theme: MapTheme): StyleLayer[] {
       {
         "icon-image": "pill",
         "icon-text-fit": "both",
-        "icon-text-fit-padding": ["literal", [1, 7, 1, 7]],
+        "icon-text-fit-padding": [1, 7, 1, 7],
         "icon-allow-overlap": true,
         "text-field": ["get", "label"],
         "text-font": ATLAS_LABEL_FONT,
