@@ -9,6 +9,10 @@ import {
   WATER_WASH_OPACITY,
   REVEAL_INNER,
   REVEAL_OUTER,
+  REVEAL_PENDING,
+  metersToPixels,
+  patternDimLayers,
+  revealPendingLayers,
   buildAtlasStyle,
   buildStyle,
   placeLayers,
@@ -261,5 +265,38 @@ describe("revealMask", () => {
     const m = revealMask(long, 600);
     expect(Date.now() - t).toBeLessThan(3000);
     expect(m.geometry.coordinates[0]!.length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("nový let: plynulé barvení a ztlumené vzory (rozhodnutí 0033)", () => {
+  it("šířka v metrech: na 50° s. š. je 1000 m při zoomu 13 asi 162 bodů a s každým zoomem dvakrát víc", () => {
+    const e = metersToPixels(1000, 50) as [string, unknown, unknown, number, number, number, number];
+    expect(e[0]).toBe("interpolate");
+    expect(e[1]).toEqual(["exponential", 2]);
+    const at13 = e[4] * 2 ** 13;
+    expect(at13).toBeGreaterThan(150);
+    expect(at13).toBeLessThan(175);
+    expect(e[6] / e[4]).toBeCloseTo(2 ** 22, 0);
+  });
+  it.each(Object.values(themes))("krytí nevybarvené části je papírová rozmazaná čára na vlastním zdroji ($id)", (theme) => {
+    const [l] = revealPendingLayers(theme, 50.2, 650);
+    expect(l!.type).toBe("line");
+    expect(l!.source).toBe(REVEAL_PENDING);
+    expect(l!.paint["line-color"]).toBe(theme.atlas.paper);
+    expect(l!.paint["line-blur"]).toBeDefined();
+    expect(l!.layout?.["line-cap"]).toBe("round");
+  });
+  it.each(Object.values(themes))("ztlumí všechny vzory (šrafy, stromy, vinice) a nic jiného ($id)", (theme) => {
+    const style = buildAtlasStyle(opts(theme));
+    const dim = patternDimLayers(style, 0.5);
+    const ids = dim.map((d) => d.id);
+    expect(ids).toEqual(expect.arrayContaining(["sk-urban", "sk-wood", "sk-vine", "ink-wood", "ink-urban", "ink-vine"]));
+    for (const d of dim) {
+      const layer = style.layers.find((l) => l.id === d.id)!;
+      expect(layer.paint["fill-pattern"]).toBeDefined();
+      const base = (layer.paint["fill-opacity"] as number | undefined) ?? 1;
+      expect(d.paint["fill-opacity"]).toBeCloseTo(base * 0.5, 9);
+    }
+    expect(patternDimLayers(style, 1).every((d) => d.paint["fill-opacity"] > 0.8)).toBe(true);
   });
 });
