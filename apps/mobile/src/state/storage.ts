@@ -157,7 +157,7 @@ export async function savePostcards(stages: number[]): Promise<void> {
 const CHAPTER_OPENED_KEY = "footatlas.chapteropened.v1";
 
 /**
- * Otevřel už chodec nějakou kapitolu? Do té doby se pod nadpisem kapitol (Domů, Sbírky) ukazuje
+ * Otevřel už chodec nějakou kapitolu? Do té doby se pod nadpisem kapitol (panel Výpravy, Atlas) ukazuje
  * vysvětlující věta; potom už ne (rozhodnutí 0029).
  */
 export async function loadChapterOpened(): Promise<boolean> {
@@ -169,5 +169,24 @@ export async function saveChapterOpened(): Promise<void> {
     await AsyncStorage.setItem(CHAPTER_OPENED_KEY, JSON.stringify(true));
   } catch {
     // věta se příště může ukázat znovu
+  }
+}
+
+const LAST_OPENED_KEY = "footatlas.lastopened.v1";
+
+/**
+ * Kdy byla aplikace naposledy otevřená (ms od epochy). Podle toho se Mezitím po ≥ 3 dnech pustí samo přes celou
+ * obrazovku (rozhodnutí 0034). `null`, dokud se nic neuložilo.
+ */
+export async function loadLastOpened(): Promise<number | null> {
+  const v = await readJson(LAST_OPENED_KEY);
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null;
+}
+
+export async function saveLastOpened(ms: number): Promise<void> {
+  try {
+    await AsyncStorage.setItem(LAST_OPENED_KEY, JSON.stringify(ms));
+  } catch {
+    // příště se počítá od dřívějšího otevření
   }
 }

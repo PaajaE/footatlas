@@ -3,7 +3,6 @@ import {
   formatMinutes,
   formatWhen,
   pluralNewPlaces,
-  reachQuip,
   shiftDay,
   stageLabel,
   sumLastDays,
@@ -76,15 +75,6 @@ describe("dny", () => {
   });
 });
 
-describe("reachQuip", () => {
-  it("hlášky z prototypu", () => {
-    expect(reachQuip(2000, [])).toBe("Akorát na odpoledne s výhledem.");
-    expect(reachQuip("stage", [])).toContain("pohlednice");
-    expect(reachQuip(4000, ["Trojský zámek"])).toBeUndefined();
-    expect(reachQuip(4000, ["Přívoz v Podbabě"])).toContain("převozníka");
-  });
-});
-
 import { zOf } from "./home";
 describe("zOf", () => {
   it("z / ze podle čísla", () => {
@@ -116,21 +106,5 @@ describe("okolí místa", () => {
     expect(approachFraction(10_437, 9_832, 10_477)).toBeCloseTo(0.94, 2);
     expect(approachFraction(5, undefined, 100)).toBeCloseTo(0.05, 2);
     expect(approachFraction(500, 0, 100)).toBe(1);
-  });
-});
-
-import { reachEmptyText } from "./home";
-
-describe("Kam dnes dojdu bez opakování další zastávky", () => {
-  it("neopakuje další zastávku z karty nad sebou", () => {
-    const t = reachEmptyText("2 km", { id: "s2", name: "Troja" }, "3,1 km", "s2");
-    expect(t).not.toContain("Troja");
-    expect(t).toBe("Za 2 km nic nového. Další místo je o kus dál, zkuste delší procházku.");
-  });
-  it("jiné nejbližší místo (malý objev) jmenuje", () => {
-    expect(reachEmptyText("1 km", { id: "d1", name: "Lávka" }, "1,4 km", "s2")).toBe("Za 1 km nic nového. Nejbližší místo, Lávka, je za 1,4 km.");
-  });
-  it("na konci trasy", () => {
-    expect(reachEmptyText("4 km", undefined, "", undefined)).toBe("Za 4 km už nic nezbývá.");
   });
 });

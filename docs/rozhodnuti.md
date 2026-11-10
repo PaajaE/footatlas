@@ -288,3 +288,17 @@ Datum: 9. 11. 2026 · Stav: přijato k realizaci (balíky K–N); podrobnosti v 
 - **Razítka se symboly** podle typu místa (16 symbolů, česká tradice turistických známek), pečeti etap a kapitol s kresbou.
 - **Kapitola vs. téma:** kapitola patří k výpravě a uzavře se; téma prochází atlasem a roste s každou výpravou (`themeId`).
 - Konkurence (Pikmin Bloom, Relive, The Conqueror, World Walking) je rozebraná v navrh-v2.md § 2.
+
+## 0034 Tři záložky a Mezitím
+Datum: 10. 11. 2026 · Stav: přijato (balík L, [navrh-v2.md](navrh-v2.md) § 3, 4, 4.1, 5 a 9); ověřeno testy a webovým exportem v Chromiu (390 dp, světlý vzhled, ukázkový postup), na zařízení NEOVĚŘENO
+
+- **Záložky Výprava, Atlas, Kronika.** Výprava se otevírá jako první (`unstable_settings.initialRouteName`). Domů a Objevovat zanikly; `/` (také `footatlas://`) přesměruje `app/index.tsx` na `/vyprava`, `/objevovat` přesměruje `app/objevovat.tsx` na `/atlas`, `/kronika?tab=sbirky` vede do Atlasu.
+- **Výprava bez výpravy:** výběr výpravy (dřívější „Vyrazit“ z Domů) a pod ním Životní cesta (`LifePathView`).
+- **Panel Výpravy** (mapa beze změny): tři polohy sbalený / poloviční (výchozí) / celý (`src/panel.ts`, s testy). Hlavička etapy je úchyt: táhnutí posouvá, klepnutí přepíná poloviční a celý. Obsah: hlavička etapy, **Další cíl**, **Před vámi**, kapitoly, „Nedávno odemčeno“ a místa po etapách. Komponenty z `HomeSections.tsx` se přesunuly do `PanelSections.tsx` (beze změny vnitřku, jen odkaz „Všechny kapitoly“ vede do Atlasu).
+- **Další cíl** (`src/cil.ts`, s testy): konec etapy do 3 km → uzavření kapitoly do 3 km (k poslednímu chybějícímu místu) → další zastávka. Hranice 3 km včetně.
+- **Před vámi** (`src/predvami.ts`, s testy; nahrazuje `WhereToday`): pás 8 km před chodcem se zamčenými razítky (`Seal`), tempo = průměr posledních 14 dní s pohybem (≥ 200 m) **před dneškem** z kroniky a výpravy (pro stejný den větší hodnota). Názvy míst v obsahu nemají 2. pád, proto věty „Za 2 dny vás čekají Zámek Veltrusy a Červený mlýn.“ a „Za 30 minut chůze (asi 2 700 kroků) vás čeká Zámek Veltrusy.“ místo „jste u Zámku …“. Odměna „Do pohlednice etapy III: 12,1 km.“ do 15 km. Táhnutím po pásu „Do sem: 4,0 km, asi 50 minut, 3 místa“; nic se neukládá. Slovo „dnes“ se nepoužívá (hlídá test).
+- **Mezitím** (`src/mezitim.ts`, s testy; nahrazuje `ReturnCard`): pruh nahoře na Výpravě „Mezitím · 23,4 km za 5 dní · 3 nová místa“, „Přehrát cestu“, „Zavřít“. Nadpis `mezitimHeading` („Mezitím přibylo“, „Od včerejška přibylo“, „Za 5 dní přibylo“, „Od 24. 10. přibylo“) je zatím jen v přístupném popisku pruhu; obrazovka `/navrat` (balík K) má vlastní `returnHeading`. Podmínka zobrazení a spotřebování beze změny (0022, 0024).
+- **Mezitím přes celou obrazovku:** `/navrat` se otevře samo, když se mezitím dokončila etapa nebo od posledního otevření uběhly ≥ 3 dny; nejvýš jednou za otevření. Čas otevření se ukládá při spuštění a při návratu z pozadí (`footatlas.lastopened.v1`, `useLastOpened`). Při prvním spuštění nové verze záznam chybí, takže jen pruh.
+- **Atlas:** výpravy (aktuální, dokončené, další), razítka a pečeti (`CollectionsView` beze změny, jen s rozjetou výpravou), pohlednice etap, Témata jako zástupná sekce pro balík N, druhy tras.
+- **Kronika:** bez Sbírek; dlaždice Dnes / Za 7 dní v hlavičce Deníku (`DiaryTiles`).
+- Neověřeno na zařízení: táhnutí panelu a pásu na Androidu (střet s posuvem panelu), automatické otevření po návratu z pozadí.

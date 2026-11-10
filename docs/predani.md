@@ -31,6 +31,10 @@ Po testu APK 1.4.0 na telefonu majitel produktu chtěl výrazně lepší prožit
 
 **Mockupy, které je dobré otevřít jako první:** `Aplikace.dc.html` (celý průchod s přechody), `Main.dc.html` (návrat „Inkoust“), `Pecete.dc.html` (pečeti, razítka, specifikace pohybu), `Domu.dc.html`, `Kronika.dc.html`, `Zastavka.dc.html`, `Hadanka.dc.html`. Noční varianty `*-noc.dc.html` používají `noc.css` (jen pro prototyp; v aplikaci se tmavý vzhled řeší tokeny v `apps/mobile/src/theme/tokens.ts`).
 
+### Navigace (rozhodnutí 0034, balík L)
+
+Tři záložky v `apps/mobile/src/app/(tabs)/`: **Výprava** (`vyprava.tsx`, otevírá se jako první: mapa, pruh Mezitím, panel se třemi polohami; bez výpravy výběr výpravy a Životní cesta), **Atlas** (`atlas.tsx`: výpravy, razítka a pečeti, pohlednice, témata) a **Kronika** (`kronika.tsx`: Deník s dlaždicemi Dnes / Za 7 dní, Cesta, Rok). Domů a Objevovat zanikly; `/` → `/vyprava` (`app/index.tsx`), `/objevovat` → `/atlas` (`app/objevovat.tsx`), `/kronika?tab=sbirky` → `/atlas`. Sekce panelu jsou v `components/PanelSections.tsx`, „Před vámi“ v `components/PredVami.tsx` + `src/predvami.ts`, Mezitím v `components/MezitimStrip.tsx` + `src/mezitim.ts`, další cíl v `src/cil.ts`, polohy panelu v `src/panel.ts`. Starší zmínky o Domů a Objevovat níže jsou historické.
+
 ## 3. Hotovo v aplikaci (na `main`)
 
 | Rozhodnutí | Co | Hlavní soubory |
