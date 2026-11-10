@@ -313,3 +313,33 @@ Datum: 9. 11. 2026 · Stav: přijato; ověřeno testy a webovým exportem v Chro
 - **Beze změny:** medailony na mapě (předgenerovaná PNG v `map/medallionFiles`), `SealBadge` na fotce místa, monogram na zástupném obrázku místa bez fotky (`PlaceHero`).
 - **Nota:** symbol `nota` je lyra s notou mezi strunami; v 28 px čte spíš jako lyra.
 - Neověřeno: vykreslení na telefonu (react-native-svg, `transform` u vnořené skupiny), tmavý vzhled.
+
+## 0033 Nový let přehrání cesty (balík K)
+Datum: 10. 11. 2026 · Stav: přijato; ověřeno testy a typovou kontrolou, na telefonu NEOVĚŘENO (plynulost se na webu ani v emulátoru posoudit nedá)
+
+Realizace navrh-v2.md § 1.2 a § 8 (bez haptiky). Nahrazuje časování z 0025 (zastavení 5/3/6 s, let 4–9 s); princip kamery z 0028 (pokyn po úsecích `SEG_MS` = 700 ms, plynulost počítá MapLibre) zůstává.
+
+**Časování (`src/navrat.ts`, `returnPlan`):**
+
+| Fáze | Délka | Poznámka |
+|---|---|---|
+| Úvodní záběr | 2,0 s | `fitBounds` na úsek a místo na obzoru (do 3 km za cílem), bez animace |
+| Ponoření | 1,0 s | `easeTo` na start úseku, zoom pro 2–3 km na šířku obrazovky |
+| Kreslení | 8–20 s podle délky (lineárně 1–15 km) | cestovní rychlost se dopočítá tak, aby se do toho vešla i místa; pohyb aspoň 60 % (a 6 s) |
+| Místo za letu (objev) | — | zpomalení na 25 %, rampy 0,6 s, pomalý průlet ≥ 1,2 s, štítek 2,5 s; let nezastaví |
+| Zastávka / konec etapy | 3,5 s / 5 s | plné zastavení, dojezd i rozjezd 0,8 s |
+| Závěrečný záběr | 1,5 s | `fitBounds` na úsek nad souhrnem (spodní okraj = 40 % výšky) |
+
+- **Spojitá rychlost.** Rychlost je po částech kosinová (rampy mají spojitou rychlost i zrychlení), poloha hrotu je její integrál. Test vzorkuje rychlost po 16 ms přes celé přehrání a hlídá, že mezi snímky se nezmění o víc než 5 % cestovní (rampa 0,6 s dělá nejvýš ~3,1 %); totéž na denních úsecích celé Vltavské stezky. Místo za letu, na které není místo pro plynulý dojezd (těsně u zastávky, startu nebo cíle), nezpomalí; dvě blízká místa za letu mají jedno společné zpomalení.
+- **Mnoho míst a rozpočet.** Od 6 míst v úseku dostanou objevy jen rychlé razítko (bez štítku a zpomalení, rozestup ≥ 250 ms). Přes 40 s se nejdřív zastávky (nejtěsněji u jiného místa) změní na místa za letu, pak místa za letu na rychlá razítka; konce etap zůstanou vždy. Běžný denní úsek 10–25 km s pár místy trvá 20–25 s (test).
+- **Kamera.** Přiblížení z šířky záběru `flightWidthM` (2 km do 2 km úseku, 3 km od 20 km) a skutečné šířky mapy (`zoomForWidth`), tj. zoom ≈ 13, ne 15. Předstih: střed je 20 % šířky před hrotem, úměrně rychlosti, takže při zastavení je kamera přesně na místě (razítko a pečeť dopadnou doprostřed). Při každém `easeTo` se posílá nulový `padding`, protože `fitBounds` ho jinak v kameře nechá.
+- **Náklon 0°** (`FLIGHT_PITCH`). Návrh zkouší 30°, ale vzory atlasu jsou rastrové a v náklonu se v horní části slévají, popisky IM Fell se zmenšují a hrot pera i předstih se počítají v rovinné projekci. Vizuálně jsme náklon nezkoušeli (nebylo na čem); ověří se na telefonu změnou konstanty (§ 11).
+- **Hrot pera** (`PenTip`) je RN overlay. Jeho posun od středu se spočítá z plánu (`screenOffsetDp`, Web Mercator) na konci každého úseku a dojede tam nativní animací stejně dlouho a lineárně jako kamera. Značka „vy“ se za letu nekreslí.
+- **Plynulé barvení: varianta „čára s `line-blur`“.** Maska `revealMask` se počítá jen jednou pro celý úsek (do `toM`); nevybarvenou část kryje široká papírová čára (`revealPendingLayers`, šířka 2,2 × 650 m v metrech přes exponenciální výraz, rozmazání 0,5 × 650 m) od kousku před hrotem do cíle. Za letu se tak posílá jen zkracující se čára (po 1/800 úseku), žádná polygonová unie. Varianta „maska kolem hrotu“ by kvůli obrácené masce (papír s dírou) potřebovala dělit krytí na disjunktní kusy a počítat polygonový rozdíl při každém kroku hodin v JS; to by na telefonu ubíralo snímky. Daň: kde se budoucí trasa vrací do 650 m k už vybarvené (meandry), je tam papír do průletu pera.
+- **Méně šumu.** Za letu se vzory (vrstvy s `fill-pattern`: šrafy, stromy, vinice, skica i kolorovaná) ztlumí na 50 % (`patternDimLayers`) úpravou existujících vrstev stylu (komponenta `Layer` se stejným id), po skončení se vrátí.
+- **Štítek místa za letu** (`FlyLabel`): nahoře, nejvýš 25 % výšky, razítko nebo fotka s razítkem, typ · km, název (zalomí se), krátká věta (`shortSentence`, nejvýš 110 znaků po celé části věty). Klepnutí otevře místo a pozastaví.
+- **Karta zastávky** (`HaltCard`): záhlaví bez uříznutí (konec etapy na vlastním řádku), razítko uvnitř karty (bez fotky je samo obrázkem, s fotkou v jejím rohu), menší fotka (72) a nižší karta, bez prázdného papírového rámečku.
+- **Pečeť konce etapy** (`StageWax`): `Seal` druhu `wax` s `roman` a `symbol` cíle etapy; kresbu čísla a symbolu dodá balík M (do té doby `Seal` tyto props ignoruje).
+- **Souhrn**: přes spodek mapy, nejvýš 40 % výšky; místa jako vodorovná řada malých razítek s názvem pod nimi; „Na obzoru“ zůstává. „Přeskočit“ skočí na závěrečný záběr.
+- **Omezit pohyb:** kamera stojí od začátku na celém úseku (už s místem pro souhrn), razítka a karty se jen prolnou.
+- **Ověřit na telefonu:** plynulost kamery a barvení (60 fps), shoda hrotu pera s koncem čáry, vzhled rozmazaného okraje barvy, náklon 30° proti 0°, čitelnost štítku a karty, zda je zoom 2–3 km správně.

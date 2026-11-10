@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { Image, PanResponder, Pressable, View, type ImageSourcePropType } from "react-native";
 import type { AppPlace } from "../data/vltavska";
-import { firstSentence } from "../navrat";
+import { shortSentence } from "../navrat";
 import { sealKm, toRoman } from "../seal";
 import { useTheme } from "../theme/ThemeProvider";
 import { Seal } from "./Seal";
+import { StageWax } from "./StageWax";
 import { T } from "./ui";
 
 export interface HaltCardProps {
@@ -24,8 +25,9 @@ export interface HaltCardProps {
 }
 
 /**
- * Karta místa při zastavení v návratu (rozhodnutí 0025): fotka (nebo kreslený rámeček se jménem), typ a km, název
- * a jedna věta háčku. Razítko místa (nebo pečeť etapy) na kartu dopadne při jejím vyjetí. Přejetí doleva či dolů = „Dál“.
+ * Karta zastávky a konce etapy (rozhodnutí 0025, upraveno v 0033): fotka nebo razítko, typ a km (záhlaví se nikdy
+ * neuřízne), název, jedna krátká věta. Razítko místa (nebo pečeť etapy) dopadne dovnitř karty, ne přes roh; karta je
+ * nižší, aby nezakryla třetinu mapy. Přejetí doleva či dolů = „Dál“.
  */
 export function HaltCard({ place, photo, stageIndex, expeditionName, dateLabel, remaining, onOpen, onNext }: HaltCardProps) {
   const { colors, fonts } = useTheme();
@@ -42,28 +44,39 @@ export function HaltCard({ place, photo, stageIndex, expeditionName, dateLabel, 
 
   const roman = stageIndex !== undefined ? toRoman(stageIndex + 1) : undefined;
   const kindLabel = place ? (place.kind === "stop" ? "Zastávka" : "Objev") : `Etapa ${roman}`;
-  const meta = [kindLabel, place ? sealKm(place.atM) : undefined, place && roman ? `konec etapy ${roman}` : undefined]
-    .filter(Boolean)
-    .join(" · ");
+  // Záhlaví se nikdy neuřízne: typ a kilometr na jednom řádku, konec etapy na vlastním (zalomí se, když je úzko).
+  const meta = [kindLabel, place ? sealKm(place.atM) : undefined].filter(Boolean).join(" · ");
+  const stageLine = place && roman ? `konec etapy ${roman}` : undefined;
   const title = place?.name ?? `Etapa ${roman} dokončena`;
-  const line = place ? firstSentence(place.hook) ?? firstSentence(place.text) : "Etapa je za vámi, pečeť dopadla.";
-  const SEAL = 68;
+  const line = place ? shortSentence(place.hook ?? place.text, 120) : "Etapa je za vámi, pečeť dopadla.";
+  const VISUAL = 72;
+  const SEAL_SMALL = 40;
+
+  // Razítko dopadne do karty (ne přes její roh): bez fotky je samo obrázkem karty, s fotkou leží v jejím rohu.
+  const seal = (size: number) =>
+    roman !== undefined && stageIndex !== undefined ? (
+      <StageWax stageIndex={stageIndex} place={place} photo={photo} dateLabel={dateLabel} size={size} animate />
+    ) : place?.kind === "stop" ? (
+      <Seal kind="wax" size={size} animate name={place.name} kmLabel={sealKm(place.atM)} dateLabel={dateLabel} photo={photo} />
+    ) : place ? (
+      <Seal kind="stamp" size={size} animate name={place.name} expeditionName={expeditionName} kmLabel={sealKm(place.atM)} dateLabel={dateLabel} />
+    ) : null;
 
   return (
     <View {...swipe.panHandlers}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${meta}. ${title}. ${line ?? ""} Otevřít detail.`}
+        accessibilityLabel={`${meta}${stageLine ? `, ${stageLine}` : ""}. ${title}. ${line ?? ""} Otevřít detail.`}
         accessibilityHint="Pozastaví přehrávání a otevře místo"
         onPress={onOpen}
         style={{
           backgroundColor: colors.surface,
-          borderRadius: 22,
+          borderRadius: 20,
           borderWidth: 1,
           borderColor: colors.line,
-          padding: 14,
-          paddingBottom: 10,
-          gap: 10,
+          padding: 12,
+          paddingBottom: 6,
+          gap: 6,
           shadowColor: "#2B2118",
           shadowOpacity: 0.28,
           shadowRadius: 6,
@@ -71,25 +84,27 @@ export function HaltCard({ place, photo, stageIndex, expeditionName, dateLabel, 
           elevation: 6,
         }}
       >
-        <View style={{ flexDirection: "row", gap: 12 }}>
-          {photo ? (
-            <Image source={photo} resizeMode="cover" style={{ width: 92, height: 92, borderRadius: 12 }} />
-          ) : (
-            <DrawnFrame name={place?.name ?? `Etapa ${roman}`} />
-          )}
-          <View style={{ flex: 1, gap: 2, paddingRight: SEAL - 18 }}>
-            <T style={{ fontFamily: fonts.displaySC, fontSize: 13, letterSpacing: 0.6, color: colors.ochre }} numberOfLines={1}>
-              {meta}
-            </T>
-            <T style={{ fontFamily: fonts.display, fontSize: 24, lineHeight: 28, color: colors.fg }} numberOfLines={2}>
-              {title}
-            </T>
+        <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+          <View style={{ width: VISUAL, height: VISUAL, alignItems: "center", justifyContent: "center" }}>
+            {photo ? (
+              <>
+                <Image source={photo} resizeMode="cover" style={{ width: VISUAL, height: VISUAL, borderRadius: 12 }} />
+                <View pointerEvents="none" style={{ position: "absolute", right: -6, bottom: -6 }}>
+                  {seal(SEAL_SMALL)}
+                </View>
+              </>
+            ) : (
+              seal(VISUAL)
+            )}
+          </View>
+          <View style={{ flex: 1, gap: 1 }}>
+            <T style={{ fontFamily: fonts.displaySC, fontSize: 13, letterSpacing: 0.6, color: colors.ochre }}>{meta}</T>
+            {stageLine && <T style={{ fontFamily: fonts.displaySC, fontSize: 12, letterSpacing: 0.6, color: colors.accent }}>{stageLine}</T>}
+            <T style={{ fontFamily: fonts.display, fontSize: 22, lineHeight: 26, color: colors.fg }}>{title}</T>
           </View>
         </View>
         {line && (
-          <T style={{ fontFamily: fonts.displayItalic, fontSize: 16, lineHeight: 21, color: colors.fgSoft }} numberOfLines={3}>
-            {line}
-          </T>
+          <T style={{ fontFamily: fonts.displayItalic, fontSize: 15, lineHeight: 20, color: colors.fgSoft }}>{line}</T>
         )}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           {/* Zbývající čas zastavení. */}
@@ -107,41 +122,6 @@ export function HaltCard({ place, photo, stageIndex, expeditionName, dateLabel, 
           </Pressable>
         </View>
       </Pressable>
-      {/* Razítko dopadne na kartu (pravý horní roh, přes okraj). */}
-      <View pointerEvents="none" style={{ position: "absolute", right: 8, top: -SEAL / 3 }}>
-        {roman !== undefined ? (
-          <Seal kind="stage" size={SEAL} animate roman={roman} ringText={`ETAPA ${roman} · ${expeditionName} ·`} />
-        ) : place?.kind === "stop" ? (
-          <Seal kind="wax" size={SEAL} animate name={place.name} kmLabel={sealKm(place.atM)} dateLabel={dateLabel} photo={photo} />
-        ) : place ? (
-          <Seal kind="stamp" size={SEAL} animate name={place.name} expeditionName={expeditionName} kmLabel={sealKm(place.atM)} dateLabel={dateLabel} />
-        ) : null}
-      </View>
-    </View>
-  );
-}
-
-/** Místo bez fotky: kreslený rámeček (dvojitá tužková linka) se jménem. */
-function DrawnFrame({ name }: { name: string }) {
-  const { colors, fonts } = useTheme();
-  return (
-    <View style={{ width: 92, height: 92, borderRadius: 4, borderWidth: 1.5, borderColor: colors.fgSoft, padding: 3, transform: [{ rotate: "-1.5deg" }] }}>
-      <View
-        style={{
-          flex: 1,
-          borderWidth: 1,
-          borderStyle: "dashed",
-          borderColor: colors.fgSoft,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 4,
-          backgroundColor: colors.ochre + "14",
-        }}
-      >
-        <T style={{ fontFamily: fonts.displayItalic, fontSize: 14, lineHeight: 17, color: colors.fg, textAlign: "center" }} numberOfLines={4}>
-          {name}
-        </T>
-      </View>
     </View>
   );
 }

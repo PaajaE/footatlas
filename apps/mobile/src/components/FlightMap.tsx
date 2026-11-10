@@ -1,25 +1,28 @@
 import { Camera, GeoJSONSource, Images, Layer, Map, type CameraRef } from "@maplibre/maplibre-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View } from "react-native";
+import { Animated, Easing, View } from "react-native";
 import {
   ATLAS_PATTERNS,
   ATLAS_SKETCH_START,
   PLACES_SOURCE,
   REVEAL_INNER,
   REVEAL_OUTER,
+  REVEAL_PENDING,
   YOU_SOURCE,
   type StyleLayer,
   buildAtlasStyle,
+  patternDimLayers,
   patternName,
   placeLayers,
   revealLayers,
   revealMask,
+  revealPendingLayers,
   routeLayers,
   themes,
   youLayers,
 } from "@footatlas/map-style";
 import { positionAt } from "@footatlas/core";
-import { flightZoom, sectionBounds } from "../navrat";
+import { flightCamera, phaseAt, screenOffsetDp, sectionBounds, SCREEN_DP, tipAt, zoomForWidth } from "../navrat";
 import { placeProps } from "../map/atlasPlaces";
 import { MEDALLIONS } from "../map/medallionFiles";
 import { PATTERNS } from "../map/patternFiles";
@@ -27,6 +30,7 @@ import { prepareMapAssets, type MapAssets } from "../map/mapAssets";
 import { useTheme } from "../theme/ThemeProvider";
 import { AtlasFrame } from "./AtlasFrame";
 import type { FlightMapProps } from "./flightMapProps";
+import { PEN_NIB, PEN_SIZE, PenTip } from "./PenTip";
 import { RouteSketch } from "./RouteSketch";
 import { T } from "./ui";
 
@@ -36,29 +40,39 @@ type Assets = { kind: "loading" } | { kind: "ready"; assets: MapAssets } | { kin
 
 const REVEAL_INNER_M = 380;
 const REVEAL_OUTER_M = 650;
+/**
+ * Nevybarvená část úseku (papírová čára) začíná kus před hrotem: kulatý konec čáry má poloměr ~1,1 × vnější okraj
+ * masky, takže barva se rozlévá těsně za perem, ne až o 650 m za ním.
+ */
+const PENDING_LEAD_M = 0.6 * REVEAL_OUTER_M;
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
 const line = (c: Array<[number, number]>) => ({ type: "Feature" as const, properties: {}, geometry: { type: "LineString" as const, coordinates: c } });
-/** Vybarvení (maska) se přepočítává po dílech úseku; polygonová unie je drahá, plynulý růst by telefon zdržoval. */
-const MASK_STEPS = 6;
-/** Přiblížení kamery za letu (zhruba čtvrť; prototyp letí na ~1,9× měřítko listu). */
-const FLIGHT_ZOOM_DEFAULT = 14;
-/** Dojezd kamery na další polohu, když není plán (`cameraAt`); o málo delší než krok hodin (50 ms). */
-const FOLLOW_MS = 70;
 /**
- * Délka jednoho pohybu kamery při letu podle plánu. Kamera dostane pokyn jen jednou za úsek a plynulost (60 snímků
- * za sekundu) si spočítá MapLibre sám; pokyn každých 50 ms se na telefonu nestíhal a mapa se sekala.
+ * Délka jednoho pohybu kamery za kreslení (rozhodnutí 0028): kamera dostane pokyn jednou za úsek s cílem na jeho
+ * konci a plynulost (60 snímků za sekundu) si spočítá MapLibre sám.
  */
 const SEG_MS = 700;
-/** Hotová část úseku se překresluje po 1/300 (jen geometrie úseku, ne celé trasy). */
-const DONE_STEPS = 300;
-/** Místo na obzoru se do závěrečného záběru přidá, jen když je blíž než tohle za koncem úseku. */
+/** Čára a její nevybarvená část se posílají do mapy po 1/800 úseku (a jen při změně). */
+const LINE_STEPS = 800;
+/** Místo na obzoru se do úvodního a závěrečného záběru přidá, jen když je blíž než tohle za koncem úseku. */
 const HORIZON_MAX_M = 3_000;
+/**
+ * Náklon kamery za letu. Návrh (§ 8.1) zkouší 30°, ale necháváme 0°: vzory atlasu (šrafy, stromy, vinice) jsou
+ * rastrové obrázky a v náklonu se v horní části obrazovky slévají v šedou plochu, popisky IM Fell se zmenšují
+ * a rozmazávají a hrot pera i předstih kamery se počítají v rovinné projekci (`screenOffsetDp`). Až se náklon ověří
+ * na telefonu (navrh-v2.md § 11), stačí změnit tuto konstantu; pero se pak posune jen přibližně.
+ */
+export const FLIGHT_PITCH = 0;
+/** Krytí vzorů za letu (1 = jak je ve stylu); po skončení se vrátí. */
+const PATTERN_DIM = 0.5;
+/** Okraje záběrů na celý úsek. */
+const PAD = { top: 70, right: 36, bottom: 40, left: 36 };
+const NO_PAD = { top: 0, right: 0, bottom: 0, left: 0 };
 
 /**
- * Mapa návratu: stejný atlasový styl jako Výprava. Kamera letí po úseku v pohybech po `SEG_MS` podle plánu
- * (`cameraAt`: ease-in-out, u míst stojí podle `returnPlan`), značka „vy“ je za letu pevně uprostřed mapy (kamera je
- * vždy na ní) a po skončení (nebo přeskočení) se ukáže celý úsek i s místem na obzoru. Místa se odemykají podle
- * polohy letu. Data zdrojů se posílají do mapy, jen když se opravdu změní.
+ * Mapa přehrání cesty (rozhodnutí 0033). Úvodní záběr ukáže celý úsek s místem na obzoru, kamera se ponoří na start
+ * (≈ 2–3 km na šířku), pak sleduje hrot pera s předstihem (pokyn po `SEG_MS`, plynulost počítá MapLibre), čára se
+ * kreslí a papír se kolem ní plynule barví, a závěrečný záběr ukáže celý vybarvený úsek nad souhrnem.
  */
 export function FlightMap(props: FlightMapProps) {
   const [state, setState] = useState<Assets>({ kind: "loading" });
@@ -75,7 +89,13 @@ export function FlightMap(props: FlightMapProps) {
   if (state.kind !== "ready") {
     return (
       <View>
-        <RouteSketch route={props.route} cumulative={props.cumulative} places={props.places} walkedM={props.walkedM} height={props.height} />
+        <RouteSketch
+          route={props.route}
+          cumulative={props.cumulative}
+          places={props.places}
+          walkedM={tipAt(props.plan, props.elapsedMs)}
+          height={props.height}
+        />
         {state.kind === "loading" && <T variant="small" style={{ paddingHorizontal: 20 }}>Připravuji mapu…</T>}
       </View>
     );
@@ -87,18 +107,13 @@ function Live({
   route,
   cumulative,
   places,
-  fromM,
-  toM,
-  walkedM,
-  durationMs,
+  plan,
+  elapsedMs: t,
   runKey,
-  finished,
-  holdZoom = 0,
-  elapsedMs,
-  cameraAt,
   horizonM,
   reduceMotion,
   height,
+  bottomInset,
   frame,
   assets,
 }: FlightMapProps & { assets: MapAssets }) {
@@ -107,54 +122,60 @@ function Live({
   const mode = mapTheme.mode;
   const style = useMemo(() => buildAtlasStyle({ theme: mapTheme, tilesUrl: assets.tilesUrl, glyphs: assets.glyphs }), [mapTheme, assets]);
   const camera = useRef<CameraRef>(null);
-  const flightZ = useMemo(() => flightZoom(toM - fromM, durationMs), [fromM, toM, durationMs]);
+  const { fromM, toM } = plan;
+  const span = Math.max(1, toM - fromM);
+  const [width, setWidth] = useState(SCREEN_DP);
   const coords = useMemo(() => route.map((p) => [p.lon, p.lat] as [number, number]), [route]);
   const start = useMemo(() => positionAt(route, cumulative, fromM), [route, cumulative, fromM]);
-  const bounds = useMemo(() => sectionBounds(route, cumulative, fromM, toM), [route, cumulative, fromM, toM]);
-  // Závěrečný záběr: úsek a k němu místo na obzoru, aby bylo vidět „jsem tady, tamhle je cíl“.
-  const endBounds = useMemo(() => {
+  const zoom = useMemo(() => zoomForWidth(plan.widthM, width, start.lat), [plan.widthM, width, start.lat]);
+  // Úvodní i závěrečný záběr: úsek a k němu místo na obzoru („jsem tady, tamhle je cíl“).
+  const overview = useMemo(() => {
     const reach = horizonM !== undefined && horizonM > toM && horizonM - toM <= HORIZON_MAX_M ? horizonM : toM;
     return sectionBounds(route, cumulative, fromM, reach);
   }, [route, cumulative, fromM, toM, horizonM]);
-  const [view, setView] = useState<{ zoom: number; lat: number }>({ zoom: FLIGHT_ZOOM_DEFAULT, lat: start.lat });
+  const [view, setView] = useState<{ zoom: number; lat: number }>({ zoom, lat: start.lat });
 
-  // Poloha značky a kamery: jemný krok (1/600 úseku), aby se plynule hýbaly se stejnými hodinami (krok ≈ 50 ms).
-  // Místa a maska se přepočítávají zřídka (drahé): místa po 1/40 úseku, maska po šestinách.
-  const span = Math.max(1, toM - fromM);
-  const frac = Math.min(1, Math.max(0, (walkedM - fromM) / span));
-  const qFine = Math.round(frac * 600) / 600;
-  const q = Math.round(frac * 40) / 40;
-  const here = fromM + q * span;
-  const youM = fromM + qFine * span;
-  const you = useMemo(() => positionAt(route, cumulative, youM), [route, cumulative, youM]);
-  // Ušlá trasa: část před úsekem se nemění; za letu se posílá jen geometrie úseku.
-  const doneM = fromM + (Math.round(frac * DONE_STEPS) / DONE_STEPS) * span;
+  const phase = phaseAt(plan, t);
+  const flying = !reduceMotion && (phase === "dive" || phase === "draw");
+
+  // Hrot pera a čára: po 1/LINE_STEPS úseku, do mapy se posílá jen při změně.
+  const tipM = tipAt(plan, t);
+  const step = Math.round(((tipM - fromM) / span) * LINE_STEPS);
+  const stepM = fromM + (step / LINE_STEPS) * span;
   const beforeData = useMemo(() => {
     if (fromM <= 0) return EMPTY;
     const a = positionAt(route, cumulative, fromM);
     return line([...coords.slice(0, Math.max(1, a.segment + 1)), [a.lon, a.lat]]);
   }, [route, cumulative, coords, fromM]);
   const sectionData = useMemo(() => {
-    if (doneM <= fromM) return EMPTY;
+    if (stepM <= fromM) return EMPTY;
     const a = positionAt(route, cumulative, fromM);
-    const b = positionAt(route, cumulative, doneM);
+    const b = positionAt(route, cumulative, stepM);
     return line([[a.lon, a.lat], ...coords.slice(a.segment + 1, b.segment + 1), [b.lon, b.lat]]);
-  }, [route, cumulative, coords, fromM, doneM]);
+  }, [route, cumulative, coords, fromM, stepM]);
+  // Nevybarvená část úseku: od kousku před hrotem do cíle. Maska se počítá jen jednou pro celý úsek (do `toM`),
+  // plynulé barvení dělá zkracující se papírová čára (`revealPendingLayers`), viz rozhodnutí 0033.
+  const pendingData = useMemo(() => {
+    const p0 = Math.min(toM, stepM + PENDING_LEAD_M);
+    if (p0 >= toM) return EMPTY;
+    const a = positionAt(route, cumulative, p0);
+    const b = positionAt(route, cumulative, toM);
+    return line([[a.lon, a.lat], ...coords.slice(a.segment + 1, b.segment + 1), [b.lon, b.lat]]);
+  }, [route, cumulative, coords, toM, stepM]);
   const restData = useMemo(() => line(coords), [coords]);
-  const maskStep = Math.round(q * MASK_STEPS);
-  const maskDone = useMemo(() => {
-    const m = fromM + (maskStep / MASK_STEPS) * span;
-    const p = positionAt(route, cumulative, m);
-    return [...coords.slice(0, Math.max(1, p.segment + 1)), [p.lon, p.lat] as [number, number]];
-  }, [coords, route, cumulative, fromM, span, maskStep]);
-  const masks = useMemo(
-    () => ({ outer: revealMask(maskDone, REVEAL_OUTER_M), inner: revealMask(maskDone, REVEAL_INNER_M) }),
-    [maskDone],
-  );
+  const masks = useMemo(() => {
+    const p = positionAt(route, cumulative, toM);
+    const done = [...coords.slice(0, Math.max(1, p.segment + 1)), [p.lon, p.lat] as [number, number]];
+    return { outer: revealMask(done, REVEAL_OUTER_M), inner: revealMask(done, REVEAL_INNER_M) };
+  }, [coords, route, cumulative, toM]);
+  const pendingLayers = useMemo(() => revealPendingLayers(mapTheme, start.lat, REVEAL_OUTER_M), [mapTheme, start.lat]);
 
-  const nextStopId = useMemo(() => places.find((p) => p.kind === "stop" && p.atM > here)?.id, [places, here]);
-  const placesData = useMemo(
-    () => ({
+  // Místa: přepočítat jen, když hrot mine další místo.
+  const reached = places.filter((p) => p.atM <= tipM).length;
+  const placesData = useMemo(() => {
+    const here = reached > 0 ? Math.max(tipM, places.filter((p) => p.atM <= tipM).at(-1)!.atM) : tipM;
+    const nextStopId = places.find((p) => p.kind === "stop" && p.atM > here)?.id;
+    return {
       type: "FeatureCollection" as const,
       features: places.map((p) => ({
         type: "Feature" as const,
@@ -162,9 +183,8 @@ function Live({
         properties: placeProps(p, here, nextStopId) as unknown as Record<string, string | number | boolean>,
         geometry: { type: "Point" as const, coordinates: [p.lon, p.lat] },
       })),
-    }),
-    [places, here, nextStopId],
-  );
+    };
+  }, [places, reached]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const images = useMemo(() => {
     const out: Record<string, number> = {};
@@ -186,52 +206,67 @@ function Live({
     return out;
   }, [places, mode, mapTheme]);
 
-  // Let: kamera skočí na začátek úseku a pak v každém kroku hodin plynule dojede (lineárně) na polohu značky.
+  // Za letu ztlumit vzory (šrafy, stromy, vinice), po skončení vrátit. Úprava existujících vrstev stylu: komponenty
+  // `Layer` se stejným id převezmou vrstvu ze stylu (nevytvářejí novou) a jen jí změní krytí.
+  const dimmed = phase !== "done";
+  const dimLayers = useMemo(() => patternDimLayers(style, dimmed ? PATTERN_DIM : 1), [style, dimmed]);
+
+  // ── Kamera ──────────────────────────────────────────────────────────────────────────────────────────────────
+  const centerAt = (ms: number): [number, number] => {
+    const p = positionAt(route, cumulative, flightCamera(plan, ms).centerM);
+    return [p.lon, p.lat];
+  };
+  const overviewPad = { ...PAD, bottom: PAD.bottom + bottomInset };
+
+  // Nové přehrání: úvodní záběr bez animace. Při „Omezit pohyb“ rovnou záběr, ve kterém zůstane i souhrn.
+  useEffect(() => {
+    camera.current?.fitBounds(overview, { padding: reduceMotion ? overviewPad : PAD, pitch: 0, bearing: 0, duration: 0 });
+  }, [runKey, reduceMotion, overview]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Pokyny kameře: ponoření (1 s), za kreslení jeden pokyn na úsek SEG_MS, závěrečný záběr (1,5 s). Přeskočení
+  // („Přeskočit“) skočí rovnou na závěrečný záběr.
+  const drawSeg = phase === "draw" ? Math.floor((t - plan.drawStartMs) / SEG_MS) : -1;
+  const cue = `${runKey}:${phase}:${drawSeg}`;
   useEffect(() => {
     const cam = camera.current;
-    if (!cam) return;
-    if (reduceMotion) {
-      cam.fitBounds(bounds, { padding: { top: 40, right: 28, bottom: 40, left: 28 }, duration: 0 });
+    if (!cam || reduceMotion) return;
+    if (phase === "dive") {
+      cam.easeTo({ center: centerAt(plan.drawStartMs), zoom, pitch: FLIGHT_PITCH, bearing: 0, padding: NO_PAD, duration: Math.max(16, plan.drawStartMs - t), easing: "ease" });
+    } else if (phase === "draw") {
+      const endMs = Math.min(plan.drawEndMs, plan.drawStartMs + (drawSeg + 1) * SEG_MS);
+      cam.easeTo({ center: centerAt(endMs), zoom, pitch: FLIGHT_PITCH, bearing: 0, padding: NO_PAD, duration: Math.max(16, endMs - t), easing: "linear" });
+    } else if (phase === "outro" || phase === "done") {
+      cam.fitBounds(overview, { padding: overviewPad, pitch: 0, bearing: 0, duration: phase === "outro" ? Math.max(300, plan.totalMs - t) : 600, easing: "ease" });
+    }
+  }, [cue]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Hrot pera: za letu je kamera o předstih před ním, takže pero není uprostřed. Jeho posun od středu se spočítá
+  // z plánu na konci každého úseku a dojede tam stejně dlouho a lineárně jako kamera (nativní animace).
+  const pen = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  useEffect(() => {
+    if (!flying) return;
+    const offsetAt = (ms: number) => {
+      const c = flightCamera(plan, ms);
+      const a = positionAt(route, cumulative, c.centerM);
+      const b = positionAt(route, cumulative, c.tipM);
+      return screenOffsetDp({ lon: a.lon, lat: a.lat }, { lon: b.lon, lat: b.lat }, zoom);
+    };
+    if (phase === "dive") {
+      pen.setValue({ x: 0, y: 0 });
       return;
     }
-    cam.jumpTo({ center: [start.lon, start.lat], zoom: flightZ });
-  }, [runKey, start, bounds, reduceMotion, flightZ]);
+    const endMs = Math.min(plan.drawEndMs, plan.drawStartMs + (drawSeg + 1) * SEG_MS);
+    pen.setValue(offsetAt(t));
+    const anim = Animated.timing(pen, { toValue: offsetAt(endMs), duration: Math.max(16, endMs - t), easing: Easing.linear, useNativeDriver: true });
+    anim.start();
+    return () => anim.stop();
+  }, [cue, flying]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Let podle plánu: jeden pokyn kameře na úsek SEG_MS, cílem je poloha na konci úseku. Při zastavení se poloha
-  // nemění a kamera jen mírně přiblíží. Skok („Dál“) nebo pauza se projeví nejpozději v dalším úseku.
-  const planned = cameraAt !== undefined && elapsedMs !== undefined;
-  const seg = planned ? Math.floor(elapsedMs / SEG_MS) : -1;
-  useEffect(() => {
-    if (!planned || finished || reduceMotion) return;
-    const endMs = (seg + 1) * SEG_MS;
-    const target = cameraAt(endMs);
-    const p = positionAt(route, cumulative, target.m);
-    camera.current?.easeTo({
-      center: [p.lon, p.lat],
-      zoom: flightZoom(toM - fromM, durationMs, target.holdZoom),
-      duration: Math.max(16, endMs - elapsedMs),
-      easing: "linear",
-    });
-  }, [seg, runKey, finished, reduceMotion]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Bez plánu (starší volání): kamera dojíždí za značkou v každém kroku hodin.
-  useEffect(() => {
-    if (planned || finished || reduceMotion) return;
-    const zoom = flightZoom(toM - fromM, durationMs, holdZoom);
-    camera.current?.easeTo({ center: [you.lon, you.lat], zoom, duration: FOLLOW_MS, easing: "linear" });
-  }, [planned, you, finished, reduceMotion, holdZoom, fromM, toM, durationMs]);
-
-  // Konec letu (doběhl, nebo se přeskočil): ukázat celý úsek a místo na obzoru.
-  useEffect(() => {
-    if (!finished || reduceMotion) return;
-    camera.current?.fitBounds(endBounds, { padding: { top: 70, right: 36, bottom: 40, left: 36 }, duration: 900 });
-  }, [finished, endBounds, reduceMotion]);
-
-  // Za letu je značka pevně uprostřed obrazovky (kamera je na ní); v mapě se kreslí až po skončení.
-  const pinned = planned && !finished && !reduceMotion;
+  // Značka „vy“ se v mapě kreslí jen mimo let (za letu je na jejím místě pero).
+  const you = useMemo(() => positionAt(route, cumulative, stepM), [route, cumulative, stepM]);
   const pointData = useMemo(
-    () => (pinned ? EMPTY : { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [you.lon, you.lat] } }),
-    [pinned, you],
+    () => (flying ? EMPTY : { type: "Feature" as const, properties: {}, geometry: { type: "Point" as const, coordinates: [you.lon, you.lat] } }),
+    [flying, you],
   );
   const toLayers = (list: StyleLayer[], source: string, extra: Record<string, unknown> = {}) =>
     list
@@ -242,7 +277,11 @@ function Live({
       });
 
   return (
-    <View style={{ height, backgroundColor: colors.bg }} accessibilityLabel="Mapa ušlého úseku">
+    <View
+      style={{ height, backgroundColor: colors.bg }}
+      accessibilityLabel="Mapa ušlého úseku"
+      onLayout={(e) => setWidth(Math.round(e.nativeEvent.layout.width) || SCREEN_DP)}
+    >
       <Map
         style={{ flex: 1 }}
         mapStyle={style as never}
@@ -257,12 +296,18 @@ function Live({
         onRegionDidChange={(e) => setView({ zoom: e.nativeEvent.zoom, lat: e.nativeEvent.center[1]! })}
       >
         <Images images={images} />
-        <Camera ref={camera} initialViewState={{ center: [start.lon, start.lat], zoom: flightZ }} />
+        <Camera ref={camera} initialViewState={{ bounds: overview, padding: PAD }} />
+        {dimLayers.map((l) => (
+          <Layer key={l.id} id={l.id} type="fill" paint={l.paint} />
+        ))}
         <GeoJSONSource id={REVEAL_INNER} data={masks.inner}>
           {toLayers(revealLayers(mapTheme), REVEAL_INNER, { beforeId: ATLAS_SKETCH_START })}
         </GeoJSONSource>
         <GeoJSONSource id={REVEAL_OUTER} data={masks.outer}>
           {toLayers(revealLayers(mapTheme), REVEAL_OUTER, { beforeId: ATLAS_SKETCH_START })}
+        </GeoJSONSource>
+        <GeoJSONSource id={REVEAL_PENDING} data={pendingData}>
+          {toLayers(pendingLayers, REVEAL_PENDING, { beforeId: ATLAS_SKETCH_START })}
         </GeoJSONSource>
         <GeoJSONSource id="route-rest" data={restData}>
           {toLayers(routeLayers(mapTheme), "route-rest")}
@@ -283,19 +328,25 @@ function Live({
           {toLayers(youLayers(mapTheme), YOU_SOURCE)}
         </GeoJSONSource>
       </Map>
-      {pinned && (
-        <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: height / 2 - 15, alignItems: "center" }}>
-          <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: mapTheme.route.done + "33", alignItems: "center", justifyContent: "center" }}>
-            <View
-              style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: mapTheme.route.done, borderWidth: 3, borderColor: mapTheme.atlas.paper }}
-            />
-          </View>
-        </View>
+      {flying && (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: width / 2 - PEN_NIB.x,
+            top: height / 2 - PEN_NIB.y,
+            width: PEN_SIZE,
+            height: PEN_SIZE,
+            transform: [{ translateX: pen.x }, { translateY: pen.y }],
+          }}
+        >
+          <PenTip ink={mapTheme.route.done} metal={colors.ochre} paper={mapTheme.atlas.paper} />
+        </Animated.View>
       )}
       <AtlasFrame title={frame} zoom={view.zoom} lat={view.lat} />
       <View
         pointerEvents="none"
-        style={{ position: "absolute", left: 12, bottom: 12, backgroundColor: colors.surface, opacity: 0.85, paddingHorizontal: 5, borderRadius: 4 }}
+        style={{ position: "absolute", left: 12, bottom: 12 + (phase === "done" ? bottomInset : 0), backgroundColor: colors.surface, opacity: 0.85, paddingHorizontal: 5, borderRadius: 4 }}
       >
         <T variant="small" style={{ fontSize: 10 }}>
           © přispěvatelé OpenStreetMap
